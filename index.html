@@ -90,7 +90,7 @@ It allows for automated and objective linear-fitting of mechanical test-data. Se
 <h3 id="sdarr-1">sdarr<a class="anchor" aria-label="anchor" href="#sdarr-1"></a>
 </h3>
 <p>Basic example of the sdarr-function on a synthetic data set, which is based on the properties of aluminium (Al 6060 T66) as given in the <a href="https://ntrl.ntis.gov/NTRL/dashboard/searchResults/titleDetail/PB2003106632.xhtml" class="external-link">Metallic Material Properties Development and Standardization (MMPDS) Handbook</a>. A toe-region and a non-zero intercept are added to make the test data less boring.</p>
-<p>The sdarr-function analyzes the data and will give a small report as a message. It should confirm the Young’s-modulus of 68 GPa and an intercept of 10 MPa. To make use of multi-core processing, configure <a href="https://furrr.futureverse.org/" class="external-link">furrr</a> to use a multisession strategy (see next example).</p>
+<p>The sdarr-function analyzes the data and will give a small report as a message. It should confirm the Young’s-modulus of 68 GPa and an intercept of 10 MPa. To make use of multi-core processing, configure <a href="https://furrr.futureverse.org/" class="external-link">furrr</a> to use a multisession strategy.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://soylentorange.github.io/sdarr/">sdarr</a></span><span class="op">)</span></span>
 <span></span>
@@ -175,8 +175,8 @@ It allows for automated and objective linear-fitting of mechanical test-data. Se
 <span>                                      enforce_subsampling <span class="op">=</span> <span class="cn">T</span>,</span>
 <span>                                      verbose <span class="op">=</span> <span class="st">"r"</span>, showPlots <span class="op">=</span> <span class="st">"r"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Determination of Slope in the Linear Region of a Test Record:</span></span>
-<span><span class="co">#&gt;   Random sub-sampling will require more computation effort than standard SDAR-algorithm:  </span></span>
-<span><span class="co">#&gt;     173580 vs. 36856 fits.</span></span>
+<span><span class="co">#&gt;   lazy algorithm requires more fits than standard SDAR-algorithm:  </span></span>
+<span><span class="co">#&gt;     174900 vs. 36856 fits.</span></span>
 <span><span class="co">#&gt;   Anyways, random sub-sampling will be used...</span></span>
 <span><span class="co">#&gt; Random sub-sampling mofification of the SDAR-algorithm</span></span>
 <span><span class="co">#&gt;   100 % of sub-sampled normalized ranges passed the data quality checks.</span></span>
