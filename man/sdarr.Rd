@@ -2,7 +2,7 @@
 % Please edit documentation in R/sdarr.R
 \name{sdarr}
 \alias{sdarr}
-\title{sdarr}
+\title{sdarr: SDAR-algorithm}
 \usage{
 sdarr(data, x, y, verbose = "report", showPlots = "report", savePlots = F)
 }
@@ -23,7 +23,7 @@ abbreviated.}
 show the plot of the final fit set to "all" to also show plots from the
 individual steps set to "none" to be quiet. Can be abbreviated.}
 
-\item{savePlots}{Give plot functions with the result}
+\item{savePlots}{Give plot functions with the result.}
 }
 \value{
 A list containing a data-frame with the results of the final fit, a
@@ -36,7 +36,7 @@ Run the SDAR algorithm as standardized in ASTM E3076-18. Will
   painfully slow for test data with high resolution.
 }
 \note{
-The function will use parallel processing via the furrr-package to use
+The function will use parallel processing via the furrr-package. To use
   this feature, set up a plan other than the default sequential strategy
   beforehand.
 }

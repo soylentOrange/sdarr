@@ -134,13 +134,13 @@ sdarr_execute <- function(prepared_data, otr.info,
 }
 
 
-#' @title sdarr
+#' @title sdarr: SDAR-algorithm
 #'
 #' @description Run the SDAR algorithm as standardized in ASTM E3076-18. Will
 #'   use numerous linear regressions (.lm.fit form the stats-package) and can be
 #'   painfully slow for test data with high resolution.
 #'
-#' @note The function will use parallel processing via the furrr-package to use
+#' @note The function will use parallel processing via the furrr-package. To use
 #'   this feature, set up a plan other than the default sequential strategy
 #'   beforehand.
 #'
@@ -173,7 +173,7 @@ sdarr_execute <- function(prepared_data, otr.info,
 #'   show the plot of the final fit set to "all" to also show plots from the
 #'   individual steps set to "none" to be quiet. Can be abbreviated.
 #'
-#' @param savePlots Give plot functions with the result
+#' @param savePlots Give plot functions with the result.
 #'
 #' @returns A list containing a data-frame with the results of the final fit, a
 #'   list with the quality- and fit-metrics, and a list containing the crated

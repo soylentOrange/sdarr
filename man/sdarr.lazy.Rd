@@ -2,7 +2,7 @@
 % Please edit documentation in R/sdarrLazy.R
 \name{sdarr.lazy}
 \alias{sdarr.lazy}
-\title{sdarr.lazy}
+\title{sdarr.lazy: Random sub-sampling variant of the SDAR-algorithm}
 \usage{
 sdarr.lazy(
   data,
@@ -66,7 +66,7 @@ Run a random sub-sampling modification of the SDAR algorithm as
   estimate for the fit-range within the data.
 }
 \note{
-The function will use parallel processing via the furrr-package to use
+The function will use parallel processing via the furrr-package. To use
   this feature, set up a plan other than the default sequential strategy
   beforehand.
 }

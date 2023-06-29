@@ -14,7 +14,7 @@ E3076-18](https://doi.org/10.1520/E3076-18).
 It allows for automated and objective linear-fitting of mechanical
 test-data. See a detailed description of the algorithm in the [NIST
 Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050)
-or in [Graham & Adler(2011)](https://doi.org/10.1520/JTE103038).
+or in [Graham & Adler (2011)](https://doi.org/10.1520/JTE103038).
 
 As the original algorithm heavily uses linear regressions, a faster
 version was implemented here, which finds the optimum region for linear
@@ -32,18 +32,18 @@ devtools::install_github("soylentOrange/sdarr")
 
 ## Examples
 
-### sdarr
+### Standard SDAR-algorithm
 
-Basic example of the sdarr-function on a synthetic data set, which is
+A basic example of using `sdarr()` on a synthetic data set, which is
 based on the properties of aluminium (Al 6060 T66) as given in the
 [Metallic Material Properties Development and Standardization (MMPDS)
 Handbook](https://ntrl.ntis.gov/NTRL/dashboard/searchResults/titleDetail/PB2003106632.xhtml).
 A toe-region and a non-zero intercept are added to make the test data
 less boring.
 
-The sdarr-function analyzes the data and will give a small report as a
-message. It should confirm the Young’s-modulus of 68 GPa and an
-intercept of 10 MPa. To make use of multi-core processing, configure
+`sdarr()` analyzes the data and will give a small report as a message.
+It should confirm the Young’s-modulus of 68 GPa and an intercept of 10
+MPa. To make use of multi-core processing, configure
 [furrr](https://furrr.futureverse.org/) to use a multisession strategy.
 
 ``` r
@@ -105,20 +105,21 @@ Al_6060_T66.result <- sdarr(Al_6060_T66, x = strain, y = stress,
 
 <img src="man/figures/README-example-sdarr-1.png" width="100%" />
 
-### sdarr.lazy
+### Random sub-sampling modification of the SDAR-algorithm
 
-Basic example of the lazy variant of the sdarr-function on a synthetic
-data set, which is based on the properties of aluminium (Al 6060 T66) as
-given in the [Metallic Material Properties Development and
-Standardization (MMPDS)
+A basic example of `sdarr.lazy()`, a lazy variant of the sdarr-function
+on a synthetic data set, which is based on the properties of aluminium
+(Al 6060 T66) as given in the [Metallic Material Properties Development
+and Standardization (MMPDS)
 Handbook](https://ntrl.ntis.gov/NTRL/dashboard/searchResults/titleDetail/PB2003106632.xhtml).
 A toe-region and a non-zero intercept are added to make the test data
 less boring.
 
-The sdarr.lazy-function analyzes the data and will give a small report
-as a message. It should confirm the Young’s-modulus of 68 GPa and an
-intercept of 10 MPa. As the data set is rather short, enforce random
-sub-sampling by setting enforce_subsampling to TRUE.
+`sdarr.lazy()` analyzes the data for the optimum size of the fitting
+region via random sub-sampling. It will give a small report as a message
+after finding the optimum fit. It should confirm the Young’s-modulus of
+68 GPa and an intercept of 10 MPa. As the data set is rather short,
+enforce random sub-sampling by setting `enforce_subsampling = TRUE`.
 
 To make use of multi-core processing, configure
 [furrr](https://furrr.futureverse.org/) to use a multisession strategy.
@@ -193,14 +194,15 @@ Al_6060_T66.result.lazy <- sdarr.lazy(Al_6060_T66, x = strain, y = stress,
 
 ### plot functions
 
-The sdarr-function will create diagnostic plots throughout calculations,
-which will only be shown when requested (i.e. set showPlots = “all). To
-have a plot drawn later, you can call the provided plot-functions from
-the results, when you set savePlots = TRUE.
+`sdarr()` and `sdarr.lazy()` will create diagnostic plots throughout
+calculations, which will only be shown when requested (i.e. set
+`showPlots = "all`). To have a plot drawn later, you can call the
+provided plot-functions from the results, when you set
+`savePlots = TRUE`.
 
 The plots are crated functions (see
 [carrier](https://github.com/r-lib/carrier)), so you can easily tap the
-environment of the function to convert it to eg. a
+environment of the function to convert it to e.g. a
 [ggplot2-graphic](https://ggplot2.tidyverse.org/).
 
 ``` r
@@ -235,7 +237,7 @@ Al_6060_T66.result$plots$final.fit()
 
 ``` r
 
-# plot fit using ggplot2 
+# plot the final fit using ggplot2 
 {
   # tap the environment of the crated plot-function
   plot.env <- rlang::fn_env(Al_6060_T66.result$plots$final.fit)

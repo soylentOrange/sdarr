@@ -266,7 +266,7 @@ sdarr_execute.lazy <- function(prepared_data, otr.info,
 }
 
 
-#' @title sdarr.lazy
+#' @title sdarr.lazy: Random sub-sampling variant of the SDAR-algorithm
 #'
 #' @description Run a random sub-sampling modification of the SDAR algorithm as
 #'   originally standardized in ASTM E3076-18. As the original version uses
@@ -275,7 +275,7 @@ sdarr_execute.lazy <- function(prepared_data, otr.info,
 #'   algorithm will use several random sub-samples of the data to find the best
 #'   estimate for the fit-range within the data.
 #'
-#' @note The function will use parallel processing via the furrr-package to use
+#' @note The function will use parallel processing via the furrr-package. To use
 #'   this feature, set up a plan other than the default sequential strategy
 #'   beforehand.
 #'
