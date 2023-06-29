@@ -1,7 +1,7 @@
 Type: Package
 Package: sdarr
 Title: Slope Determination by Analysis of Residuals
-Version: 0.2.1
+Version: 0.2.2
 Authors@R: c(
     person("Robert", "Wendlandt", , "robert.wendlandt@uksh.de", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-6368-1622"))
@@ -31,8 +31,14 @@ Imports:
 Suggests:
     ggplot2,
     future,
-    parallelly
+    parallelly,
+    knitr,
+    rmarkdown,
+    plotly,
+    readr,
+    report
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.3
 URL: https://soylentorange.github.io/sdarr/
+VignetteBuilder: knitr

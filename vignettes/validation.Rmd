@@ -1,0 +1,305 @@
+---
+title: "Validation against Reference Data Set E3076-DS1(2018)"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Validation against Reference Data Set E3076-DS1(2018)}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE, echo=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  out.width = "100%"
+)
+```
+
+```{r setup, message=FALSE, warning=FALSE}
+# attach required packages
+library(sdarr)
+library(magrittr)
+library(report)
+library(stats)
+library(ggplot2)
+library(plotly)
+
+# setup multisession calculations with a maximum of 8 cores 
+# (or however many cores are available...)
+future::plan(future::multisession, 
+             workers = min(c(parallelly::availableCores(), 8)))
+```
+
+# Validation of sdarr and sdarr.lazy
+
+Though no exhaustive validation has been conducted, the Reference Data Set *E3076-DS1(2018) File 01* mentioned in [ASTM E3076-18](https://doi.org/10.1520/E3076-18) as *...available for download from ASTM at https://www.astm.org/ COMMITTEE/E08.htm, under the heading, Additional Information...* has been used to check the results of this implementation. The Reference Data Set *E3076-DS1(2018) File 01* was also analyzed as benchmark in [NIST Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050) with minor differences to the expected results listed in the standard.
+  
+  
+## Reference Data Set
+
+A plot of the Reference Data Set (after downloading, unpacking and labelling) is given below.
+
+```{r Reference_Data_Set, message=FALSE, warning=FALSE, include=FALSE, echo=FALSE}
+# Get Data from Reference Data Set E3076-DS1(2018)
+sdarr.get_DS1.data <- carrier::crate(function(localFileName = NULL) {
+  # satisfy pipe addiction...
+  `%>%` <- magrittr::`%>%`
+  
+  # local file name supplied?
+  filename <- localFileName
+  if(is.null(filename)) {
+    # otherwise download file from the Internet 
+    utils::download.file("https://web.archive.org/web/20190905162007/https://www.astm.org/COMMIT/E3076-DS1(2018).zip",
+                         "E3076_DS1_2018.zip")
+    
+    # Extract the Zip Archive
+    filename <- utils::unzip("E3076_DS1_2018.zip")
+  }
+  
+  # read Data Set from unzipped file
+  E3076_DS1_2018.rowwise <- readr::read_csv(filename,
+                                            col_names = FALSE,
+                                            trim_ws = FALSE,
+                                            show_col_types = FALSE) %>%
+    dplyr::mutate(rownum = dplyr::row_number()) 
+
+  # find start of the data section
+  data.startIdx <- E3076_DS1_2018.rowwise %>%
+    dplyr::mutate(data.start = stringr::str_detect(X1, stringr::coll("<Data>"))) %>%
+    dplyr::filter(data.start) %>% {.$rownum %>% as.numeric}
+  
+  # find end of the data section 
+  data.endIdx <- E3076_DS1_2018.rowwise %>%
+    dplyr::mutate(data.end = stringr::str_detect(X1, stringr::coll("</Data>"))) %>%
+    dplyr::filter(data.end) %>% {.$rownum %>% as.numeric}
+  
+  # read the names and units from test record
+  E3076_DS1_2018.names <- readr::read_table(filename, 
+                                      show_col_types = FALSE,
+                                      skip = data.startIdx + 3, 
+                                      n_max = 1)
+  
+  # read the data-points from the test record
+  E3076_DS1_2018.data <- readr::read_table(filename,
+                                           col_names = FALSE,
+                                           show_col_types = FALSE,
+                                           skip = data.startIdx + 5, 
+                                           n_max = data.endIdx - data.startIdx - 5) %>%
+    magrittr::set_names(E3076_DS1_2018.names %>% names) %>% 
+    labelled::set_variable_labels(.labels = E3076_DS1_2018.names) %>%
+    magrittr::set_attr("spec", NULL)
+})
+
+# Get Data from Reference Data Set E3076-DS1(2018)
+E3076_DS1_2018 <- if(!file.exists("E3076-DS1(2018).txt")) {
+  sdarr.get_DS1.data()
+} else {
+  sdarr.get_DS1.data("E3076-DS1(2018).txt")
+}
+```
+
+```{r plot-Reference_Data_Set, message=FALSE, warning=FALSE, fig.height=4, fig.width=6}
+# brief report of the data
+E3076_DS1_2018 %>% 
+  report()
+
+# plot of the data
+E3076_DS1_2018 %>% {
+  ggplot(data = ., aes(x = extensometer, y = force, color = "E3076_DS1_2018")) +
+    geom_line() +
+    theme_bw() +
+    labs(title = "Plot of the Reference Data Set",
+       x = "extensometer (in mm)",
+       y = "force (in kN)")
+} %>% 
+  ggplotly(dynamicTicks = T) %>%
+  config(displaylogo = F, showSendToCloud = F)
+```
+
+## Standard algorithm (sdarr)
+
+```{r sdarr_check, fig.height=4, fig.width=6}
+# Run the algorithm
+sdarr.results <- E3076_DS1_2018 %>% 
+  sdarr(extensometer, force,
+        showPlots = "n",
+        savePlots = T)
+
+# show the plot of the final fit
+sdarr.results$plots$final.fit %>% {
+  
+  # tap the environment of the crated plot-function
+  plot.env <- rlang::fn_env(.)
+  
+  # get data and labels
+  plot.data <- plot.env$plot.data
+  plot.main <- plot.env$plot.main
+  plot.xlab <- plot.env$plot.xlab
+  plot.ylab <- plot.env$plot.ylab
+  y.data.max <- plot.data$y.data %>% max()
+  
+  # create the ggplot2
+  plot.data %>% ggplot(aes(x = x.data, 
+                           y = y.data, 
+                           color = "E3076_DS1_2018")) +
+    geom_line() +
+    geom_line(data = plot.data %>% 
+                dplyr::filter(y.fit <= y.data.max),
+              aes(x = x.data, y = y.fit, color = "fit (sdarr)")) +
+    theme_bw() +
+    labs(title = plot.main,
+       x = plot.xlab,
+       y = plot.ylab)
+} %>% 
+  ggplotly(dynamicTicks = T) %>%
+  config(displaylogo = F, showSendToCloud = F)
+```
+
+### Validation Result
+The results of the analysis using the sdarr-function are practically identical to the results given in [ASTM E3076-18](https://doi.org/10.1520/E3076-18) and perfectly match the results from [NIST Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050) (except for omitting any rounding in sdarr). As stated in [NIST Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050) *...The few small discrepancies are most likely attributable to rounding errors...*.
+
+## Random sub-sampling mofification of the SDAR-algorithm (sdarr.lazy)
+
+```{r sdarr.lazy_check, fig.height=4, fig.width=6}
+# Run the algorithm (after setting a random seed)
+set.seed(50041180)
+sdarr.lazy.results <- E3076_DS1_2018 %>% 
+  sdarr.lazy(extensometer,  force,
+             enforce_subsampling = T,
+             showPlots = "n", savePlots = T)
+
+# show the plot of the final fit
+sdarr.lazy.results$plots$final.fit %>% {
+  
+  # tap the environment of the crated plot-function
+  plot.env <- rlang::fn_env(.)
+  
+  # get data and labels
+  plot.data <- plot.env$plot.data
+  plot.main <- plot.env$plot.main
+  plot.xlab <- plot.env$plot.xlab
+  plot.ylab <- plot.env$plot.ylab
+  y.data.max <- plot.data$y.data %>% max()
+  
+  # create the ggplot2
+  plot.data %>% 
+    ggplot(aes(x = x.data, y = y.data, color = "E3076_DS1_2018")) +
+    geom_line() +
+    geom_line(data = plot.data %>%
+                dplyr::filter(y.fit <= y.data.max),
+              aes(x = x.data, y = y.fit, 
+                  color = "fit (sdarr.lazy)")) +
+    theme_bw() +
+    labs(title = plot.main,
+       x = plot.xlab,
+       y = plot.ylab)
+} %>% 
+  ggplotly(dynamicTicks = T) %>%
+  config(displaylogo = F, showSendToCloud = F)
+```
+
+### Validation Result
+At first glimpse, the results of the analysis using the random sub-sampling variant of the SDAR-algorithm (sdarr.lazy) are not identical to the results given in [ASTM E3076-18](https://doi.org/10.1520/E3076-18) or the results from [NIST Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050) (except for omitting any rounding in sdarr).  
+However, when considering the 95% confidence intervals (additionally given with the result from sdarr and sdarr-lazy) obtained from the final fitting in the standard SDAR-algorithm, the results of the lazy variant are well within the 95%-CI of the standard variant. There is only a minor difference in the y-range of the final fits resulting in slightly different final results.  
+Comparing the regression curves of sdarr.lazy and sdarr over the mechanical data, you see that there is practically no difference (zoom in ...a lot... to see a difference).
+
+```{r sdarr.lazy_comparison, fig.height=4, fig.width=6}
+
+# plot fit (with 95% CI) and lazy fit against original test record
+{
+  
+  # tap the environment of the crated plot-functions
+  plot.env <- rlang::fn_env(sdarr.results$plots$final.fit)
+  plot.env.lazy <- rlang::fn_env(sdarr.lazy.results$plots$final.fit)
+  
+  # get data and labels
+  plot.data <- plot.env$plot.data %>% 
+    dplyr::select(x.data, y.data)
+  plot.main <- plot.env$plot.main
+  plot.xlab <- plot.env$plot.xlab
+  plot.ylab <- plot.env$plot.ylab
+  
+  # get fit ranges
+  x.lowerBound <- sdarr.results$sdar$x.lowerBound
+  x.upperBound <- sdarr.results$sdar$x.upperBound
+  x.lowerBound.lazy <- sdarr.lazy.results$sdar$x.lowerBound
+  x.upperBound.lazy <- sdarr.lazy.results$sdar$x.upperBound
+  
+  # re-fit for plotting
+  y.data.prediction <- plot.data %>% 
+    dplyr::filter(dplyr::between(x.data, x.lowerBound, x.upperBound)) %>% {
+      data <- .
+      lm(y.data ~ x.data, data = data) %>%
+      predict(newdata = dplyr::bind_rows(data.frame(x.data = 0),
+                                         plot.data %>% dplyr::select(x.data)),
+              interval = "confidence")
+    }
+  
+  y.data.prediction.lazy <- plot.data %>% 
+    dplyr::filter(dplyr::between(x.data, 
+                                 x.lowerBound.lazy, 
+                                 x.upperBound.lazy)) %>% {
+      data <- .
+      lm(y.data ~ x.data, data = data) %>%
+      predict(newdata = dplyr::bind_rows(data.frame(x.data = 0), 
+                                         plot.data %>% 
+                                           dplyr::select(x.data))) %>% 
+        as.data.frame() %>% 
+        set_names("fit.lazy")
+    }
+  
+  # add a (empty) data point at 0mm extension to see the difference in intercept
+  plot.data <- data.frame(x.data = 0, y.data = NA) %>% 
+    dplyr::bind_rows(plot.data) %>% 
+    dplyr::bind_cols(y.data.prediction,
+                     y.data.prediction.lazy)
+  
+  y.data.max <- plot.data$y.data %>% max(na.rm = T)
+  
+  ggplot(data = plot.data, 
+         aes(x = x.data, y = y.data, color = "E3076_DS1_2018")) +
+    geom_line() +
+    geom_line(data = plot.data %>% 
+                dplyr::filter(dplyr::between(x.data, 
+                                             x.lowerBound, x.upperBound)),
+              aes(x = x.data, y = y.data, color = "fit-range (sdarr)")) +
+    geom_line(data = plot.data %>% 
+                dplyr::filter(dplyr::between(x.data, 
+                                             x.lowerBound.lazy, x.upperBound.lazy)),
+              aes(x = x.data, y = y.data, color = "fit-range (sdarr.lazy)")) +
+    geom_line(data = plot.data %>% 
+                dplyr::filter(fit <= y.data.max),
+              aes(x = x.data, y = fit, color = "fit (sdarr)")) +
+    geom_ribbon(data = plot.data %>% 
+                dplyr::filter(fit <= y.data.max),
+                aes(x = x.data, y = fit, ymin = lwr, ymax = upr, 
+                    color = "fit (sdarr)"),
+                alpha = 0.25) +
+    geom_line(data = plot.data %>% 
+                dplyr::filter(fit.lazy <= y.data.max),
+              aes(x = x.data, y = fit.lazy, color = "fit (sdarr.lazy)")) +
+    theme_bw() +
+    labs(title = "Final fit (with 95% CI) vs. final lazy fit",
+       x = plot.xlab,
+       y = plot.ylab) 
+  } %>% 
+  ggplotly(dynamicTicks = T) %>%
+  config(displaylogo = F, showSendToCloud = F)
+```
+
+## Conclusions
+
+Even though this is more a benchmarking than a *real* validation, the results of the sdarr-function are practically identical to the results listed in [ASTM E3076-18](https://doi.org/10.1520/E3076-18) and in [NIST Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050). Considering the 95% confidence of the fitting results, same seems true for the random sub-sampling modification used in sdarr.lazy.
+
+## Final Remark
+  
+Even though the functions within this package have been tested, see the remark in the LICENSE...
+  
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
