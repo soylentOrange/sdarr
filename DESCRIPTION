@@ -1,12 +1,10 @@
 Type: Package
 Package: sdarr
 Title: Slope Determination by Analysis of Residuals
-Version: 0.2.0
+Version: 0.2.1
 Authors@R: c(
     person("Robert", "Wendlandt", , "robert.wendlandt@uksh.de", role = c("aut", "cre"),
-           comment = c(ORCID = "0000-0001-6368-1622")),
-    person("UKSH", role = c("cph", "fnd")),
-    person("BMBF", role = c("fnd"))
+           comment = c(ORCID = "0000-0001-6368-1622"))
   )
 BugReports: https://github.com/soylentOrange/sdarr/issues
 Description: Implementation of the SDAR algorithm for Slope Determination by 

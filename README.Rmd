@@ -95,7 +95,8 @@ Al_6060_T66 <- synthesize_test_data(slope = 68000, yield.y = 160,
                                     toe.initial.y = 3, toe.max.y = 15,
                                     toe.initial.slope = 34000)
 
-# Analyze the test record
+# Analyze the test record (after setting a random seed)
+set.seed(50041180)
 Al_6060_T66.result.lazy <- sdarr.lazy(Al_6060_T66, x = strain, y = stress,
                                       enforce_subsampling = T,
                                       verbose = "r", showPlots = "r")

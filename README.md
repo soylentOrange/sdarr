@@ -139,13 +139,15 @@ Al_6060_T66 <- synthesize_test_data(slope = 68000, yield.y = 160,
                                     toe.initial.y = 3, toe.max.y = 15,
                                     toe.initial.slope = 34000)
 
-# Analyze the test record
+# Analyze the test record (after setting a random seed)
+set.seed(50041180)
 Al_6060_T66.result.lazy <- sdarr.lazy(Al_6060_T66, x = strain, y = stress,
                                       enforce_subsampling = T,
                                       verbose = "r", showPlots = "r")
 #> Determination of Slope in the Linear Region of a Test Record:
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
 #>   lazy algorithm requires more fits than standard SDAR-algorithm:  
-#>     174900 vs. 36856 fits.
+#>     141015 vs. 36856 fits.
 #>   Anyways, random sub-sampling will be used...
 #> Random sub-sampling mofification of the SDAR-algorithm
 #>   100 % of sub-sampled normalized ranges passed the data quality checks.
