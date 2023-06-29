@@ -1,7 +1,7 @@
 Type: Package
 Package: sdarr
 Title: Slope Determination by Analysis of Residuals
-Version: 0.3.0
+Version: 0.3.1
 Authors@R: c(
     person("Robert", "Wendlandt", , "robert.wendlandt@uksh.de", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-6368-1622"))
@@ -35,8 +35,7 @@ Suggests:
     knitr,
     rmarkdown,
     plotly,
-    readr,
-    report
+    readr
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.3

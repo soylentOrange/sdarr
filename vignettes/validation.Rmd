@@ -19,7 +19,6 @@ knitr::opts_chunk$set(
 # attach required packages
 library(sdarr)
 library(magrittr)
-library(report)
 library(stats)
 library(ggplot2)
 library(plotly)
@@ -99,13 +98,10 @@ E3076_DS1_2018 <- if(!file.exists("E3076-DS1(2018).txt")) {
 ```
 
 ```{r plot-Reference_Data_Set, message=FALSE, warning=FALSE, fig.height=4, fig.width=6}
-# brief report of the data
-E3076_DS1_2018 %>% 
-  report()
-
 # plot of the data
 E3076_DS1_2018 %>% {
-  ggplot(data = ., aes(x = extensometer, y = force, color = "E3076_DS1_2018")) +
+  ggplot(data = ., aes(x = extensometer, y = force, 
+                       color = "E3076_DS1_2018")) +
     geom_line() +
     theme_bw() +
     labs(title = "Plot of the Reference Data Set",
@@ -248,7 +244,7 @@ Comparing the regression curves of sdarr.lazy and sdarr over the mechanical data
         set_names("fit.lazy")
     }
   
-  # add a (empty) data point at 0mm extension to see the difference in intercept
+  # add an empty data point at 0 extension to see the difference in intercept
   plot.data <- data.frame(x.data = 0, y.data = NA) %>% 
     dplyr::bind_rows(plot.data) %>% 
     dplyr::bind_cols(y.data.prediction,
@@ -261,12 +257,16 @@ Comparing the regression curves of sdarr.lazy and sdarr over the mechanical data
     geom_line() +
     geom_line(data = plot.data %>% 
                 dplyr::filter(dplyr::between(x.data, 
-                                             x.lowerBound, x.upperBound)),
-              aes(x = x.data, y = y.data, color = "fit-range (sdarr)")) +
+                                             x.lowerBound, 
+                                             x.upperBound)),
+              aes(x = x.data, y = y.data, 
+                  color = "fit-range (sdarr)")) +
     geom_line(data = plot.data %>% 
                 dplyr::filter(dplyr::between(x.data, 
-                                             x.lowerBound.lazy, x.upperBound.lazy)),
-              aes(x = x.data, y = y.data, color = "fit-range (sdarr.lazy)")) +
+                                             x.lowerBound.lazy, 
+                                             x.upperBound.lazy)),
+              aes(x = x.data, y = y.data, 
+                  color = "fit-range (sdarr.lazy)")) +
     geom_line(data = plot.data %>% 
                 dplyr::filter(fit <= y.data.max),
               aes(x = x.data, y = fit, color = "fit (sdarr)")) +
@@ -289,7 +289,7 @@ Comparing the regression curves of sdarr.lazy and sdarr over the mechanical data
 
 ## Conclusions
 
-Even though this is more a benchmarking than a *real* validation, the results of the sdarr-function are practically identical to the results listed in [ASTM E3076-18](https://doi.org/10.1520/E3076-18) and in [NIST Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050). Considering the 95% confidence of the fitting results, same seems true for the random sub-sampling modification used in sdarr.lazy.
+Even though this is more a benchmarking than a *real* validation, the results of the sdarr-function are practically identical to the results listed in [ASTM E3076-18](https://doi.org/10.1520/E3076-18) and in [NIST Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050). Considering the 95% confidence intervals of the fitting results, same seems true for the random sub-sampling modification used in sdarr.lazy.
 
 ## Final Remark
   
