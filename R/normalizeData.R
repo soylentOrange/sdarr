@@ -60,7 +60,7 @@ normalize_data <- function(data, otr.info = NULL,
 
   # print messages
   if(verbose) {
-    message("Normalize Test Data according to NIST Technical Note 205 / ASTM E3076-18\n")
+    message("Normalize Test Data\n")
     message("  shift")
     message(paste0("      shift x:                 ", shift$x.shift))
     message(paste0("      shift y:                 ", shift$y.shift))

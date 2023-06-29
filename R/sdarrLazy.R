@@ -12,7 +12,7 @@ sdarr_execute.lazy <- function(prepared_data, otr.info,
 
   # Give a (long) welcome message
   if(verbose.report) {
-    message("Random sub-sampling mofification of Standard Practice for Determination of Slope in the Linear Region of a Test Record, ASTM E3076\n")
+    message("Random sub-sampling mofification of the SDAR-algorithm\n")
   }
 
   # maybe the offset for step 1 needs to be raised later
@@ -288,12 +288,12 @@ sdarr_execute.lazy <- function(prepared_data, otr.info,
 #'   Region of a Test Record (ASTM E3076-18). (2018).
 #'   https://doi.org/10.1520/E3076-18
 #'
-#' @param data data record to analyze. Labels of the data columns will be used
+#' @param data Data record to analyze. Labels of the data columns will be used
 #'   as units.
 #'
-#' @param x use tidy selection to specify x within the data.
+#' @param x Use tidy selection to specify x within the data.
 #'
-#' @param y use tidy selection to specify y within the data.
+#' @param y Use tidy selection to specify y within the data.
 #'
 #' @param fit.rep Repetitions of random sub-sampling and fitting.
 #'
@@ -310,16 +310,16 @@ sdarr_execute.lazy <- function(prepared_data, otr.info,
 #' @param enforce_subsampling Set to TRUE, to use sub-sampling method even when
 #'   it is computationally more expensive than the standard SDAR-algorithm.
 #'
-#' @param verbose give informational messages during computation defaults to
+#' @param verbose Give informational messages during computation defaults to
 #'   "report" to only show a summarizing information set to "all" to also give
 #'   messages from the individual steps set to "none" to be quiet. Can be
 #'   abbreviated.
 #'
-#' @param showPlots show plots during computation defaults to "report" to only
+#' @param showPlots Show plots during computation defaults to "report" to only
 #'   show the plot of the final fit set to "all" to also show plots from the
 #'   individual steps set to "none" to be quiet. Can be abbreviated.
 #'
-#' @param savePlots give plot functions with the result
+#' @param savePlots Give plot functions with the result.
 #'
 #' @returns A list containing a data-frame with the results of the final fit, a
 #'   list with the quality- and fit-metrics, and a list containing the crated
@@ -409,7 +409,7 @@ sdarr.lazy <- function(data, x, y, fit.rep = 5,
 
   if(viability$viable == F) {
     if(verbose.report) {
-      message(paste0("  Random sub-sampling will require more computation effort than standard SDAR-algorithm: ",
+      message(paste0("  Random sub-sampling will require more computation effort than standard SDAR-algorithm:  \n    ",
                      viability$Nfits.subsampling, " vs. ", viability$Nfits.plain, " fits."))
       if(enforce_subsampling == F) {
         message("  Standard SDAR-algorithm will be used...\n")

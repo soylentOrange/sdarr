@@ -33,17 +33,19 @@ You can install the development version of sdarr from [GitHub](https://github.co
 devtools::install_github("soylentOrange/sdarr")
 ```
 
-## Example
+## Examples
+
+### sdarr
 
 Basic example of the sdarr-function on a synthetic data set.
 The synthetic data set is based on the properties of aluminium (Al 6060 T66) as given in the 
 [Metallic Material Properties Development and Standardization (MMPDS) Handbook](https://ntrl.ntis.gov/NTRL/dashboard/searchResults/titleDetail/PB2003106632.xhtml).
 A toe-region and a non-zero intercept are added to make the test data less boring.  
   
-The sdarr-function analyzes the data and wil give a small report as a message.
+The sdarr-function analyzes the data and will give a small report as a message.
 It should confirm the Young's-modulus of 68 GPa and an intercept of 10 MPa.
 
-```{r example}
+```{r example - sdarr}
 library(sdarr)
 
 # Synthesize a test record resembling Al 6060 T66
@@ -57,6 +59,41 @@ Al_6060_T66 <- synthesize_test_data(slope = 68000, yield.y = 160,
 # Analyze the test record
 Al_6060_T66.result <- sdarr(Al_6060_T66, x = strain, y = stress, 
                             verbose = "r", showPlots = "r")
+
+```
+
+### sdarr.lazy
+
+Basic example of the lazy variant of the sdarr-function on a synthetic data set.
+The synthetic data set is based on the properties of aluminium (Al 6060 T66) as given in the 
+[Metallic Material Properties Development and Standardization (MMPDS) Handbook](https://ntrl.ntis.gov/NTRL/dashboard/searchResults/titleDetail/PB2003106632.xhtml).
+A toe-region and a non-zero intercept are added to make the test data less boring.  
+  
+The sdarr.lazy-function analyzes the data and will give a small report as a message.
+It should confirm the Young's-modulus of 68 GPa and an intercept of 10 MPa.
+As the data set is rather short, enforce random sub-sampling by setting enforce_subsampling to TRUE.
+
+To make use of multi-core processing, configure [furrr](https://furrr.futureverse.org/) to use a multisession strategy.
+
+```{r example - sdarr.lazy}
+library(sdarr)
+
+# setup multisession calculations with a maximum of 8 cores (or however many cores are available...)
+library(furrr)
+plan(multisession, workers = min(c(parallelly::availableCores(), 8)))
+
+# Synthesize a test record resembling Al 6060 T66
+# (Values from MMPDS Handbook, with a toe region added)
+Al_6060_T66 <- synthesize_test_data(slope = 68000, yield.y = 160, 
+                                    ultimate.y = 215, ultimate.x = 0.091,
+                                    offset = 10,
+                                    toe.initial.y = 3, toe.max.y = 15,
+                                    toe.initial.slope = 34000)
+
+# Analyze the test record
+Al_6060_T66.result.lazy <- sdarr.lazy(Al_6060_T66, x = strain, y = stress,
+                                      enforce_subsampling = T,
+                                      verbose = "r", showPlots = "r")
 
 ```
 

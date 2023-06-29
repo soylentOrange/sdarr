@@ -7,23 +7,23 @@
 sdarr(data, x, y, verbose = "report", showPlots = "report", savePlots = F)
 }
 \arguments{
-\item{data}{data record to analyze. Labels of the data columns will be used
+\item{data}{Data record to analyze. Labels of the data columns will be used
 as units.}
 
-\item{x}{use tidy selection to specify x within the data.}
+\item{x}{Use tidy selection to specify x within the data.}
 
-\item{y}{use tidy selection to specify y within the data.}
+\item{y}{Use tidy selection to specify y within the data.}
 
-\item{verbose}{give informational messages during computation defaults to
+\item{verbose}{Give informational messages during computation defaults to
 "report" to only show a summarizing information set to "all" to also give
 messages from the individual steps set to "none" to be quiet. Can be
 abbreviated.}
 
-\item{showPlots}{show plots during computation defaults to "report" to only
+\item{showPlots}{Show plots during computation defaults to "report" to only
 show the plot of the final fit set to "all" to also show plots from the
 individual steps set to "none" to be quiet. Can be abbreviated.}
 
-\item{savePlots}{give plot functions with the result}
+\item{savePlots}{Give plot functions with the result}
 }
 \value{
 A list containing a data-frame with the results of the final fit, a

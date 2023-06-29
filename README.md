@@ -30,7 +30,9 @@ You can install the development version of sdarr from
 devtools::install_github("soylentOrange/sdarr")
 ```
 
-## Example
+## Examples
+
+### sdarr
 
 Basic example of the sdarr-function on a synthetic data set. The
 synthetic data set is based on the properties of aluminium (Al 6060 T66)
@@ -40,7 +42,7 @@ Handbook](https://ntrl.ntis.gov/NTRL/dashboard/searchResults/titleDetail/PB20031
 A toe-region and a non-zero intercept are added to make the test data
 less boring.
 
-The sdarr-function analyzes the data and wil give a small report as a
+The sdarr-function analyzes the data and will give a small report as a
 message. It should confirm the Young’s-modulus of 68 GPa and an
 intercept of 10 MPa.
 
@@ -96,7 +98,91 @@ Al_6060_T66.result <- sdarr(Al_6060_T66, x = strain, y = stress,
 #>       y-Range:                 24.7366333007812 MPa - 84.4049072265625 MPa
 ```
 
-<img src="man/figures/README-example-1.png" width="100%" />
+<img src="man/figures/README-example - sdarr-1.png" width="100%" />
+
+### sdarr.lazy
+
+Basic example of the lazy variant of the sdarr-function on a synthetic
+data set. The synthetic data set is based on the properties of aluminium
+(Al 6060 T66) as given in the [Metallic Material Properties Development
+and Standardization (MMPDS)
+Handbook](https://ntrl.ntis.gov/NTRL/dashboard/searchResults/titleDetail/PB2003106632.xhtml).
+A toe-region and a non-zero intercept are added to make the test data
+less boring.
+
+The sdarr.lazy-function analyzes the data and will give a small report
+as a message. It should confirm the Young’s-modulus of 68 GPa and an
+intercept of 10 MPa. As the data set is rather short, enforce random
+sub-sampling by setting enforce_subsampling to TRUE.
+
+To make use of multi-core processing, configure
+[furrr](https://furrr.futureverse.org/) to use a multisession strategy.
+
+``` r
+library(sdarr)
+
+# setup multisession calculations with a maximum of 8 cores (or however many cores are available...)
+library(furrr)
+#> Loading required package: future
+plan(multisession, workers = min(c(parallelly::availableCores(), 8)))
+
+# Synthesize a test record resembling Al 6060 T66
+# (Values from MMPDS Handbook, with a toe region added)
+Al_6060_T66 <- synthesize_test_data(slope = 68000, yield.y = 160, 
+                                    ultimate.y = 215, ultimate.x = 0.091,
+                                    offset = 10,
+                                    toe.initial.y = 3, toe.max.y = 15,
+                                    toe.initial.slope = 34000)
+
+# Analyze the test record
+Al_6060_T66.result.lazy <- sdarr.lazy(Al_6060_T66, x = strain, y = stress,
+                                      enforce_subsampling = T,
+                                      verbose = "r", showPlots = "r")
+#> Determination of Slope in the Linear Region of a Test Record:
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#>   Random sub-sampling will require more computation effort than standard SDAR-algorithm: 138650 vs. 36856 fits.
+#>   Anyways, random sub-sampling will be used...
+#> Random sub-sampling mofification of Standard Practice for Determination of Slope in the Linear Region of a Test Record, ASTM E3076
+#>   100 % of sub-sampled normalized ranges passed the data quality checks.
+#>   100 % of linear regressions passed the fit quality checks.
+#>   100 % of linear regressions passed all quality checks.
+#>   Data Quality Metric: Digital Resolution
+#>     x
+#>       Relative x-Resolution:   0.333333333333333
+#>       % at this resolution:    0
+#>       % in zeroth bin:         100
+#>       --> pass
+#>     y
+#>       Relative y-Resolution:   0.333333333333333
+#>       % at this resolution:    1.19402985074627
+#>       % in zeroth bin:         98.8059701492537
+#>       --> pass
+#>   Data Quality Metric: Noise
+#>     x
+#>       Relative x-Noise:        1.12835262887974e-14
+#>       --> pass
+#>     y
+#>       Relative y-Noise:        0.0590566035999252
+#>       --> pass
+#>   Fit Quality Metric: Curvature
+#>     1st Quartile
+#>       Relative Residual Slope: 0.00229104799716044
+#>       Number of Points:        39
+#>       --> pass
+#>     4th Quartile
+#>       Relative Residual Slope: -0.0074870270416416
+#>       Number of Points:        40
+#>       --> pass
+#>   Fit Quality Metric: Fit Range
+#>       relative fit range:      0.811046770601336
+#>       --> pass
+#>   Un-normalized fit
+#>       Final Slope:             67999.8182344699 MPa
+#>       True Intercept:          10.0020306561035 MPa
+#>       y-Range:                 25.1040649414062 MPa - 84.0243530273438 MPa
+```
+
+<img src="man/figures/README-example - sdarr.lazy-1.png" width="100%" />
 
 ## Acknowledgements
 

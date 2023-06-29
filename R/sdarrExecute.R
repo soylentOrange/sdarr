@@ -14,7 +14,7 @@ sdarr_execute <- function(prepared_data, otr.info,
 
   # Give a welcome message
   if(verbose.report) {
-    message("Standard Practice for Determination of Slope in the Linear Region of a Test Record, ASTM E3076\n")
+    message("SDAR-algorithm\n")
   }
 
   # do step 1, check data quality, and get optimum fit

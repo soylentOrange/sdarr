@@ -13,7 +13,7 @@ sdarr_execute <- function(prepared_data, otr.info,
 
   # Give a welcome message
   if(verbose.report) {
-    message("Standard Practice for Determination of Slope in the Linear Region of a Test Record, ASTM E3076\n")
+    message("SDAR-algorithm\n")
   }
 
   # do step 1, check data quality, and get optimum fit
@@ -153,23 +153,23 @@ sdarr_execute <- function(prepared_data, otr.info,
 #' Region of a Test Record (ASTM E3076-18). (2018).
 #' https://doi.org/10.1520/E3076-18
 #'
-#' @param data data record to analyze. Labels of the data columns will be used
+#' @param data Data record to analyze. Labels of the data columns will be used
 #'   as units.
 #'
-#' @param x use tidy selection to specify x within the data.
+#' @param x Use tidy selection to specify x within the data.
 #'
-#' @param y use tidy selection to specify y within the data.
+#' @param y Use tidy selection to specify y within the data.
 #'
-#' @param verbose give informational messages during computation defaults to
+#' @param verbose Give informational messages during computation defaults to
 #'   "report" to only show a summarizing information set to "all" to also give
 #'   messages from the individual steps set to "none" to be quiet. Can be
 #'   abbreviated.
 #'
-#' @param showPlots show plots during computation defaults to "report" to only
+#' @param showPlots Show plots during computation defaults to "report" to only
 #'   show the plot of the final fit set to "all" to also show plots from the
 #'   individual steps set to "none" to be quiet. Can be abbreviated.
 #'
-#' @param savePlots give plot functions with the result
+#' @param savePlots Give plot functions with the result
 #'
 #' @returns A list containing a data-frame with the results of the final fit, a
 #'   list with the quality- and fit-metrics, and a list containing the crated
