@@ -69,7 +69,8 @@
 #'
 #' @examples
 #' # Synthesize a test record resembling Al 6060 T66
-#' # (Values according to )
+#' # (Values according to Metallic Material Properties Development and
+#' # Standardization (MMPDS) Handbook)
 #' Al_6060_T66 <- synthesize_test_data(slope = 68000,
 #'                                     yield.y = 160,
 #'                                     ultimate.y = 215,
