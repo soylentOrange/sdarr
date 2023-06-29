@@ -43,7 +43,7 @@ A toe-region and a non-zero intercept are added to make the test data less borin
   
 The sdarr-function analyzes the data and will give a small report as a message.
 It should confirm the Young's-modulus of 68 GPa and an intercept of 10 MPa.
-To make use of multi-core processing, configure [furrr](https://furrr.futureverse.org/) to use a multisession strategy (see next example).
+To make use of multi-core processing, configure [furrr](https://furrr.futureverse.org/) to use a multisession strategy.
 
 ```{r example-sdarr}
 library(sdarr)

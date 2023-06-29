@@ -409,7 +409,7 @@ sdarr.lazy <- function(data, x, y, fit.rep = 5,
 
   if(viability$viable == F) {
     if(verbose.report) {
-      message(paste0("  Random sub-sampling will require more computation effort than standard SDAR-algorithm:  \n    ",
+      message(paste0("  lazy algorithm requires more fits than standard SDAR-algorithm:  \n    ",
                      viability$Nfits.subsampling, " vs. ", viability$Nfits.plain, " fits."))
       if(enforce_subsampling == F) {
         message("  Standard SDAR-algorithm will be used...\n")

@@ -44,8 +44,7 @@ less boring.
 The sdarr-function analyzes the data and will give a small report as a
 message. It should confirm the Young’s-modulus of 68 GPa and an
 intercept of 10 MPa. To make use of multi-core processing, configure
-[furrr](https://furrr.futureverse.org/) to use a multisession strategy
-(see next example).
+[furrr](https://furrr.futureverse.org/) to use a multisession strategy.
 
 ``` r
 library(sdarr)
@@ -145,8 +144,8 @@ Al_6060_T66.result.lazy <- sdarr.lazy(Al_6060_T66, x = strain, y = stress,
                                       enforce_subsampling = T,
                                       verbose = "r", showPlots = "r")
 #> Determination of Slope in the Linear Region of a Test Record:
-#>   Random sub-sampling will require more computation effort than standard SDAR-algorithm:  
-#>     173580 vs. 36856 fits.
+#>   lazy algorithm requires more fits than standard SDAR-algorithm:  
+#>     174900 vs. 36856 fits.
 #>   Anyways, random sub-sampling will be used...
 #> Random sub-sampling mofification of the SDAR-algorithm
 #>   100 % of sub-sampled normalized ranges passed the data quality checks.
