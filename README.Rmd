@@ -45,6 +45,7 @@ It should confirm the Young's-modulus of 68 GPa and an intercept of 10 MPa.
 
 ```{r example}
 library(sdarr)
+
 # Synthesize a test record resembling Al 6060 T66
 # (Values from MMPDS Handbook, with a toe region added)
 Al_6060_T66 <- synthesize_test_data(slope = 68000, yield.y = 160, 
@@ -56,6 +57,7 @@ Al_6060_T66 <- synthesize_test_data(slope = 68000, yield.y = 160,
 # Analyze the test record
 Al_6060_T66.result <- sdarr(Al_6060_T66, x = strain, y = stress, 
                             verbose = "r", showPlots = "r")
+
 ```
 
 ## Acknowledgements

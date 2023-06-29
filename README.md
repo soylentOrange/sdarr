@@ -46,6 +46,7 @@ intercept of 10 MPa.
 
 ``` r
 library(sdarr)
+
 # Synthesize a test record resembling Al 6060 T66
 # (Values from MMPDS Handbook, with a toe region added)
 Al_6060_T66 <- synthesize_test_data(slope = 68000, yield.y = 160, 
