@@ -79,4 +79,8 @@ Lucon, E. (2019). Use and validation of the slope determination
 Standard Practice for Determination of the Slope in the Linear
   Region of a Test Record (ASTM E3076-18). (2018).
   https://doi.org/10.1520/E3076-18
+
+Graham, S., & Adler, M. (2011). Determining the Slope and Quality
+  of Fit for the Linear Part of a Test Record. Journal of Testing and
+  Evaluation - J TEST EVAL, 39. https://doi.org/10.1520/JTE103038
 }

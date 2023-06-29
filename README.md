@@ -12,9 +12,9 @@ The sdarr-package provides a R implementation of the SDAR algorithm for
 Slope Determination by Analysis of Residuals as standardized in [ASTM
 E3076-18](https://doi.org/10.1520/E3076-18).  
 It allows for automated and objective linear-fitting of mechanical
-test-data. See a detailed description of the original algorithm in the
-[NIST Technical Note 2050 by E.
-Lucon](https://doi.org/10.6028/NIST.TN.2050).
+test-data. See a detailed description of the algorithm in the [NIST
+Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050)
+or in [Graham & Adler(2011)](https://doi.org/10.1520/JTE103038).
 
 As the original algorithm heavily uses linear regressions, a faster
 version was implemented here, which finds the optimum region for linear

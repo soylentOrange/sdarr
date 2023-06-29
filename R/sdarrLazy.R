@@ -288,6 +288,10 @@ sdarr_execute.lazy <- function(prepared_data, otr.info,
 #'   Region of a Test Record (ASTM E3076-18). (2018).
 #'   https://doi.org/10.1520/E3076-18
 #'
+#' @references Graham, S., & Adler, M. (2011). Determining the Slope and Quality
+#'   of Fit for the Linear Part of a Test Record. Journal of Testing and
+#'   Evaluation - J TEST EVAL, 39. https://doi.org/10.1520/JTE103038
+#'
 #' @param data Data record to analyze. Labels of the data columns will be used
 #'   as units.
 #'
