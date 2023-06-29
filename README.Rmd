@@ -37,16 +37,21 @@ devtools::install_github("soylentOrange/sdarr")
 
 ### sdarr
 
-Basic example of the sdarr-function on a synthetic data set.
-The synthetic data set is based on the properties of aluminium (Al 6060 T66) as given in the 
+Basic example of the sdarr-function on a synthetic data set, which is based on the properties of aluminium (Al 6060 T66) as given in the 
 [Metallic Material Properties Development and Standardization (MMPDS) Handbook](https://ntrl.ntis.gov/NTRL/dashboard/searchResults/titleDetail/PB2003106632.xhtml).
 A toe-region and a non-zero intercept are added to make the test data less boring.  
   
 The sdarr-function analyzes the data and will give a small report as a message.
 It should confirm the Young's-modulus of 68 GPa and an intercept of 10 MPa.
+To make use of multi-core processing, configure [furrr](https://furrr.futureverse.org/) to use a multisession strategy (see next example).
 
 ```{r example-sdarr}
 library(sdarr)
+
+# setup multisession calculations with a maximum of 8 cores 
+# (or however many cores are available...)
+future::plan(future::multisession, 
+             workers = min(c(parallelly::availableCores(), 8)))
 
 # Synthesize a test record resembling Al 6060 T66
 # (Values from MMPDS Handbook, with a toe region added)
@@ -64,8 +69,7 @@ Al_6060_T66.result <- sdarr(Al_6060_T66, x = strain, y = stress,
 
 ### sdarr.lazy
 
-Basic example of the lazy variant of the sdarr-function on a synthetic data set.
-The synthetic data set is based on the properties of aluminium (Al 6060 T66) as given in the 
+Basic example of the lazy variant of the sdarr-function on a synthetic data set, which is based on the properties of aluminium (Al 6060 T66) as given in the 
 [Metallic Material Properties Development and Standardization (MMPDS) Handbook](https://ntrl.ntis.gov/NTRL/dashboard/searchResults/titleDetail/PB2003106632.xhtml).
 A toe-region and a non-zero intercept are added to make the test data less boring.  
   
@@ -78,9 +82,10 @@ To make use of multi-core processing, configure [furrr](https://furrr.futurevers
 ```{r example-sdarr.lazy}
 library(sdarr)
 
-# setup multisession calculations with a maximum of 8 cores (or however many cores are available...)
-library(furrr)
-plan(multisession, workers = min(c(parallelly::availableCores(), 8)))
+# setup multisession calculations with a maximum of 8 cores 
+# (or however many cores are available...)
+future::plan(future::multisession, 
+             workers = min(c(parallelly::availableCores(), 8)))
 
 # Synthesize a test record resembling Al 6060 T66
 # (Values from MMPDS Handbook, with a toe region added)
@@ -94,6 +99,65 @@ Al_6060_T66 <- synthesize_test_data(slope = 68000, yield.y = 160,
 Al_6060_T66.result.lazy <- sdarr.lazy(Al_6060_T66, x = strain, y = stress,
                                       enforce_subsampling = T,
                                       verbose = "r", showPlots = "r")
+
+```
+
+### plot functions
+
+The sdarr-function will create diagnostic plots throughout calculations, which will only be shown when requested (i.e. set showPlots = "all). To have a plot drawn later, you can call the provided plot-functions from the results, when you set savePlots = TRUE.  
+
+The plots are crated functions (see [carrier](https://github.com/r-lib/carrier)), so you can easily tap the environment of the function to convert it to eg. a [ggplot2-graphic](https://ggplot2.tidyverse.org/).
+
+```{r example-plot-fun}
+library(sdarr)
+# satisfy pipe addiction...
+library(magrittr)
+# make nice and shiny graphics withh ggplot2...
+library(ggplot2)
+
+# setup multisession calculations with a maximum of 8 cores 
+# (or however many cores are available...)
+future::plan(future::multisession, 
+             workers = min(c(parallelly::availableCores(), 8)))
+
+# Synthesize a test record resembling Al 6060 T66
+# (Values from MMPDS Handbook, with a toe region added)
+Al_6060_T66 <- synthesize_test_data(slope = 68000, yield.y = 160, 
+                                    ultimate.y = 215, ultimate.x = 0.091,
+                                    offset = 10,
+                                    toe.initial.y = 3, toe.max.y = 15,
+                                    toe.initial.slope = 34000)
+
+# Analyze the test record using the standard algorithm
+Al_6060_T66.result <- sdarr(Al_6060_T66, x = strain, y = stress,
+                            verbose = "n", showPlots = "n", savePlots = TRUE)
+
+# show plot of final fit using the plot function from the result
+Al_6060_T66.result$plots$final.fit()
+
+# plot fit using ggplot2 
+{
+  # tap the environment of the crated plot-function
+  plot.env <- rlang::fn_env(Al_6060_T66.result$plots$final.fit)
+  
+  # get data and labels
+  plot.data <- plot.env$plot.data
+  plot.main <- plot.env$plot.main
+  plot.xlab <- plot.env$plot.xlab
+  plot.ylab <- plot.env$plot.ylab
+  y.data.max <- plot.data$y.data %>% max()
+  
+  # create the ggplot2
+  plot.data %>% ggplot(aes(x = x.data, y = y.data, color = "Al_6060_T66")) +
+    geom_line() +
+    geom_line(data = plot.data %>% 
+                dplyr::filter(y.fit <= y.data.max),
+              aes(x = x.data, y = y.fit, color = "fit (SDAR)")) +
+    theme_bw() +
+    labs(title = plot.main,
+       x = plot.xlab,
+       y = plot.ylab)
+}
 
 ```
 

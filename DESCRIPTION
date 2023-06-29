@@ -1,9 +1,14 @@
 Type: Package
 Package: sdarr
 Title: Slope Determination by Analysis of Residuals
-Version: 0.1.3
-Author: Robert Wendlandt
-Maintainer: Robert Wendlandt <robert.wendlandt@uksh.de>
+Version: 0.2.0
+Authors@R: c(
+    person("Robert", "Wendlandt", , "robert.wendlandt@uksh.de", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0001-6368-1622")),
+    person("UKSH", role = c("cph", "fnd")),
+    person("BMBF", role = c("fnd"))
+  )
+BugReports: https://github.com/soylentOrange/sdarr/issues
 Description: Implementation of the SDAR algorithm for Slope Determination by 
     Analysis of Residuals as standardized in ASTM E3076-18. 
     It allows for automated and objective linear-fitting of mechanical test-data. 
