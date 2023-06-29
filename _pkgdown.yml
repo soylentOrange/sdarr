@@ -2,3 +2,4 @@ url: https://soylentorange.github.io/sdarr/
 template:
   bootstrap: 5
 
+use_readme_rmd(open = rlang::is_interactive())
