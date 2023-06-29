@@ -61,7 +61,7 @@ Al_6060_T66 <- synthesize_test_data(slope = 68000, yield.y = 160,
 Al_6060_T66.result <- sdarr(Al_6060_T66, x = strain, y = stress, 
                             verbose = "r", showPlots = "r")
 #> Determination of Slope in the Linear Region of a Test Record:
-#> Standard Practice for Determination of Slope in the Linear Region of a Test Record, ASTM E3076
+#> SDAR-algorithm
 #>   Data Quality Metric: Digital Resolution
 #>     x
 #>       Relative x-Resolution:   0.333333333333333
@@ -98,7 +98,7 @@ Al_6060_T66.result <- sdarr(Al_6060_T66, x = strain, y = stress,
 #>       y-Range:                 24.7366333007812 MPa - 84.4049072265625 MPa
 ```
 
-<img src="man/figures/README-example - sdarr-1.png" width="100%" />
+<img src="man/figures/README-example-sdarr-1.png" width="100%" />
 
 ### sdarr.lazy
 
@@ -139,13 +139,15 @@ Al_6060_T66.result.lazy <- sdarr.lazy(Al_6060_T66, x = strain, y = stress,
                                       enforce_subsampling = T,
                                       verbose = "r", showPlots = "r")
 #> Determination of Slope in the Linear Region of a Test Record:
+#> Warning: glm.fit: algorithm did not converge
 #> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
-#>   Random sub-sampling will require more computation effort than standard SDAR-algorithm: 138650 vs. 36856 fits.
+#>   Random sub-sampling will require more computation effort than standard SDAR-algorithm:  
+#>     129390 vs. 36856 fits.
 #>   Anyways, random sub-sampling will be used...
-#> Random sub-sampling mofification of Standard Practice for Determination of Slope in the Linear Region of a Test Record, ASTM E3076
-#>   100 % of sub-sampled normalized ranges passed the data quality checks.
+#> Random sub-sampling mofification of the SDAR-algorithm
+#>   40 % of sub-sampled normalized ranges passed the data quality checks.
 #>   100 % of linear regressions passed the fit quality checks.
-#>   100 % of linear regressions passed all quality checks.
+#>   40 % of linear regressions passed all quality checks.
 #>   Data Quality Metric: Digital Resolution
 #>     x
 #>       Relative x-Resolution:   0.333333333333333
@@ -166,23 +168,23 @@ Al_6060_T66.result.lazy <- sdarr.lazy(Al_6060_T66, x = strain, y = stress,
 #>       --> pass
 #>   Fit Quality Metric: Curvature
 #>     1st Quartile
-#>       Relative Residual Slope: 0.00229104799716044
-#>       Number of Points:        39
+#>       Relative Residual Slope: 0.00112596960003188
+#>       Number of Points:        40
 #>       --> pass
 #>     4th Quartile
-#>       Relative Residual Slope: -0.0074870270416416
+#>       Relative Residual Slope: -0.00682689398113825
 #>       Number of Points:        40
 #>       --> pass
 #>   Fit Quality Metric: Fit Range
-#>       relative fit range:      0.811046770601336
+#>       relative fit range:      0.800879700901693
 #>       --> pass
 #>   Un-normalized fit
-#>       Final Slope:             67999.8182344699 MPa
-#>       True Intercept:          10.0020306561035 MPa
-#>       y-Range:                 25.1040649414062 MPa - 84.0243530273438 MPa
+#>       Final Slope:             67999.5684247684 MPa
+#>       True Intercept:          10.0022190872361 MPa
+#>       y-Range:                 24.7366333007812 MPa - 84.4049072265625 MPa
 ```
 
-<img src="man/figures/README-example - sdarr.lazy-1.png" width="100%" />
+<img src="man/figures/README-example-sdarr.lazy-1.png" width="100%" />
 
 ## Acknowledgements
 
