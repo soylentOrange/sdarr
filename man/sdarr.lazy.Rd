@@ -12,10 +12,10 @@ sdarr.lazy(
   fit.candidates = 20,
   cutoff_probability = 0.975,
   quality_penalty = 0.1,
-  enforce_subsampling = F,
+  enforce_subsampling = FALSE,
   verbose = "report",
   showPlots = "report",
-  savePlots = F
+  savePlots = FALSE
 )
 }
 \arguments{
