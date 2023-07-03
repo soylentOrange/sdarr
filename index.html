@@ -114,7 +114,7 @@ It allows for automated and objective linear-fitting of mechanical test-data. Se
 <span>                                    toe.initial.slope <span class="op">=</span> <span class="fl">34000</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Analyze the test record</span></span>
-<span><span class="va">Al_6060_T66.result</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sdarr.html">sdarr</a></span><span class="op">(</span><span class="va">Al_6060_T66</span>, x <span class="op">=</span> <span class="va">strain</span>, y <span class="op">=</span> <span class="va">stress</span>, </span>
+<span><span class="va">Al_6060_T66.result</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sdarr.html">sdarr</a></span><span class="op">(</span><span class="va">Al_6060_T66</span>, x <span class="op">=</span> <span class="va">strain</span>, y <span class="op">=</span> <span class="va">stress</span>,</span>
 <span>                            verbose <span class="op">=</span> <span class="st">"r"</span>, showPlots <span class="op">=</span> <span class="st">"r"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Determination of Slope in the Linear Region of a Test Record:</span></span>
 <span><span class="co">#&gt; SDAR-algorithm</span></span>
@@ -152,7 +152,7 @@ It allows for automated and objective linear-fitting of mechanical test-data. Se
 <span><span class="co">#&gt;       Final Slope:             67999.5684247684 MPa</span></span>
 <span><span class="co">#&gt;       True Intercept:          10.0022190872361 MPa</span></span>
 <span><span class="co">#&gt;       y-Range:                 24.7366333007812 MPa - 84.4049072265625 MPa</span></span></code></pre></div>
-<p><img src="reference/figures/README-example-sdarr-1.png" width="100%"></p>
+<p><img src="reference/figures/README-example-sdar-1.png" width="100%"></p>
 </div>
 <div class="section level3">
 <h3 id="random-sub-sampling-modification-of-the-sdar-algorithm">Random sub-sampling modification of the SDAR-algorithm<a class="anchor" aria-label="anchor" href="#random-sub-sampling-modification-of-the-sdar-algorithm"></a>
@@ -176,20 +176,26 @@ It allows for automated and objective linear-fitting of mechanical test-data. Se
 <span>                                    toe.initial.y <span class="op">=</span> <span class="fl">3</span>, toe.max.y <span class="op">=</span> <span class="fl">15</span>,</span>
 <span>                                    toe.initial.slope <span class="op">=</span> <span class="fl">34000</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Analyze the test record (after setting a random seed)</span></span>
+<span><span class="co"># set a random seed</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">50041180</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Analyze the test record </span></span>
+<span><span class="co"># (using a relaxed cutoff_probability for the noise-free synthetic data)</span></span>
 <span><span class="va">Al_6060_T66.result.lazy</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sdarr.lazy.html">sdarr.lazy</a></span><span class="op">(</span><span class="va">Al_6060_T66</span>, x <span class="op">=</span> <span class="va">strain</span>, y <span class="op">=</span> <span class="va">stress</span>,</span>
+<span>                                      cutoff_probability <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>                                      enforce_subsampling <span class="op">=</span> <span class="cn">T</span>,</span>
 <span>                                      verbose <span class="op">=</span> <span class="st">"r"</span>, showPlots <span class="op">=</span> <span class="st">"r"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Determination of Slope in the Linear Region of a Test Record:</span></span>
-<span><span class="co">#&gt; Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</span></span>
 <span><span class="co">#&gt;   lazy algorithm requires more fits than standard SDAR-algorithm:  </span></span>
-<span><span class="co">#&gt;     141015 vs. 36856 fits.</span></span>
+<span><span class="co">#&gt;     99500 vs. 36856 fits.</span></span>
 <span><span class="co">#&gt;   Anyways, random sub-sampling will be used...</span></span>
-<span><span class="co">#&gt; Random sub-sampling mofification of the SDAR-algorithm</span></span>
-<span><span class="co">#&gt;   100 % of sub-sampled normalized ranges passed the data quality checks.</span></span>
-<span><span class="co">#&gt;   100 % of linear regressions passed the fit quality checks.</span></span>
-<span><span class="co">#&gt;   100 % of linear regressions passed all quality checks.</span></span>
+<span><span class="co">#&gt; Random sub-sampling modification of the SDAR-algorithm</span></span>
+<span><span class="co">#&gt;   Random sub-sampling information:</span></span>
+<span><span class="co">#&gt;       247 points of 337 points in the normalized range were used.</span></span>
+<span><span class="co">#&gt;       20 % of sub-sampled normalized ranges passed the data quality checks.</span></span>
+<span><span class="co">#&gt;       100 % of linear regressions passed the fit quality checks.</span></span>
+<span><span class="co">#&gt;       20 % of linear regressions passed all quality checks.</span></span>
+<span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   Data Quality Metric: Digital Resolution</span></span>
 <span><span class="co">#&gt;     x</span></span>
 <span><span class="co">#&gt;       Relative x-Resolution:   0.333333333333333</span></span>
@@ -210,21 +216,21 @@ It allows for automated and objective linear-fitting of mechanical test-data. Se
 <span><span class="co">#&gt;       --&gt; pass</span></span>
 <span><span class="co">#&gt;   Fit Quality Metric: Curvature</span></span>
 <span><span class="co">#&gt;     1st Quartile</span></span>
-<span><span class="co">#&gt;       Relative Residual Slope: 0.00256415820575556</span></span>
+<span><span class="co">#&gt;       Relative Residual Slope: 0.00277455072182705</span></span>
 <span><span class="co">#&gt;       Number of Points:        40</span></span>
 <span><span class="co">#&gt;       --&gt; pass</span></span>
 <span><span class="co">#&gt;     4th Quartile</span></span>
-<span><span class="co">#&gt;       Relative Residual Slope: -0.00688798683981675</span></span>
+<span><span class="co">#&gt;       Relative Residual Slope: -0.00745994845842898</span></span>
 <span><span class="co">#&gt;       Number of Points:        40</span></span>
 <span><span class="co">#&gt;       --&gt; pass</span></span>
 <span><span class="co">#&gt;   Fit Quality Metric: Fit Range</span></span>
-<span><span class="co">#&gt;       relative fit range:      0.805842000442576</span></span>
+<span><span class="co">#&gt;       relative fit range:      0.806020362992475</span></span>
 <span><span class="co">#&gt;       --&gt; pass</span></span>
 <span><span class="co">#&gt;   Un-normalized fit</span></span>
-<span><span class="co">#&gt;       Final Slope:             67999.776210731 MPa</span></span>
-<span><span class="co">#&gt;       True Intercept:          10.0020521296595 MPa</span></span>
-<span><span class="co">#&gt;       y-Range:                 25.1040649414062 MPa - 84.4049072265625 MPa</span></span></code></pre></div>
-<p><img src="reference/figures/README-example-sdarr.lazy-1.png" width="100%"></p>
+<span><span class="co">#&gt;       Final Slope:             67999.060977753 MPa</span></span>
+<span><span class="co">#&gt;       True Intercept:          10.0024898483829 MPa</span></span>
+<span><span class="co">#&gt;       y-Range:                 25.484619140625 MPa - 84.7723388671875 MPa</span></span></code></pre></div>
+<p><img src="reference/figures/README-example-sdar.lazy-1.png" width="100%"></p>
 </div>
 <div class="section level3">
 <h3 id="plot-functions">plot functions<a class="anchor" aria-label="anchor" href="#plot-functions"></a>
@@ -277,7 +283,7 @@ It allows for automated and objective linear-fitting of mechanical test-data. Se
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">plot.data</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>                <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">y.fit</span> <span class="op">&lt;=</span> <span class="va">y.data.max</span><span class="op">)</span>,</span>
-<span>              <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x.data</span>, y <span class="op">=</span> <span class="va">y.fit</span>, color <span class="op">=</span> <span class="st">"fit (SDAR)"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>              <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x.data</span>, y <span class="op">=</span> <span class="va">y.fit</span>, color <span class="op">=</span> <span class="st">"fit (sdarr)"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="va">plot.main</span>,</span>
 <span>       x <span class="op">=</span> <span class="va">plot.xlab</span>,</span>
