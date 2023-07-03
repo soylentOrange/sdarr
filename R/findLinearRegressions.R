@@ -6,8 +6,6 @@
 #' @description
 #' the actual implementation
 #'
-#' @importFrom stats .lm.fit
-#'
 #' @returns a list of the best candidates
 #'
 #' @noRd
@@ -146,7 +144,7 @@ find_linear_regressions <- function(data.normalized, verbose = F) {
   }
 
   if(results$offset_raise_required %>% unlist(T,F)) {
-    warning("Upper index of the optimum region is the last point in the truncated test record: The offset point needs to be raised!\n")
+    warning("Upper index of the optimum region is the last point in the truncated test record: The offset point needs to be raised!\n", call. = F)
   }
 
   # return results

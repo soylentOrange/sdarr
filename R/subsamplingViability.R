@@ -2,7 +2,7 @@
 #'
 #' @description Checks whether to use sub-sampling aproach or not by estimating
 #' the number required fits for the standard algorithm vs. the sub-sampling
-#' aproach.
+#' approach.
 #'
 #' @noRd
 subsampling_viability <- function(rangeSize.original, rangeSize.optimum,
@@ -33,10 +33,9 @@ optimum_size_for_subsampling <- function(data.normalized,
                                          showPlots = F,
                                          savePlots = F) {
 
-  # find optimum fit-range for subsampling
-  normalized.ranges <- seq.int(50,nrow(data.normalized),1) %>%  {
-    c(.[1], .[length(.)], sample(.[2:length(.)-1], 98))
-  } %>% sort() %>% {
+  # find optimum fit-range for sub-sampling
+  normalized.ranges <- seq.int(50,nrow(data.normalized),(nrow(data.normalized) - 50)/99) %>%
+    round(0) %>% {
     data.frame(idx = seq.int(length(.)), range.size = .)
   } %>% tidyr::nest(.by = idx, .key = "range.size") %>%
     dplyr::mutate(otr.idcs = purrr::map(range.size, carrier::crate(function(value) {
@@ -60,8 +59,12 @@ optimum_size_for_subsampling <- function(data.normalized,
       # select data by index
       data.normalized %>%
         dplyr::filter(otr.idx %in% value$otr.idx) %>%
-        check_data_quality.lazy() %>% .$passed.check
-
+        check_data_quality.lazy() %>% {
+          1.0 - ifelse(.$passed.check.resolution.y == T, 0, 0.25) -
+            ifelse(.$passed.check.resolution.x == T, 0, 0.25) -
+            ifelse(.$passed.check.noise.y == T, 0, 0.25) -
+            ifelse(.$passed.check.noise.x == T, 0, 0.25)
+        }
     },
     data.normalized = data.normalized,
     check_data_quality.lazy = check_data_quality.lazy),
@@ -74,7 +77,7 @@ optimum_size_for_subsampling <- function(data.normalized,
   # find logistic regression of data quality passed over sub-sampled range-size
   normalized.ranges.model <- stats::glm(data.quality.passed ~ range.size,
                                         data = normalized.ranges,
-                                        family = stats::binomial(link='logit'))
+                                        family = stats::quasibinomial(link='logit'))
 
   # predict probability of passing data quality check over all possible range-sizes
   normalized.ranges.modelpredictions <- data.frame(range.size = seq.int(50,nrow(data.normalized),1)) %>%  {
@@ -92,14 +95,26 @@ optimum_size_for_subsampling <- function(data.normalized,
     )
   }
 
-  # find optimum range size
+  # check if we can satisfy cutoff_probability,
+  # possibly adjust it
+  max.pm <- normalized.ranges.modelpredictions$pm %>% max(na.rm = T)
+  cutoff_probability.matched <- TRUE
+  if(max.pm < cutoff_probability) {
+    warning("Failed to determine optimum size by given cutoff_probability.", call. = F)
+    cutoff_probability <- max.pm
+    cutoff_probability.matched <- FALSE
+  }
+
+  # find optimum range size by (possibly adjusted) cutoff_probability
   optimum.range.size <- normalized.ranges.modelpredictions %>%
-    dplyr::filter(pm > cutoff_probability) %>%
+    dplyr::filter(pm >= cutoff_probability) %>%
     {.[1, "range.size"] %>%
         unlist(T,F)}
 
   # prepare results
-  results <- list("optimum.range.size" = optimum.range.size)
+  results <- list("optimum.range.size" = optimum.range.size,
+                  "cutoff_probability.matched" = cutoff_probability.matched,
+                  "max.pm" = max.pm)
 
   # Let's get plotty...
   if(showPlots || savePlots) {
@@ -129,14 +144,14 @@ optimum_size_for_subsampling <- function(data.normalized,
                       plot.data$pl,
                       lwd = 2, col = "red")
 
-      # add horizontal line for cutoff
-      graphics::abline(h = cutoff_probability, lty= "dotdash")
+      # # add horizontal line for cutoff
+      # graphics::abline(h = cutoff_probability, lty= "dotdash")
 
     }, plot.data = data.frame("range.size" = normalized.ranges.modelpredictions$range.size %>% unlist(T,F),
                               pm = normalized.ranges.modelpredictions$pm %>% unlist(T,F),
                               pu = normalized.ranges.modelpredictions$pu %>% unlist(T,F),
                               pl = normalized.ranges.modelpredictions$pl %>% unlist(T,F)),
-    cutoff_probability = cutoff_probability,
+    #cutoff_probability = cutoff_probability,
     plot.x = "range.size",
     plot.y = "pm",
     plot.y.upr = "pu",

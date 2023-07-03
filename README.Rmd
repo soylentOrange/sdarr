@@ -45,7 +45,7 @@ A toe-region and a non-zero intercept are added to make the test data less borin
 It should confirm the Young's-modulus of 68 GPa and an intercept of 10 MPa.
 To make use of multi-core processing, configure [furrr](https://furrr.futureverse.org/) to use a multisession strategy.
 
-```{r example-sdarr}
+```{r example-sdar}
 library(sdarr)
 
 # setup multisession calculations with a maximum of 8 cores 
@@ -62,7 +62,7 @@ Al_6060_T66 <- synthesize_test_data(slope = 68000, yield.y = 160,
                                     toe.initial.slope = 34000)
 
 # Analyze the test record
-Al_6060_T66.result <- sdarr(Al_6060_T66, x = strain, y = stress, 
+Al_6060_T66.result <- sdarr(Al_6060_T66, x = strain, y = stress,
                             verbose = "r", showPlots = "r")
 
 ```
@@ -79,7 +79,7 @@ As the data set is rather short, enforce random sub-sampling by setting `enforce
 
 To make use of multi-core processing, configure [furrr](https://furrr.futureverse.org/) to use a multisession strategy.
 
-```{r example-sdarr.lazy}
+```{r example-sdar.lazy}
 library(sdarr)
 
 # setup multisession calculations with a maximum of 8 cores 
@@ -95,9 +95,13 @@ Al_6060_T66 <- synthesize_test_data(slope = 68000, yield.y = 160,
                                     toe.initial.y = 3, toe.max.y = 15,
                                     toe.initial.slope = 34000)
 
-# Analyze the test record (after setting a random seed)
+# set a random seed
 set.seed(50041180)
+
+# Analyze the test record 
+# (using a relaxed cutoff_probability for the noise-free synthetic data)
 Al_6060_T66.result.lazy <- sdarr.lazy(Al_6060_T66, x = strain, y = stress,
+                                      cutoff_probability = 0.8,
                                       enforce_subsampling = T,
                                       verbose = "r", showPlots = "r")
 
@@ -153,7 +157,7 @@ Al_6060_T66.result$plots$final.fit()
     geom_line() +
     geom_line(data = plot.data %>% 
                 dplyr::filter(y.fit <= y.data.max),
-              aes(x = x.data, y = y.fit, color = "fit (SDAR)")) +
+              aes(x = x.data, y = y.fit, color = "fit (sdarr)")) +
     theme_bw() +
     labs(title = plot.main,
        x = plot.xlab,

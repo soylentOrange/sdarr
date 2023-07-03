@@ -43,11 +43,11 @@ check_data_quality.noise <- function(data.normalized, verbose = F, warn = T) {
   # Warn in case of excessive noise
   if(warn) {
     if(!passed.check.noise.x) {
-      warning(paste0("excessive relative noise for x-values (", round(relative.noise.x*100, 1), " %)\n"))
+      warning(paste0("excessive relative noise for x-values (", round(relative.noise.x*100, 1), " %)\n"), call. = F)
     }
 
     if(!passed.check.noise.y) {
-      warning(paste0("excessive relative noise for y-values (", round(relative.noise.y*100, 1), " %)\n"))
+      warning(paste0("excessive relative noise for y-values (", round(relative.noise.y*100, 1), " %)\n"), call. = F)
     }
   }
 
@@ -159,12 +159,12 @@ check_data_quality.resolution <- function(data.normalized,
   if(warn) {
     if(!passed.check.resolution.x) {
       warning(paste0("relative digital resolution of x-values might be insufficient (",
-                     round(relativeResolution.x*100, 1), " %)\n"))
+                     round(relativeResolution.x*100, 1), " %)\n"), call. = F)
     }
 
     if(!passed.check.resolution.y) {
       warning(paste0("relative digital resolution of y-values might be insufficient (",
-                     round(relativeResolution.y*100, 1), " %)\n"))
+                     round(relativeResolution.y*100, 1), " %)\n"), call. = F)
     }
   }
 
@@ -364,11 +364,11 @@ check_fit_quality <- function(data.normalized,
   # give warning when quality metric checks have failed
   if(warn) {
     if(!(check.passed.first_quartile && check.passed.fourth_quartile)) {
-      warning("First Fit Quality Metric checks failed: Excessive curvature found in the vicinity of the fitted range!\n")
+      warning("First Fit Quality Metric checks failed: Excessive curvature found in the vicinity of the fitted range!\n", call. = F)
     }
 
     if(!check.passed.relative_fit_range) {
-      warning("Second Fit Quality Metric check failed: unacceptably small linear region!\n")
+      warning("Second Fit Quality Metric check failed: unacceptably small linear region!\n", call. = F)
     }
   }
 

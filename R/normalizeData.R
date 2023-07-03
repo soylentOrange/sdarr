@@ -1,10 +1,9 @@
 #' 1st step of SDAR-algorithm: offset, truncation, and normalization
+#' actual implementation of normalization
 #' @noRd
-normalize_data <- function(data, otr.info = NULL,
+normalize_data.execute <- function(data, otr.info = NULL,
                            raise_offset_times = 0,
-                           verbose = F,
-                           showPlots = F,
-                           savePlots = F) {
+                           return_data.normalized = F) {
 
   # find shift for test data
   shift <- data %>% utils::head(1) %>% magrittr::set_names(c("x.shift", "y.shift"))
@@ -15,7 +14,7 @@ normalize_data <- function(data, otr.info = NULL,
     dplyr::mutate(y.data = y.data - shift$y.shift)
 
   # find offset
-  y.max <- max(data.offset$y.data)
+  y.max <- max(data.offset$y.data, na.rm = T)
 
   y.offset <- data.offset %>%
     dplyr::filter(y.data > 0.05 * y.max) %>%
@@ -58,24 +57,103 @@ normalize_data <- function(data, otr.info = NULL,
   y.tangent <- data.trunc[tangent_slope.peak[1,2],]$y.data
   otr.idx.tangency <- data.trunc[tangent_slope.peak[1,2],]$otr.idx
 
-  # print messages
-  if(verbose) {
-    message("Normalize Test Data\n")
-    message("  shift")
-    message(paste0("      shift x:                 ", shift$x.shift))
-    message(paste0("      shift y:                 ", shift$y.shift))
-    message("  tangency point")
-    message(paste0("      tangency point x:        ", x.tangent))
-    message(paste0("      tangency point y:        ", y.tangent, "\n"))
+  # assemble results
+  results <- list(
+    "tangency.point" = list(
+      "x.tangent" = x.tangent,
+      "y.tangent" = y.tangent,
+      "otr.idx.tangent" = otr.idx.tangency
+    ),
+    "shift" = list(
+      "x.shift" = shift$x.shift,
+      "y.shift" = shift$y.shift
+    )
+  )
+
+  if(return_data.normalized) {
+    # normalize data
+    data.normalized <- data.offset %>%
+      dplyr::filter(y.data <= y.tangent) %>%
+      dplyr::filter(x.data <= x.tangent) %>%
+      dplyr::mutate(x.normalized = x.data/x.tangent) %>%
+      dplyr::mutate(y.normalized = y.data/y.tangent) %>%
+      dplyr::select(-x.data, -y.data)
+
+    # return results with data
+    results %>%
+      append(list("data.normalized" = data.normalized)) %>%
+      return()
+  } else {
+    # return bare results
+    return(results)
+  }
+}
+
+#' 1st step of SDAR-algorithm: offset, truncation, and normalization
+#' @noRd
+normalize_data <- function(data, otr.info = NULL,
+                           raise_offset_times = 0,
+                           denoise.x = F,
+                           denoise.y = F,
+                           verbose = F,
+                           showPlots = F,
+                           savePlots = F) {
+
+  # just normalize and return normalized data (with info and (possibly) plots)
+  if(denoise.x == F && denoise.y == F) {
+    normalized_data <- normalize_data.execute(data = data,
+                                              otr.info = otr.info,
+                                              raise_offset_times = raise_offset_times,
+                                              return_data.normalized = T)
+  } else {
+    # do a first normalization on the data to get info on the range
+    normalized_data <- normalize_data.execute(data = data,
+                                              otr.info = otr.info,
+                                              raise_offset_times = raise_offset_times,
+                                              return_data.normalized = F)
+
+    # denoise x and y (in a limited range of the original data, saving time...)
+    data_denoised <- data %>%
+      dplyr::filter(otr.idx <= normalized_data$tangency.point$otr.idx.tangent * 1.1)
+
+    if(denoise.x == T) {
+      data_denoised$x.data <- denoise_vector(data_denoised$x.data %>%
+                                               as.numeric(),
+                                             verbose = F)
+    }
+
+    if(denoise.y == T) {
+      data_denoised$y.data <- denoise_vector(data_denoised$y.data %>%
+                                               as.numeric(),
+                                             verbose = F)
+    }
+
+    # do the normalization on the de-noised data
+    normalized_data <- normalize_data.execute(data = data_denoised,
+                                              otr.info = otr.info,
+                                              raise_offset_times = raise_offset_times,
+                                              return_data.normalized = T)
   }
 
-  # normalize data
-  data.normalized <- data.offset %>%
-    dplyr::filter(y.data <= y.tangent) %>%
-    dplyr::filter(x.data <= x.tangent) %>%
-    dplyr::mutate(x.normalized = x.data/x.tangent) %>%
-    dplyr::mutate(y.normalized = y.data/y.tangent) %>%
-    dplyr::select(-x.data, -y.data)
+  # print messages
+  if(verbose) {
+    if(denoise.x || denoise.y) {
+      message("Normalize de-noised Test Data\n")
+    } else {
+      message("Normalize Test Data\n")
+    }
+
+    message("  shift")
+    message(paste0("      shift x:                 ",
+                   normalized_data$shift$x.shift))
+    message(paste0("      shift y:                 ",
+                   normalized_data$shift$y.shift))
+    message("  tangency point")
+    message(paste0("      tangency point x:        ",
+                   normalized_data$tangency.point$x.tangent))
+    message(paste0("      tangency point y:        ",
+                   normalized_data$tangency.point$y.tangent, "\n"))
+  }
 
   # Let's get plotty...
   if(showPlots || savePlots) {
@@ -132,8 +210,8 @@ normalize_data <- function(data, otr.info = NULL,
            xlab = plot.xlab,
            ylab = plot.ylab)
     },
-    plot.data = data.frame("x.normalized" = data.normalized$x.normalized %>% unlist(T, F),
-                           "y.normalized" = data.normalized$y.normalized %>% unlist(T, F)),
+    plot.data = data.frame("x.normalized" = normalized_data$data.normalized$x.normalized %>% unlist(T, F),
+                           "y.normalized" = normalized_data$data.normalized$y.normalized %>% unlist(T, F)),
     plot.x = "x.normalized",
     plot.y = "y.normalized",
     plot.xlab = "normalized x",
@@ -147,17 +225,7 @@ normalize_data <- function(data, otr.info = NULL,
   }
 
   # assemble results
-  results <- list(
-    "tangency.point" = list(
-      "x.tangent" = x.tangent,
-      "y.tangent" = y.tangent,
-      "otr.idx.tangent" = otr.idx.tangency
-    ),
-    "shift" = list(
-      "x.shift" = shift$x.shift,
-      "y.shift" = shift$y.shift
-    )
-  )
+  results <- normalized_data
 
   if(savePlots) {
     results <- results %>% append(list(
@@ -169,5 +237,5 @@ normalize_data <- function(data, otr.info = NULL,
   }
 
   # return results
-  results %>% append(list("data.normalized" = data.normalized))
+  return(results)
 }

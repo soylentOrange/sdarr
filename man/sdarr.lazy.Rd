@@ -2,7 +2,7 @@
 % Please edit documentation in R/sdarrLazy.R
 \name{sdarr.lazy}
 \alias{sdarr.lazy}
-\title{sdarr.lazy: Random sub-sampling variant of the SDAR-algorithm}
+\title{Random sub-sampling variant of the SDAR-algorithm}
 \usage{
 sdarr.lazy(
   data,
@@ -22,9 +22,7 @@ sdarr.lazy(
 \item{data}{Data record to analyze. Labels of the data columns will be used
 as units.}
 
-\item{x}{Use tidy selection to specify x within the data.}
-
-\item{y}{Use tidy selection to specify y within the data.}
+\item{x, y}{Use tidy selection to specify x & y within the data.}
 
 \item{fit.rep}{Repetitions of random sub-sampling and fitting.}
 
@@ -60,7 +58,7 @@ A list containing a data-frame with the results of the final fit, a
 \description{
 Run a random sub-sampling modification of the SDAR algorithm as
   originally standardized in ASTM E3076-18. As the original version uses
-  numerous linear regressions (.lm.fit form the stats-package), can be
+  numerous linear regressions (`.lm.fit()` from the stats-package), can be
   painfully slow for test data with high resolution. The lazy variant of the
   algorithm will use several random sub-samples of the data to find the best
   estimate for the fit-range within the data.
@@ -83,4 +81,7 @@ Standard Practice for Determination of the Slope in the Linear
 Graham, S., & Adler, M. (2011). Determining the Slope and Quality
   of Fit for the Linear Part of a Test Record. Journal of Testing and
   Evaluation - J TEST EVAL, 39. https://doi.org/10.1520/JTE103038
+}
+\seealso{
+[sdarr()] for the standard SDAR-algorithm.
 }

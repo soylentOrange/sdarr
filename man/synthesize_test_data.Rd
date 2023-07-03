@@ -81,7 +81,7 @@ A data.frame with the synthetic data. Units (when provided) are
 Synthesize Test Data by Ramberg-Osgood-Equation.
 }
 \details{
-Synthesize Test Data
+Additional details...
 }
 \note{
 As random values are drawn, set a random seed beforehand to get

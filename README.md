@@ -63,7 +63,7 @@ Al_6060_T66 <- synthesize_test_data(slope = 68000, yield.y = 160,
                                     toe.initial.slope = 34000)
 
 # Analyze the test record
-Al_6060_T66.result <- sdarr(Al_6060_T66, x = strain, y = stress, 
+Al_6060_T66.result <- sdarr(Al_6060_T66, x = strain, y = stress,
                             verbose = "r", showPlots = "r")
 #> Determination of Slope in the Linear Region of a Test Record:
 #> SDAR-algorithm
@@ -103,7 +103,7 @@ Al_6060_T66.result <- sdarr(Al_6060_T66, x = strain, y = stress,
 #>       y-Range:                 24.7366333007812 MPa - 84.4049072265625 MPa
 ```
 
-<img src="man/figures/README-example-sdarr-1.png" width="100%" />
+<img src="man/figures/README-example-sdar-1.png" width="100%" />
 
 ### Random sub-sampling modification of the SDAR-algorithm
 
@@ -140,20 +140,26 @@ Al_6060_T66 <- synthesize_test_data(slope = 68000, yield.y = 160,
                                     toe.initial.y = 3, toe.max.y = 15,
                                     toe.initial.slope = 34000)
 
-# Analyze the test record (after setting a random seed)
+# set a random seed
 set.seed(50041180)
+
+# Analyze the test record 
+# (using a relaxed cutoff_probability for the noise-free synthetic data)
 Al_6060_T66.result.lazy <- sdarr.lazy(Al_6060_T66, x = strain, y = stress,
+                                      cutoff_probability = 0.8,
                                       enforce_subsampling = T,
                                       verbose = "r", showPlots = "r")
 #> Determination of Slope in the Linear Region of a Test Record:
-#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
 #>   lazy algorithm requires more fits than standard SDAR-algorithm:  
-#>     141015 vs. 36856 fits.
+#>     99500 vs. 36856 fits.
 #>   Anyways, random sub-sampling will be used...
-#> Random sub-sampling mofification of the SDAR-algorithm
-#>   100 % of sub-sampled normalized ranges passed the data quality checks.
-#>   100 % of linear regressions passed the fit quality checks.
-#>   100 % of linear regressions passed all quality checks.
+#> Random sub-sampling modification of the SDAR-algorithm
+#>   Random sub-sampling information:
+#>       247 points of 337 points in the normalized range were used.
+#>       20 % of sub-sampled normalized ranges passed the data quality checks.
+#>       100 % of linear regressions passed the fit quality checks.
+#>       20 % of linear regressions passed all quality checks.
+#> 
 #>   Data Quality Metric: Digital Resolution
 #>     x
 #>       Relative x-Resolution:   0.333333333333333
@@ -174,23 +180,23 @@ Al_6060_T66.result.lazy <- sdarr.lazy(Al_6060_T66, x = strain, y = stress,
 #>       --> pass
 #>   Fit Quality Metric: Curvature
 #>     1st Quartile
-#>       Relative Residual Slope: 0.00256415820575556
+#>       Relative Residual Slope: 0.00277455072182705
 #>       Number of Points:        40
 #>       --> pass
 #>     4th Quartile
-#>       Relative Residual Slope: -0.00688798683981675
+#>       Relative Residual Slope: -0.00745994845842898
 #>       Number of Points:        40
 #>       --> pass
 #>   Fit Quality Metric: Fit Range
-#>       relative fit range:      0.805842000442576
+#>       relative fit range:      0.806020362992475
 #>       --> pass
 #>   Un-normalized fit
-#>       Final Slope:             67999.776210731 MPa
-#>       True Intercept:          10.0020521296595 MPa
-#>       y-Range:                 25.1040649414062 MPa - 84.4049072265625 MPa
+#>       Final Slope:             67999.060977753 MPa
+#>       True Intercept:          10.0024898483829 MPa
+#>       y-Range:                 25.484619140625 MPa - 84.7723388671875 MPa
 ```
 
-<img src="man/figures/README-example-sdarr.lazy-1.png" width="100%" />
+<img src="man/figures/README-example-sdar.lazy-1.png" width="100%" />
 
 ### plot functions
 
@@ -254,7 +260,7 @@ Al_6060_T66.result$plots$final.fit()
     geom_line() +
     geom_line(data = plot.data %>% 
                 dplyr::filter(y.fit <= y.data.max),
-              aes(x = x.data, y = y.fit, color = "fit (SDAR)")) +
+              aes(x = x.data, y = y.fit, color = "fit (sdarr)")) +
     theme_bw() +
     labs(title = plot.main,
        x = plot.xlab,

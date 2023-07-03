@@ -1,11 +1,12 @@
-#' Synthesize Test Data
-#'
 #' @title Synthesize Test Data
 #'
 #' @description Synthesize Test Data by Ramberg-Osgood-Equation.
 #'
 #' @note As random values are drawn, set a random seed beforehand to get
 #'   reproducible results.
+#'
+#' @details
+#' Additional details...
 #'
 #' @references Hill, H. N. (1944). Determination of stress-strain relations
 #'   from" offset" yield strength values. Aluminum Co of America Pittsburgh Pa.
@@ -80,7 +81,6 @@
 #'      type = "l",
 #'      xlab = "strain", ylab = "stress (in MPa)")
 #'
-#' @importFrom magrittr `%>%`
 #' @export
 synthesize_test_data <- function(slope, yield.y, yield.xp = 0.002,
                                  ultimate.y, ultimate.x, offset = 0,
@@ -184,15 +184,3 @@ synthesize_test_data <- function(slope, yield.y, yield.xp = 0.002,
     magrittr::set_names(c(x.name, y.name)) %>%
     return()
 }
-
-# suppress R CMD check warning
-
-
-
-# @importFrom dplyr mutate
-# @importFrom dplyr filter
-# @importFrom dplyr bind_rows
-# @importFrom dplyr arrange
-# @importFrom stats splinefun
-# @importFrom labelled set_variable_labels
-# @importFrom magrittr set_names
