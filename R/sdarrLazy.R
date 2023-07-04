@@ -330,7 +330,7 @@ sdarr_execute.lazy <- function(prepared_data,
 #'
 #' @description Run a random sub-sampling modification of the SDAR algorithm as
 #'   originally standardized in ASTM E3076-18. As the original version uses
-#'   numerous linear regressions (`.lm.fit()` from the stats-package), can be
+#'   numerous linear regressions (.lm.fit from the stats-package), can be
 #'   painfully slow for test data with high resolution. The lazy variant of the
 #'   algorithm will use several random sub-samples of the data to find the best
 #'   estimate for the fit-range within the data.

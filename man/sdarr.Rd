@@ -30,13 +30,33 @@ A list containing a data-frame with the results of the final fit, a
 }
 \description{
 Run the SDAR algorithm as standardized in ASTM E3076-18. Will
-  use numerous linear regressions (`.lm.fit()` from the stats-package) and can be
+  use numerous linear regressions (.lm.fit from the stats-package) and can be
   painfully slow for test data with high resolution.
 }
 \note{
 The function will use parallel processing via the furrr-package. To use
   this feature, set up a plan other than the default sequential strategy
   beforehand.
+}
+\examples{
+# Synthesize a test record resembling Al 6060 T66
+# (Values according to Metallic Material Properties
+# Development and Standardization (MMPDS) Handbook).
+# Explicitly set names to "strain" and "stress",
+# set effective number of bits in the x-data to 12
+# to limit the number of data points.
+Al_6060_T66 <- synthesize_test_data(slope = 68000,
+                                    yield.y = 160,
+                                    ultimate.y = 215,
+                                    ultimate.x = 0.091,
+                                    x.name = "strain",
+                                    y.name = "stress",
+                                    enob.x = 12)
+
+# use sdarr() to analyze the synthetic test record
+# will print a report and give a plot of the final fit
+sdarr(Al_6060_T66, strain, stress)
+
 }
 \references{
 Lucon, E. (2019). Use and validation of the slope determination
@@ -54,5 +74,5 @@ Graham, S., & Adler, M. (2011). Determining the Slope and Quality
 }
 \seealso{
 [sdarr.lazy()] for the random sub-sampling modification of the
-SDAR-algorithm.
+  SDAR-algorithm.
 }

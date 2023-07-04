@@ -3,7 +3,6 @@
 "_PACKAGE"
 
 ## usethis namespace: start
-#' @importFrom magrittr `%>%`
 #' @importFrom stats .lm.fit
 ## usethis namespace: end
 NULL
