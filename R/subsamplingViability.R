@@ -6,7 +6,7 @@
 #'
 #' @noRd
 subsampling_viability <- function(rangeSize.original, rangeSize.optimum,
-                                  rep = 1, verbose = F) {
+                                  rep = 1, verbose = FALSE) {
 
   Nmin.plain <- max(floor(rangeSize.original * 0.2), 10)
   Nfits.plain <- 0.5*((rangeSize.original - Nmin.plain + 1)^2 + (rangeSize.original - Nmin.plain + 1))
@@ -29,9 +29,9 @@ subsampling_viability <- function(rangeSize.original, rangeSize.optimum,
 #' @noRd
 optimum_size_for_subsampling <- function(data.normalized,
                                          cutoff_probability,
-                                         verbose = F,
-                                         showPlots = F,
-                                         savePlots = F) {
+                                         verbose = FALSE,
+                                         showPlots = FALSE,
+                                         savePlots = FALSE) {
 
   # find optimum fit-range for sub-sampling
   normalized.ranges <- seq.int(50,nrow(data.normalized),(nrow(data.normalized) - 50)/99) %>%
@@ -51,7 +51,7 @@ optimum_size_for_subsampling <- function(data.normalized,
         }
     },
     otr.idx = data.normalized$otr.idx %>%
-      unlist(T,F)))) %>%
+      unlist(TRUE,FALSE)))) %>%
     dplyr::mutate(data.quality.passed = furrr::future_map(otr.idcs, carrier::crate(function(value) {
       # satisfy pipe addiction...
       `%>%` <- magrittr::`%>%`
@@ -60,10 +60,10 @@ optimum_size_for_subsampling <- function(data.normalized,
       data.normalized %>%
         dplyr::filter(otr.idx %in% value$otr.idx) %>%
         check_data_quality.lazy() %>% {
-          1.0 - ifelse(.$passed.check.resolution.y == T, 0, 0.25) -
-            ifelse(.$passed.check.resolution.x == T, 0, 0.25) -
-            ifelse(.$passed.check.noise.y == T, 0, 0.25) -
-            ifelse(.$passed.check.noise.x == T, 0, 0.25)
+          1.0 - ifelse(.$passed.check.resolution.y == TRUE, 0, 0.25) -
+            ifelse(.$passed.check.resolution.x == TRUE, 0, 0.25) -
+            ifelse(.$passed.check.noise.y == TRUE, 0, 0.25) -
+            ifelse(.$passed.check.noise.x == TRUE, 0, 0.25)
         }
     },
     data.normalized = data.normalized,
@@ -84,7 +84,7 @@ optimum_size_for_subsampling <- function(data.normalized,
     probs <- stats::predict(normalized.ranges.model,
                             newdata = .,
                             type = 'link',
-                            se.fit = T)
+                            se.fit = TRUE)
 
     ilink <- stats::family(normalized.ranges.model)$linkinv
 
@@ -97,10 +97,10 @@ optimum_size_for_subsampling <- function(data.normalized,
 
   # check if we can satisfy cutoff_probability,
   # possibly adjust it
-  max.pm <- normalized.ranges.modelpredictions$pm %>% max(na.rm = T)
+  max.pm <- normalized.ranges.modelpredictions$pm %>% max(na.rm = TRUE)
   cutoff_probability.matched <- TRUE
   if(max.pm < cutoff_probability) {
-    warning("Failed to determine optimum size by given cutoff_probability.", call. = F)
+    warning("Failed to determine optimum size by given cutoff_probability.", call. = FALSE)
     cutoff_probability <- max.pm
     cutoff_probability.matched <- FALSE
   }
@@ -109,7 +109,7 @@ optimum_size_for_subsampling <- function(data.normalized,
   optimum.range.size <- normalized.ranges.modelpredictions %>%
     dplyr::filter(pm >= cutoff_probability) %>%
     {.[1, "range.size"] %>%
-        unlist(T,F)}
+        unlist(TRUE,FALSE)}
 
   # prepare results
   results <- list("optimum.range.size" = optimum.range.size,
@@ -147,10 +147,10 @@ optimum_size_for_subsampling <- function(data.normalized,
       # # add horizontal line for cutoff
       # graphics::abline(h = cutoff_probability, lty= "dotdash")
 
-    }, plot.data = data.frame("range.size" = normalized.ranges.modelpredictions$range.size %>% unlist(T,F),
-                              pm = normalized.ranges.modelpredictions$pm %>% unlist(T,F),
-                              pu = normalized.ranges.modelpredictions$pu %>% unlist(T,F),
-                              pl = normalized.ranges.modelpredictions$pl %>% unlist(T,F)),
+    }, plot.data = data.frame("range.size" = normalized.ranges.modelpredictions$range.size %>% unlist(TRUE,FALSE),
+                              pm = normalized.ranges.modelpredictions$pm %>% unlist(TRUE,FALSE),
+                              pu = normalized.ranges.modelpredictions$pu %>% unlist(TRUE,FALSE),
+                              pl = normalized.ranges.modelpredictions$pl %>% unlist(TRUE,FALSE)),
     #cutoff_probability = cutoff_probability,
     plot.x = "range.size",
     plot.y = "pm",

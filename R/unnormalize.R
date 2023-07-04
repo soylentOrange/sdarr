@@ -12,8 +12,8 @@ unnormalize_results <- function(normalized_data,
                                 dataQualityMetrics,
                                 fit,
                                 fitQualityMetrics,
-                                verbose = F,
-                                warn = T) {
+                                verbose = FALSE,
+                                warn = TRUE) {
 
   # shorthands for calculations
   y.tangent <- normalized_data[["tangency.point"]][["y.tangent"]]

@@ -10,7 +10,7 @@
 #' @returns a list with noise metrics for normalized x and y
 #'
 #' @noRd
-check_data_quality.noise <- function(data.normalized, verbose = F, warn = T) {
+check_data_quality.noise <- function(data.normalized, verbose = FALSE, warn = TRUE) {
 
   # calculate noise for x and y
   normalized.noise <- data.normalized %>%
@@ -23,12 +23,12 @@ check_data_quality.noise <- function(data.normalized, verbose = F, warn = T) {
                  normalized.noise.y = stats::sd(.$delta.y.r))
     }
 
-  normalized.noise.x <- normalized.noise[1,"normalized.noise.x"] %>% unlist(T,F)
-  normalized.noise.y <- normalized.noise[1,"normalized.noise.y"] %>% unlist(T,F)
+  normalized.noise.x <- normalized.noise[1,"normalized.noise.x"] %>% unlist(TRUE,FALSE)
+  normalized.noise.y <- normalized.noise[1,"normalized.noise.y"] %>% unlist(TRUE,FALSE)
   relative.noise.x <- normalized.noise.x/0.005
   relative.noise.y <- normalized.noise.y/0.005
-  passed.check.noise.x <- ifelse(relative.noise.x <= 1, T, F)
-  passed.check.noise.y <- ifelse(relative.noise.y <= 1, T, F)
+  passed.check.noise.x <- ifelse(relative.noise.x <= 1, TRUE, FALSE)
+  passed.check.noise.y <- ifelse(relative.noise.y <= 1, TRUE, FALSE)
 
   # print messages
   if(verbose) {
@@ -43,11 +43,11 @@ check_data_quality.noise <- function(data.normalized, verbose = F, warn = T) {
   # Warn in case of excessive noise
   if(warn) {
     if(!passed.check.noise.x) {
-      warning(paste0("excessive relative noise for x-values (", round(relative.noise.x*100, 1), " %)\n"), call. = F)
+      warning(paste0("excessive relative noise for x-values (", round(relative.noise.x*100, 1), " %)\n"), call. = FALSE)
     }
 
     if(!passed.check.noise.y) {
-      warning(paste0("excessive relative noise for y-values (", round(relative.noise.y*100, 1), " %)\n"), call. = F)
+      warning(paste0("excessive relative noise for y-values (", round(relative.noise.y*100, 1), " %)\n"), call. = FALSE)
     }
   }
 
@@ -81,10 +81,10 @@ check_data_quality.noise <- function(data.normalized, verbose = F, warn = T) {
 #'
 #' @noRd
 check_data_quality.resolution <- function(data.normalized,
-                                          verbose = F,
-                                          showPlots = F,
-                                          savePlots = F,
-                                          warn = T) {
+                                          verbose = FALSE,
+                                          showPlots = FALSE,
+                                          savePlots = FALSE,
+                                          warn = TRUE) {
 
   # The optimum digital resolution, δ (delta.optimal), for the normalized data set is:
   delta.optimal <- 2^-12
@@ -112,15 +112,15 @@ check_data_quality.resolution <- function(data.normalized,
   sdar.hist.x <- graphics::hist(normalized.resolution$delta.delta.x / delta.optimal,
                                 breaks = bin.breaks.x, plot = showPlots,
                                 main = "Histogram for assessment of x-Resolution",
-                                xlab = "\u2206\u2206xi (binned by \u03B4)", warn.unused = F)
+                                xlab = "\u2206\u2206xi (binned by \u03B4)", warn.unused = FALSE)
 
   z.delta.delta.x <- sdar.hist.x[["counts"]] %>%
     utils::tail(-1) %>%
     which.max
   relativeResolution.x <- z.delta.delta.x/3
-  passed.check.resolution.x <- ifelse(relativeResolution.x <= 1, T, F)
-  passed.check.binz.ratio.x <- ifelse((sdar.hist.x[["counts"]][z.delta.delta.x+1])/samples > 0.25, F, T)
-  passed.check.bin0.ratio.x <- ifelse((sdar.hist.x[["counts"]][1])/samples > 0.25, F, T)
+  passed.check.resolution.x <- ifelse(relativeResolution.x <= 1, TRUE, FALSE)
+  passed.check.binz.ratio.x <- ifelse((sdar.hist.x[["counts"]][z.delta.delta.x+1])/samples > 0.25, FALSE, TRUE)
+  passed.check.bin0.ratio.x <- ifelse((sdar.hist.x[["counts"]][1])/samples > 0.25, FALSE, TRUE)
 
   # Analyze y-resolution
   max.delta.delta.y <- normalized.resolution$delta.delta.y %>% max
@@ -130,15 +130,15 @@ check_data_quality.resolution <- function(data.normalized,
   sdar.hist.y <- graphics::hist(normalized.resolution$delta.delta.y / delta.optimal,
                                 breaks = bin.breaks.y, plot = showPlots,
                                 main = "Histogram for assessment of y-Resolution",
-                                xlab = "\u2206\u2206yi (binned by \u03B4)", warn.unused = F)
+                                xlab = "\u2206\u2206yi (binned by \u03B4)", warn.unused = FALSE)
 
   z.delta.delta.y <- sdar.hist.y[["counts"]] %>%
     utils::tail(-1) %>%
     which.max
   relativeResolution.y <- z.delta.delta.y/3
-  passed.check.resolution.y <- ifelse(relativeResolution.y <= 1, T, F)
-  passed.check.binz.ratio.y <- ifelse((sdar.hist.y[["counts"]][z.delta.delta.y+1])/samples > 0.25, F, T)
-  passed.check.bin0.ratio.y <- ifelse((sdar.hist.y[["counts"]][1])/samples > 0.25, F, T)
+  passed.check.resolution.y <- ifelse(relativeResolution.y <= 1, TRUE, FALSE)
+  passed.check.binz.ratio.y <- ifelse((sdar.hist.y[["counts"]][z.delta.delta.y+1])/samples > 0.25, FALSE, TRUE)
+  passed.check.bin0.ratio.y <- ifelse((sdar.hist.y[["counts"]][1])/samples > 0.25, FALSE, TRUE)
 
   # secondary checks. for resolution if first have failed
   if(!passed.check.resolution.x) {
@@ -159,12 +159,12 @@ check_data_quality.resolution <- function(data.normalized,
   if(warn) {
     if(!passed.check.resolution.x) {
       warning(paste0("relative digital resolution of x-values might be insufficient (",
-                     round(relativeResolution.x*100, 1), " %)\n"), call. = F)
+                     round(relativeResolution.x*100, 1), " %)\n"), call. = FALSE)
     }
 
     if(!passed.check.resolution.y) {
       warning(paste0("relative digital resolution of y-values might be insufficient (",
-                     round(relativeResolution.y*100, 1), " %)\n"), call. = F)
+                     round(relativeResolution.y*100, 1), " %)\n"), call. = FALSE)
     }
   }
 
@@ -234,9 +234,9 @@ check_data_quality.resolution <- function(data.normalized,
 #'
 #' @noRd
 check_data_quality <- function(data.normalized,
-                               verbose = F,
-                               showPlots = F,
-                               savePlots = F) {
+                               verbose = FALSE,
+                               showPlots = FALSE,
+                               savePlots = FALSE) {
 
   # get and check data quality metrics
   list(
@@ -260,8 +260,8 @@ check_data_quality.lazy <- function(data.normalized) {
   `%>%` <- magrittr::`%>%`
 
   # get and check both data quality metrics
-  digitalResolution <- check_data_quality.resolution(data.normalized, warn = F)
-  Noise <- check_data_quality.noise(data.normalized, warn = F)
+  digitalResolution <- check_data_quality.resolution(data.normalized, warn = FALSE)
+  Noise <- check_data_quality.noise(data.normalized, warn = FALSE)
 
   list("passed.check" = digitalResolution$passed.check && Noise$passed.check,
        "passed.check.resolution.x" = digitalResolution$x$passed.check,
@@ -283,10 +283,10 @@ check_data_quality.lazy <- function(data.normalized) {
 #' @noRd
 check_fit_quality <- function(data.normalized,
                               fit,
-                              verbose = F,
-                              showPlots = F,
-                              savePlots = F,
-                              warn = T) {
+                              verbose = FALSE,
+                              showPlots = FALSE,
+                              savePlots = FALSE,
+                              warn = TRUE) {
 
   # shorthands for slope and intercept
   m <- fit[["m"]]
@@ -327,20 +327,20 @@ check_fit_quality <- function(data.normalized,
   residual_slope.first_quartile <- slope.first_quartile
   relative_residual_slope.first_quartile <- slope.first_quartile/allowable_residual_slope
   check.passed.first_quartile <- ifelse(number_of_points.first_quartile >= 5,
-                                        ifelse(abs(relative_residual_slope.first_quartile) <= 1, T, F),
-                                        F)
+                                        ifelse(abs(relative_residual_slope.first_quartile) <= 1, TRUE, FALSE),
+                                        FALSE)
 
   number_of_points.fourth_quartile <- nrow(data.fourth_quartile)
   residual_slope.fourth_quartile <- slope.fourth_quartile
   relative_residual_slope.fourth_quartile <- slope.fourth_quartile/allowable_residual_slope
   check.passed.fourth_quartile <- ifelse(number_of_points.fourth_quartile >= 5,
-                                         ifelse(abs(relative_residual_slope.fourth_quartile) <= 1, T, F),
-                                         F)
+                                         ifelse(abs(relative_residual_slope.fourth_quartile) <= 1, TRUE, FALSE),
+                                         FALSE)
 
   # Assemble second fit quality metrics
   normalized_y_range <- y.range
   relative_fit_range <- 0.4/y.range
-  check.passed.relative_fit_range <- ifelse(relative_fit_range > 1, F, T)
+  check.passed.relative_fit_range <- ifelse(relative_fit_range > 1, FALSE, TRUE)
 
   # print messages
   if(verbose) {
@@ -364,11 +364,11 @@ check_fit_quality <- function(data.normalized,
   # give warning when quality metric checks have failed
   if(warn) {
     if(!(check.passed.first_quartile && check.passed.fourth_quartile)) {
-      warning("First Fit Quality Metric checks failed: Excessive curvature found in the vicinity of the fitted range!\n", call. = F)
+      warning("First Fit Quality Metric checks failed: Excessive curvature found in the vicinity of the fitted range!\n", call. = FALSE)
     }
 
     if(!check.passed.relative_fit_range) {
-      warning("Second Fit Quality Metric check failed: unacceptably small linear region!\n", call. = F)
+      warning("Second Fit Quality Metric check failed: unacceptably small linear region!\n", call. = FALSE)
     }
   }
 
@@ -380,16 +380,16 @@ check_fit_quality <- function(data.normalized,
       `%>%` <- magrittr::`%>%`
 
       # shorthands
-      y.residual.min <- unlist(plot.data$y.residual, T, F) %>% min
-      y.residual.max <- unlist(plot.data$y.residual, T, F) %>% max
+      y.residual.min <- unlist(plot.data$y.residual, TRUE, FALSE) %>% min
+      y.residual.max <- unlist(plot.data$y.residual, TRUE, FALSE) %>% max
       y.residual.range <- y.residual.max - y.residual.min
-      x.min <- unlist(plot.data$x.normalized, T, F) %>% min
-      x.max <- unlist(plot.data$x.normalized, T, F) %>% max
+      x.min <- unlist(plot.data$x.normalized, TRUE, FALSE) %>% min
+      x.max <- unlist(plot.data$x.normalized, TRUE, FALSE) %>% max
       x.range <- x.max - x.min
 
       # generate plot
-      plot(x = unlist(plot.data$x.normalized, T, F),
-           y = unlist(plot.data$y.residual, T, F),
+      plot(x = unlist(plot.data$x.normalized, TRUE, FALSE),
+           y = unlist(plot.data$y.residual, TRUE, FALSE),
            type ="p",
            main = plot.main,
            xlab = plot.xlab,
@@ -412,8 +412,8 @@ check_fit_quality <- function(data.normalized,
                        length = 0.1)
       graphics::text(x.max - 0.125 * x.range, y.residual.max + 0.1 * y.residual.range, "4th Quartile")
     },
-    plot.data = data.frame("x.normalized" = data.filtered$x.normalized %>% unlist(T, F),
-                           "y.residual" = data.filtered$y.residual %>% unlist(T, F)),
+    plot.data = data.frame("x.normalized" = data.filtered$x.normalized %>% unlist(TRUE, FALSE),
+                           "y.residual" = data.filtered$y.residual %>% unlist(TRUE, FALSE)),
     plot.x = "x.normalized",
     plot.y = "y.residual",
     plot.xlab = "normalized x",
@@ -472,7 +472,7 @@ check_fit_quality <- function(data.normalized,
 #'
 #' @noRd
 check_fit_quality.lazy <- function(data.normalized, fit) {
-  fit_quality_metrics <- check_fit_quality(data.normalized, fit, F, F, F, F)
+  fit_quality_metrics <- check_fit_quality(data.normalized, fit, FALSE, FALSE, FALSE, FALSE)
 
   list("passed.check" = fit_quality_metrics$passed.check,
        "fit.quality.passed.first_quartile" = fit_quality_metrics$Curvature$first_quartile$passed.check,

@@ -1,11 +1,11 @@
 #' Run the SDAR algorithm on prepared data
 #' @noRd
 sdarr_execute <- function(prepared_data, otr.info,
-                         verbose.all = F,
-                         verbose.report = T,
-                         showPlots.all = F,
-                         showPlots.report = T,
-                         savePlots = F) {
+                         verbose.all = FALSE,
+                         verbose.report = TRUE,
+                         showPlots.all = FALSE,
+                         showPlots.report = TRUE,
+                         savePlots = FALSE) {
 
   # maybe the offset for step 1 needs to be raised later
   raise_offset_times <- 0
@@ -23,8 +23,8 @@ sdarr_execute <- function(prepared_data, otr.info,
     normalized_data <- normalize_data(data = prepared_data,
                                       otr.info = otr.info,
                                       raise_offset_times = raise_offset_times,
-                                      denoise.x = F,
-                                      denoise.y = F,
+                                      denoise.x = FALSE,
+                                      denoise.y = FALSE,
                                       verbose = verbose.all,
                                       showPlots = showPlots.all,
                                       savePlots = savePlots)
@@ -142,9 +142,9 @@ sdarr_execute <- function(prepared_data, otr.info,
 #'   use numerous linear regressions (`.lm.fit()` from the stats-package) and
 #'   can be painfully slow for test data with high resolution.
 #'
-#' @note The function can use parallel processing via the
-#'   [furrr::furrr-package]. To use this feature, set up a plan other than the
-#'   default sequential strategy beforehand.
+#'  @note The function can use parallel processing via the
+#'   [`furrr-package`][furrr::furrr-package]. To use this feature, set up a plan
+#'   other than the default sequential strategy beforehand.
 #'
 #' @references Lucon, E. (2019). Use and validation of the slope determination
 #'   by the analysis of residuals (SDAR) algorithm (NIST TN 2050; p. NIST TN
@@ -212,13 +212,13 @@ sdarr <- function(data,
   y <- rlang::enquo(y)
 
   # determine verbosity level
-  verbose.all <- ifelse(verbose == "a" || verbose == "all", T, F)
-  verbose.report <- ifelse(verbose == "r" || verbose == "report", T, F)
+  verbose.all <- ifelse(verbose == "a" || verbose == "all", TRUE, FALSE)
+  verbose.report <- ifelse(verbose == "r" || verbose == "report", TRUE, FALSE)
   verbose.report <- verbose.report || verbose.all
 
   # determine plot level
-  showPlots.all <- ifelse(showPlots == "a" || showPlots == "all", T, F)
-  showPlots.report <- ifelse(showPlots == "r" || showPlots == "report", T, F)
+  showPlots.all <- ifelse(showPlots == "a" || showPlots == "all", TRUE, FALSE)
+  showPlots.report <- ifelse(showPlots == "r" || showPlots == "report", TRUE, FALSE)
   showPlots.report <- showPlots.report || showPlots.all
 
   # get units for data
@@ -230,8 +230,8 @@ sdarr <- function(data,
   y.name <- data %>% dplyr::select(!!y) %>% names() %>% {.[[1]]}
 
   # prepare data, add an index and remove NA from data
-  prepared_data <- data.frame(x.data = data %>% dplyr::select(!!x) %>% unlist(T,F),
-                              y.data = data %>% dplyr::select(!!y) %>% unlist(T,F),
+  prepared_data <- data.frame(x.data = data %>% dplyr::select(!!x) %>% unlist(TRUE,FALSE),
+                              y.data = data %>% dplyr::select(!!y) %>% unlist(TRUE,FALSE),
                               otr.idx = seq.int(nrow(data))) %>%
     tidyr::drop_na()
 

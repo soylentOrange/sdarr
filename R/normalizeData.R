@@ -3,7 +3,7 @@
 #' @noRd
 normalize_data.execute <- function(data, otr.info = NULL,
                            raise_offset_times = 0,
-                           return_data.normalized = F) {
+                           return_data.normalized = FALSE) {
 
   # find shift for test data
   shift <- data %>% utils::head(1) %>% magrittr::set_names(c("x.shift", "y.shift"))
@@ -14,7 +14,7 @@ normalize_data.execute <- function(data, otr.info = NULL,
     dplyr::mutate(y.data = y.data - shift$y.shift)
 
   # find offset
-  y.max <- max(data.offset$y.data, na.rm = T)
+  y.max <- max(data.offset$y.data, na.rm = TRUE)
 
   y.offset <- data.offset %>%
     dplyr::filter(y.data > 0.05 * y.max) %>%
@@ -36,7 +36,7 @@ normalize_data.execute <- function(data, otr.info = NULL,
                                           nups = 2,
                                           ndowns = 2,
                                           npeaks = 1,
-                                          sortstr = T)
+                                          sortstr = TRUE)
 
   # retry with relaxed settings, when no tangency point was found
   if(is.null(tangent_slope.peak)) {
@@ -44,7 +44,7 @@ normalize_data.execute <- function(data, otr.info = NULL,
                                             nups = 1,
                                             ndowns = 1,
                                             npeaks = 1,
-                                            sortstr = T)
+                                            sortstr = TRUE)
   }
 
   # give an error, when no tangency point was found
@@ -93,46 +93,46 @@ normalize_data.execute <- function(data, otr.info = NULL,
 #' @noRd
 normalize_data <- function(data, otr.info = NULL,
                            raise_offset_times = 0,
-                           denoise.x = F,
-                           denoise.y = F,
-                           verbose = F,
-                           showPlots = F,
-                           savePlots = F) {
+                           denoise.x = FALSE,
+                           denoise.y = FALSE,
+                           verbose = FALSE,
+                           showPlots = FALSE,
+                           savePlots = FALSE) {
 
   # just normalize and return normalized data (with info and (possibly) plots)
-  if(denoise.x == F && denoise.y == F) {
+  if(denoise.x == FALSE && denoise.y == FALSE) {
     normalized_data <- normalize_data.execute(data = data,
                                               otr.info = otr.info,
                                               raise_offset_times = raise_offset_times,
-                                              return_data.normalized = T)
+                                              return_data.normalized = TRUE)
   } else {
     # do a first normalization on the data to get info on the range
     normalized_data <- normalize_data.execute(data = data,
                                               otr.info = otr.info,
                                               raise_offset_times = raise_offset_times,
-                                              return_data.normalized = F)
+                                              return_data.normalized = FALSE)
 
     # denoise x and y (in a limited range of the original data, saving time...)
     data_denoised <- data %>%
       dplyr::filter(otr.idx <= normalized_data$tangency.point$otr.idx.tangent * 1.1)
 
-    if(denoise.x == T) {
+    if(denoise.x == TRUE) {
       data_denoised$x.data <- denoise_vector(data_denoised$x.data %>%
                                                as.numeric(),
-                                             verbose = F)
+                                             verbose = FALSE)
     }
 
-    if(denoise.y == T) {
+    if(denoise.y == TRUE) {
       data_denoised$y.data <- denoise_vector(data_denoised$y.data %>%
                                                as.numeric(),
-                                             verbose = F)
+                                             verbose = FALSE)
     }
 
     # do the normalization on the de-noised data
     normalized_data <- normalize_data.execute(data = data_denoised,
                                               otr.info = otr.info,
                                               raise_offset_times = raise_offset_times,
-                                              return_data.normalized = T)
+                                              return_data.normalized = TRUE)
   }
 
   # print messages
@@ -177,8 +177,8 @@ normalize_data <- function(data, otr.info = NULL,
 
     # create function for plot of Original Test Record
     plot.otr <- carrier::crate(function(value) {
-      plot(x = unlist(plot.data$x.data, T, F),
-           y = unlist(plot.data$y.data, T, F),
+      plot(x = unlist(plot.data$x.data, TRUE, FALSE),
+           y = unlist(plot.data$y.data, TRUE, FALSE),
            type ="l",
            col = "red",
            lwd = 1.25,
@@ -186,8 +186,8 @@ normalize_data <- function(data, otr.info = NULL,
            xlab = plot.xlab,
            ylab = plot.ylab)
     },
-    plot.data = data.frame("x.data" = data$x.data %>% unlist(T,F),
-                           "y.data" = data$y.data %>% unlist(T,F)),
+    plot.data = data.frame("x.data" = data$x.data %>% unlist(TRUE,FALSE),
+                           "y.data" = data$y.data %>% unlist(TRUE,FALSE)),
     plot.x = "x.data",
     plot.y = "y.data",
     plot.xlab = x.lab,
@@ -201,8 +201,8 @@ normalize_data <- function(data, otr.info = NULL,
 
     # create function for plot of Shifted, Truncated and Normalized Test Record
     plot.normalized <- carrier::crate(function(value) {
-      plot(x = unlist(plot.data$x.normalized, T, F),
-           y = unlist(plot.data$y.normalized, T, F),
+      plot(x = unlist(plot.data$x.normalized, TRUE, FALSE),
+           y = unlist(plot.data$y.normalized, TRUE, FALSE),
            type ="l",
            col = "red",
            lwd = 1.25,
@@ -210,8 +210,8 @@ normalize_data <- function(data, otr.info = NULL,
            xlab = plot.xlab,
            ylab = plot.ylab)
     },
-    plot.data = data.frame("x.normalized" = normalized_data$data.normalized$x.normalized %>% unlist(T, F),
-                           "y.normalized" = normalized_data$data.normalized$y.normalized %>% unlist(T, F)),
+    plot.data = data.frame("x.normalized" = normalized_data$data.normalized$x.normalized %>% unlist(TRUE, FALSE),
+                           "y.normalized" = normalized_data$data.normalized$y.normalized %>% unlist(TRUE, FALSE)),
     plot.x = "x.normalized",
     plot.y = "y.normalized",
     plot.xlab = "normalized x",

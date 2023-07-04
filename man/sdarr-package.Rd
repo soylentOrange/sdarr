@@ -6,7 +6,7 @@
 \alias{_PACKAGE}
 \title{sdarr: Slope Determination by Analysis of Residuals}
 \description{
-Implementation of the SDAR algorithm for Slope Determination by Analysis of Residuals as standardized in ASTM E3076-18. It allows for automated and objective linear-fitting of mechanical test-data. As the algorithm heavily uses linear regressions, a faster version is also available to find the optimum region for linear fitting by random sub-sampling.
+Slope Determination by Analysis of Residuals (SDAR) for automated and objective linear-fitting of mechanical test-data (see: standard ASTM E3076-18 ≤doi:10.1520/E3076-18> or a detailed description in E. Lucon (2019) \doi{10.6028/NIST.TN.2050}). As the SDAR-algorithm heavily uses linear regressions, a faster version is additionally available to find the optimum region for the (one) final linear regression by random sub-sampling within the normalized range of the test-data.
 }
 \seealso{
 Useful links:

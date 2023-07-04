@@ -108,8 +108,8 @@ E3076_DS1_2018 %>% {
        x = "extensometer (in mm)",
        y = "force (in kN)")
 } %>% 
-  ggplotly(dynamicTicks = T) %>%
-  config(displaylogo = F, showSendToCloud = F)
+  ggplotly(dynamicTicks = TRUE) %>%
+  config(displaylogo = FALSE, showSendToCloud = FALSE)
 ```
 
 ## Standard algorithm (sdarr)
@@ -119,7 +119,7 @@ E3076_DS1_2018 %>% {
 sdarr.results <- E3076_DS1_2018 %>% 
   sdarr(extensometer, force,
         showPlots = "n",
-        savePlots = T)
+        savePlots = TRUE)
 
 # show the plot of the final fit
 sdarr.results$plots$final.fit %>% {
@@ -147,8 +147,8 @@ sdarr.results$plots$final.fit %>% {
        x = plot.xlab,
        y = plot.ylab)
 } %>% 
-  ggplotly(dynamicTicks = T) %>%
-  config(displaylogo = F, showSendToCloud = F)
+  ggplotly(dynamicTicks = TRUE) %>%
+  config(displaylogo = FALSE, showSendToCloud = FALSE)
 ```
 
 ### Validation Result
@@ -161,8 +161,8 @@ The results of the analysis using `sdarr()` are practically identical to the res
 set.seed(50041180)
 sdarr.lazy.results <- E3076_DS1_2018 %>% 
   sdarr.lazy(extensometer, force,
-             enforce_subsampling = T,
-             showPlots = "n", savePlots = T)
+             enforce_subsampling = TRUE,
+             showPlots = "n", savePlots = TRUE)
 
 # show the plot of the final fit
 sdarr.lazy.results$plots$final.fit %>% {
@@ -190,8 +190,8 @@ sdarr.lazy.results$plots$final.fit %>% {
        x = plot.xlab,
        y = plot.ylab)
 } %>% 
-  ggplotly(dynamicTicks = T) %>%
-  config(displaylogo = F, showSendToCloud = F)
+  ggplotly(dynamicTicks = TRUE) %>%
+  config(displaylogo = FALSE, showSendToCloud = FALSE)
 ```
 
 ### Validation Result
@@ -250,7 +250,7 @@ Comparing the regression curves of `sdarr.lazy()` and `sdarr()` over the mechani
     dplyr::bind_cols(y.data.prediction,
                      y.data.prediction.lazy)
   
-  y.data.max <- plot.data$y.data %>% max(na.rm = T)
+  y.data.max <- plot.data$y.data %>% max(na.rm = TRUE)
   
   ggplot(data = plot.data, 
          aes(x = x.data, y = y.data, color = "E3076_DS1_2018")) +
@@ -285,8 +285,8 @@ Comparing the regression curves of `sdarr.lazy()` and `sdarr()` over the mechani
        x = plot.xlab,
        y = plot.ylab) 
   } %>% 
-  ggplotly(dynamicTicks = T) %>%
-  config(displaylogo = F, showSendToCloud = F)
+  ggplotly(dynamicTicks = TRUE) %>%
+  config(displaylogo = FALSE, showSendToCloud = FALSE)
 ```
 
 ## Conclusions

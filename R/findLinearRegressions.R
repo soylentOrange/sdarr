@@ -40,8 +40,8 @@ find_linear_regressions.lazy <- function(data.normalized, nCandidates) {
       `%>%` <- magrittr::`%>%`
 
       # get start and count as numbers without much ado...
-      limit.start <- limit[1,"round.start"] %>% unlist(T, T)
-      limit.count <- limit[1,"count"] %>% unlist(T, T)
+      limit.start <- limit[1,"round.start"] %>% unlist(TRUE, TRUE)
+      limit.count <- limit[1,"count"] %>% unlist(TRUE, TRUE)
 
       # "calculate" starts indices
       starts <- rep(limit.start, limit.count)
@@ -63,7 +63,7 @@ find_linear_regressions.lazy <- function(data.normalized, nCandidates) {
       `%>%` <- magrittr::`%>%`
 
       # get indices for fit
-      fit.range <- bound %>% unlist(T,F)
+      fit.range <- bound %>% unlist(TRUE,FALSE)
 
       # grab data to analyze
       fit.input <- data.normalized %>%
@@ -84,18 +84,18 @@ find_linear_regressions.lazy <- function(data.normalized, nCandidates) {
     dplyr::arrange(norm.residual) %>%
     utils::head(nCandidates) %>%
     dplyr::mutate(offset_raise_required = dplyr::case_when(
-      otr.idx.end == samples ~ T,
-      T ~ F
+      otr.idx.end == samples ~ TRUE,
+      TRUE ~ FALSE
     ))
 
   # Assemble results
   data.frame(
-    "m" = optimum.fits$m %>% unlist(T,F),
-    "b" = optimum.fits$b %>% unlist(T,F),
-    "otr.idx.start" = optimum.fits$otr.idx.start %>% unlist(T,F),
-    "otr.idx.end" = optimum.fits$otr.idx.end %>% unlist(T,F),
-    "norm.residual" = optimum.fits$norm.residual %>% unlist(T,F),
-    "offset_raise_required" = optimum.fits$offset_raise_required %>% unlist(T,F)) %>%
+    "m" = optimum.fits$m %>% unlist(TRUE,FALSE),
+    "b" = optimum.fits$b %>% unlist(TRUE,FALSE),
+    "otr.idx.start" = optimum.fits$otr.idx.start %>% unlist(TRUE,FALSE),
+    "otr.idx.end" = optimum.fits$otr.idx.end %>% unlist(TRUE,FALSE),
+    "norm.residual" = optimum.fits$norm.residual %>% unlist(TRUE,FALSE),
+    "offset_raise_required" = optimum.fits$offset_raise_required %>% unlist(TRUE,FALSE)) %>%
     return()
 }
 
@@ -109,7 +109,7 @@ find_linear_regressions.lazy <- function(data.normalized, nCandidates) {
 #' A wrapper for the actual implementation
 #'
 #' @noRd
-find_linear_regressions <- function(data.normalized, verbose = F) {
+find_linear_regressions <- function(data.normalized, verbose = FALSE) {
 
   # find optimum fit
   optimum.fit <- find_linear_regressions.lazy(data.normalized, 1)
@@ -133,18 +133,18 @@ find_linear_regressions <- function(data.normalized, verbose = F) {
     message(paste0("      --> minimum number of points for linear-fit: ", Nmin))
     message(paste0("      --> total number of linear fits:             ", Nfits))
     message(paste0("      --> optimum fit found between indices:      ",
-                   results$otr.idx.start %>% unlist(T,F), " and ",
-                   results$otr.idx.end %>% unlist(T,F)))
-    message(paste0("      m = ", results$m %>% unlist(T,F)))
-    message(paste0("      b = ", results$b %>% unlist(T,F)))
+                   results$otr.idx.start %>% unlist(TRUE,FALSE), " and ",
+                   results$otr.idx.end %>% unlist(TRUE,FALSE)))
+    message(paste0("      m = ", results$m %>% unlist(TRUE,FALSE)))
+    message(paste0("      b = ", results$b %>% unlist(TRUE,FALSE)))
     message(paste0("      --> Upper index of the optimum region is ",
-                   ifelse(results$offset_raise_required %>% unlist(T,F),
+                   ifelse(results$offset_raise_required %>% unlist(TRUE,FALSE),
                           "", "not "),
                    "the last point in the truncated test record\n"))
   }
 
-  if(results$offset_raise_required %>% unlist(T,F)) {
-    warning("Upper index of the optimum region is the last point in the truncated test record: The offset point needs to be raised!\n", call. = F)
+  if(results$offset_raise_required %>% unlist(TRUE,FALSE)) {
+    warning("Upper index of the optimum region is the last point in the truncated test record: The offset point needs to be raised!\n", call. = FALSE)
   }
 
   # return results
@@ -180,7 +180,7 @@ find_linear_regressions.subsampled <- function(data.normalized,
     },
     size = range.size,
     otr.idx = data.normalized$otr.idx %>%
-      unlist(T,F))) %>%
+      unlist(TRUE,FALSE))) %>%
     purrr::list_rbind() %>%
     tidyr::nest(.by = mc.idx, .key = "otr.idcs") %>%
     dplyr::mutate(data.quality.check = furrr::future_map(otr.idcs, carrier::crate(function(value) {

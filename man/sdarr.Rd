@@ -30,11 +30,10 @@ lists with the quality- and fit-metrics, and a list containing the
 Run the SDAR algorithm as standardized in ASTM E3076-18. Will
 use numerous linear regressions (\code{.lm.fit()} from the stats-package) and
 can be painfully slow for test data with high resolution.
-}
-\note{
-The function can use parallel processing via the
-\link[furrr:furrr-package]{furrr::furrr-package}. To use this feature, set up a plan other than the
-default sequential strategy beforehand.
+
+@note The function can use parallel processing via the
+\code{\link[furrr:furrr-package]{furrr-package}}. To use this feature, set up a plan
+other than the default sequential strategy beforehand.
 }
 \examples{
 # Synthesize a test record resembling Al 6060 T66

@@ -63,9 +63,10 @@ estimate for the fit-range within the data.
 }
 \note{
 The function can use parallel processing via the
-\link[furrr:furrr-package]{furrr::furrr-package}. To use this feature, set up a plan other than the
-default sequential strategy beforehand. As random values are drawn, set a
-random seed (see: \code{\link[=set.seed]{set.seed()}}) beforehand to get reproducible results.
+\code{\link[furrr:furrr-package]{furrr-package}}. To use this feature, set up a plan
+other than the default sequential strategy beforehand. As random values are
+drawn, set a random seed (see: \code{\link[=set.seed]{set.seed()}}) beforehand to get reproducible
+results.
 }
 \examples{
 # Synthesize a test record resembling Al 6060 T66
@@ -82,9 +83,11 @@ Al_6060_T66 <- synthesize_test_data(slope = 68000,
 # use sdarr.lazy() to analyze the synthetic test record
 # (using relaxed settings for the noise-free synthetic data)
 # will print a report and give a plot of the final fit
+\donttest{
 result <- sdarr.lazy(Al_6060_T66, strain, stress,
                      cutoff_probability = 0.8,
                      fit.rep = 2)
+}
 
 }
 \references{

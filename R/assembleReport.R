@@ -9,9 +9,9 @@ assemble_report <- function(normalized_data,
                             dataQualityMetrics,
                             fit,
                             fitQualityMetrics,
-                            verbose = F,
-                            showPlots = F,
-                            savePlots = F) {
+                            verbose = FALSE,
+                            showPlots = FALSE,
+                            savePlots = FALSE) {
 
   # print messages
   if(verbose) {
@@ -139,8 +139,8 @@ assemble_report <- function(normalized_data,
       `%>%` <- magrittr::`%>%`
 
       # Plot Test Record with fit
-      plot(x = unlist(plot.data$x.data, T, F),
-           y = unlist(plot.data$y.data, T, F),
+      plot(x = unlist(plot.data$x.data, TRUE, FALSE),
+           y = unlist(plot.data$y.data, TRUE, FALSE),
            type ="l",
            col = "red",
            lwd = 1.25,
@@ -166,9 +166,9 @@ assemble_report <- function(normalized_data,
                      adj = c(0.5, 1),
                      "fit range")
     },
-    plot.data = data.frame("x.data" = data.normalized.unnormalized$x.data %>% unlist(T, F),
-                           "y.data" = data.normalized.unnormalized$y.data %>% unlist(T, F),
-                           "y.fit" = data.normalized.unnormalized$y.fit %>% unlist(T, F)),
+    plot.data = data.frame("x.data" = data.normalized.unnormalized$x.data %>% unlist(TRUE, FALSE),
+                           "y.data" = data.normalized.unnormalized$y.data %>% unlist(TRUE, FALSE),
+                           "y.fit" = data.normalized.unnormalized$y.fit %>% unlist(TRUE, FALSE)),
     plot.x = "x.data",
     plot.y = "y.data",
     plot.y.fit = "y.fit",

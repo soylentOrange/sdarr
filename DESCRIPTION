@@ -1,19 +1,21 @@
 Type: Package
 Package: sdarr
 Title: Slope Determination by Analysis of Residuals
-Version: 0.4.2
+Version: 0.4.4
 Authors@R: c(
     person("Robert", "Wendlandt", , "robert.wendlandt@uksh.de", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-6368-1622")),
     person("UKSH", role = c("cph", "fnd"))
   )
 BugReports: https://github.com/soylentOrange/sdarr/issues
-Description: Implementation of the SDAR algorithm for Slope Determination by 
-    Analysis of Residuals as standardized in ASTM E3076-18. 
-    It allows for automated and objective linear-fitting of mechanical test-data. 
-    As the algorithm heavily uses linear regressions, a faster version is 
-    also available to find the optimum region for linear fitting by random
-    sub-sampling.
+Description: Slope Determination by Analysis of Residuals (SDAR) for automated 
+    and objective linear-fitting of mechanical test-data 
+    (see: standard ASTM E3076-18 ≤doi:10.1520/E3076-18> or a detailed 
+    description in E. Lucon (2019) <doi:10.6028/NIST.TN.2050>). As the 
+    SDAR-algorithm heavily uses linear regressions, a faster version is 
+    additionally available to find the optimum region for the (one) final 
+    linear regression by random sub-sampling within the normalized range of the 
+    test-data.
 License: MIT + file LICENSE
 Imports:
     carrier,
@@ -39,7 +41,6 @@ Suggests:
     plotly,
     readr
 Encoding: UTF-8
-LazyData: true
 RoxygenNote: 7.2.3
 URL: https://soylentorange.github.io/sdarr/
 VignetteBuilder: knitr

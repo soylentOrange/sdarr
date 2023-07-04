@@ -9,11 +9,11 @@ sdarr_execute.lazy <- function(prepared_data,
                               optimum.range.size,
                               cutoff_probability,
                               quality_penalty,
-                              verbose.all = F,
-                              verbose.report = T,
-                              showPlots.all = F,
-                              showPlots.report = T,
-                              savePlots = F) {
+                              verbose.all = FALSE,
+                              verbose.report = TRUE,
+                              showPlots.all = FALSE,
+                              showPlots.report = TRUE,
+                              savePlots = FALSE) {
 
   # Give a (long) welcome message
   if(verbose.report) {
@@ -55,24 +55,24 @@ sdarr_execute.lazy <- function(prepared_data,
     # penalize by data quality metrics
     dplyr::mutate(data.quality.penalty = 1.0) %>%
     dplyr::mutate(data.quality.penalty = dplyr::case_when(
-      data.quality.check.passed.check.noise.y == F ~ data.quality.penalty*quality_penalty,
-      T ~ data.quality.penalty)) %>%
+      data.quality.check.passed.check.noise.y == FALSE ~ data.quality.penalty*quality_penalty,
+      TRUE ~ data.quality.penalty)) %>%
     dplyr::mutate(data.quality.penalty = dplyr::case_when(
-      data.quality.check.passed.check.noise.x == F ~ data.quality.penalty*quality_penalty,
-      T ~ data.quality.penalty)) %>%
+      data.quality.check.passed.check.noise.x == FALSE ~ data.quality.penalty*quality_penalty,
+      TRUE ~ data.quality.penalty)) %>%
     dplyr::mutate(data.quality.penalty = dplyr::case_when(
-      data.quality.check.passed.check.resolution.y == F ~ data.quality.penalty*quality_penalty,
-      T ~ data.quality.penalty)) %>%
+      data.quality.check.passed.check.resolution.y == FALSE ~ data.quality.penalty*quality_penalty,
+      TRUE ~ data.quality.penalty)) %>%
     dplyr::mutate(data.quality.penalty = dplyr::case_when(
-      data.quality.check.passed.check.resolution.x == F ~ data.quality.penalty*quality_penalty,
-      T ~ data.quality.penalty)) %>%
+      data.quality.check.passed.check.resolution.x == FALSE ~ data.quality.penalty*quality_penalty,
+      TRUE ~ data.quality.penalty)) %>%
     dplyr::mutate(offset_raise.weighed = dplyr::case_when(
       offset_raise_required ~ -data.quality.penalty,
-      T ~ data.quality.penalty))
+      TRUE ~ data.quality.penalty))
 
     # judge by weighed majority decision if an offset raise is required
     if(mean(optimum_fits$offset_raise.weighed) >= 0) {
-      optimum_fits_are_found <- T
+      optimum_fits_are_found <- TRUE
     }
 
     # repeat otherwise
@@ -89,20 +89,20 @@ sdarr_execute.lazy <- function(prepared_data,
   # discard fits when offset raise would be required or numerical problem in fitting occurred
   optimum_fits.nrow <- nrow(optimum_fits)
   optimum_fits <- optimum_fits %>%
-    dplyr::filter(offset_raise_required == F) %>%
+    dplyr::filter(offset_raise_required == FALSE) %>%
     dplyr::mutate(norm.residual = dplyr::case_when(
       norm.residual < 10*.Machine$double.eps ~ 10*.Machine$double.eps,
-      T ~ norm.residual
+      TRUE ~ norm.residual
     ))
 
   # calculate success rate of quality checks
   passed.check.data <- nrow(optimum_fits %>%
-                              dplyr::filter(data.quality.check.passed.check == T))/optimum_fits.nrow
+                              dplyr::filter(data.quality.check.passed.check == TRUE))/optimum_fits.nrow
   passed.check.fit <- nrow(optimum_fits %>%
-                             dplyr::filter(passed.check == T))/optimum_fits.nrow
+                             dplyr::filter(passed.check == TRUE))/optimum_fits.nrow
   passed.check <- nrow(optimum_fits %>%
-                         dplyr::filter(data.quality.check.passed.check == T) %>%
-                         dplyr::filter(passed.check == T))/optimum_fits.nrow
+                         dplyr::filter(data.quality.check.passed.check == TRUE) %>%
+                         dplyr::filter(passed.check == TRUE))/optimum_fits.nrow
 
   # give a message on success rate of data and fit quality checks
   if(verbose.report) {
@@ -125,14 +125,14 @@ sdarr_execute.lazy <- function(prepared_data,
     # penalize by fit quality metrics
     dplyr::mutate(fit.quality.penalty = 1.0) %>%
     dplyr::mutate(fit.quality.penalty = dplyr::case_when(
-      fit.quality.passed.Fit_range == F ~ fit.quality.penalty*quality_penalty,
-      T ~ fit.quality.penalty)) %>%
+      fit.quality.passed.Fit_range == FALSE ~ fit.quality.penalty*quality_penalty,
+      TRUE ~ fit.quality.penalty)) %>%
     dplyr::mutate(fit.quality.penalty = dplyr::case_when(
-      fit.quality.passed.fourth_quartile == F ~ fit.quality.penalty*quality_penalty,
-      T ~ fit.quality.penalty)) %>%
+      fit.quality.passed.fourth_quartile == FALSE ~ fit.quality.penalty*quality_penalty,
+      TRUE ~ fit.quality.penalty)) %>%
     dplyr::mutate(fit.quality.penalty = dplyr::case_when(
-      fit.quality.passed.first_quartile == F ~ fit.quality.penalty*quality_penalty,
-      T ~ fit.quality.penalty)) %>%
+      fit.quality.passed.first_quartile == FALSE ~ fit.quality.penalty*quality_penalty,
+      TRUE ~ fit.quality.penalty)) %>%
     dplyr::mutate(quality.penalty = fit.quality.penalty * data.quality.penalty) %>%
     dplyr::mutate(weight = quality.penalty/norm.residual) %>%
     dplyr::select(-offset_raise_required,
@@ -146,8 +146,8 @@ sdarr_execute.lazy <- function(prepared_data,
     normalized_data <- normalize_data(data = prepared_data,
                                       otr.info = otr.info,
                                       raise_offset_times = raise_offset_times,
-                                      denoise.x = F,
-                                      denoise.y = F,
+                                      denoise.x = FALSE,
+                                      denoise.y = FALSE,
                                       verbose = verbose.all,
                                       showPlots = showPlots.all,
                                       savePlots = savePlots)
@@ -336,9 +336,10 @@ sdarr_execute.lazy <- function(prepared_data,
 #'   estimate for the fit-range within the data.
 #'
 #' @note The function can use parallel processing via the
-#'   [furrr::furrr-package]. To use this feature, set up a plan other than the
-#'   default sequential strategy beforehand. As random values are drawn, set a
-#'   random seed (see: [set.seed()]) beforehand to get reproducible results.
+#'   [`furrr-package`][furrr::furrr-package]. To use this feature, set up a plan
+#'   other than the default sequential strategy beforehand. As random values are
+#'   drawn, set a random seed (see: [set.seed()]) beforehand to get reproducible
+#'   results.
 #'
 #' @references Lucon, E. (2019). Use and validation of the slope determination
 #'   by the analysis of residuals (SDAR) algorithm (NIST TN 2050; p. NIST TN
@@ -391,9 +392,11 @@ sdarr_execute.lazy <- function(prepared_data,
 #' # use sdarr.lazy() to analyze the synthetic test record
 #' # (using relaxed settings for the noise-free synthetic data)
 #' # will print a report and give a plot of the final fit
+#' \donttest{
 #' result <- sdarr.lazy(Al_6060_T66, strain, stress,
 #'                      cutoff_probability = 0.8,
 #'                      fit.rep = 2)
+#' }
 #'
 #' @export
 sdarr.lazy <- function(data, x, y, fit.rep = 5,
@@ -410,13 +413,13 @@ sdarr.lazy <- function(data, x, y, fit.rep = 5,
   y <- rlang::enquo(y)
 
   # determine verbosity level
-  verbose.all <- ifelse(verbose == "a" || verbose == "all", T, F)
-  verbose.report <- ifelse(verbose == "r" || verbose == "report", T, F)
+  verbose.all <- ifelse(verbose == "a" || verbose == "all", TRUE, FALSE)
+  verbose.report <- ifelse(verbose == "r" || verbose == "report", TRUE, FALSE)
   verbose.report <- verbose.report || verbose.all
 
   # determine plot level
-  showPlots.all <- ifelse(showPlots == "a" || showPlots == "all", T, F)
-  showPlots.report <- ifelse(showPlots == "r" || showPlots == "report", T, F)
+  showPlots.all <- ifelse(showPlots == "a" || showPlots == "all", TRUE, FALSE)
+  showPlots.report <- ifelse(showPlots == "r" || showPlots == "report", TRUE, FALSE)
   showPlots.report <- showPlots.report || showPlots.all
 
   # get units for data
@@ -428,8 +431,8 @@ sdarr.lazy <- function(data, x, y, fit.rep = 5,
   y.name <- data %>% dplyr::select(!!y) %>% names() %>% {.[[1]]}
 
   # prepare data, add an index and remove NA from data
-  prepared_data <- data.frame(x.data = data %>% dplyr::select(!!x) %>% unlist(T,F),
-                              y.data = data %>% dplyr::select(!!y) %>% unlist(T,F),
+  prepared_data <- data.frame(x.data = data %>% dplyr::select(!!x) %>% unlist(TRUE,FALSE),
+                              y.data = data %>% dplyr::select(!!y) %>% unlist(TRUE,FALSE),
                               otr.idx = seq.int(nrow(data))) %>%
     tidyr::drop_na()
 
@@ -454,8 +457,8 @@ sdarr.lazy <- function(data, x, y, fit.rep = 5,
   normalized_data <- normalize_data(data = prepared_data,
                                     otr.info = otr.info,
                                     raise_offset_times = 0,
-                                    denoise.x = F,
-                                    denoise.y = F,
+                                    denoise.x = FALSE,
+                                    denoise.y = FALSE,
                                     verbose = verbose.all,
                                     showPlots = showPlots.all,
                                     savePlots = savePlots)
@@ -477,9 +480,9 @@ sdarr.lazy <- function(data, x, y, fit.rep = 5,
                                       raise_offset_times = 0,
                                       denoise.x = denoise.x,
                                       denoise.y = denoise.y,
-                                      verbose = F,
-                                      showPlots = F,
-                                      savePlots = F)
+                                      verbose = FALSE,
+                                      showPlots = FALSE,
+                                      savePlots = FALSE)
 
     # get data quality metrics of de-noised data
     data_quality_metrics <- check_data_quality.lazy(normalized_data$data.normalized)
@@ -518,7 +521,7 @@ sdarr.lazy <- function(data, x, y, fit.rep = 5,
 
   # check for possible errors in determination of optimum size
   if(optimum_size$cutoff_probability.matched == FALSE) {
-    if(enforce_subsampling == T) {
+    if(enforce_subsampling == TRUE) {
       # Give an informational message and proceed using the found quasi-optimum
       # size
       if(verbose.report) {
@@ -543,11 +546,11 @@ sdarr.lazy <- function(data, x, y, fit.rep = 5,
                                      fit.rep)
 
   # check, whether sub-sampling would save time and execute standard or lazy variant
-  if(viability$viable == F) {
+  if(viability$viable == FALSE) {
     if(verbose.report) {
       message(paste0("  lazy algorithm requires more fits than standard SDAR-algorithm:  \n    ",
                      viability$Nfits.subsampling, " vs. ", viability$Nfits.plain, " fits."))
-      if(enforce_subsampling == F) {
+      if(enforce_subsampling == FALSE) {
         message("  Standard SDAR-algorithm will be used...\n")
       } else {
         message("  Anyways, random sub-sampling will be used...\n")
@@ -555,7 +558,7 @@ sdarr.lazy <- function(data, x, y, fit.rep = 5,
     }
 
     # use standard SDAR-algorithm or force sub-sampling method
-    if(enforce_subsampling == F) {
+    if(enforce_subsampling == FALSE) {
       # execute the standard SDAR-algorithm
       result <- sdarr_execute(prepared_data, otr.info, verbose.all, verbose.report,
                               showPlots.all, showPlots.report, savePlots)

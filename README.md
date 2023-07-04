@@ -18,7 +18,8 @@ or in [Graham & Adler (2011)](https://doi.org/10.1520/JTE103038).
 
 As the SDAR-algorithm, implemented in `sdarr()`, heavily uses linear
 regressions, a faster version `sdarr.lazy()` was implemented, which
-finds the optimum region for linear fitting by random sub-sampling.
+finds the optimum region for the (one) final linear regression by random
+sub-sampling within the normalized range of the test-data.
 
 ## Installation
 
@@ -147,7 +148,7 @@ set.seed(50041180)
 # (using a relaxed cutoff_probability for the noise-free synthetic data)
 Al_6060_T66.result.lazy <- sdarr.lazy(Al_6060_T66, x = strain, y = stress,
                                       cutoff_probability = 0.8,
-                                      enforce_subsampling = T,
+                                      enforce_subsampling = TRUE,
                                       verbose = "r", showPlots = "r")
 #> Determination of Slope in the Linear Region of a Test Record:
 #>   lazy algorithm requires more fits than standard SDAR-algorithm:  
@@ -206,9 +207,8 @@ calculations, which will only be shown when requested (i.e. set
 provided plot-functions from the results, when you set
 `savePlots = TRUE`.
 
-The plots are crated functions (see
-[carrier](https://github.com/r-lib/carrier)), so you can easily tap the
-environment of the function to convert it to e.g. a
+The plot-functions are [crated](https://github.com/r-lib/carrier), so
+you can easily tap their environment to convert it into e.g. a
 [ggplot2-graphic](https://ggplot2.tidyverse.org/).
 
 ``` r
