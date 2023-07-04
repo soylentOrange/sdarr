@@ -22,8 +22,8 @@ sdarr.lazy(
 \item{data}{Data record to analyze. Labels of the data columns will be used
 as units.}
 
-\item{x, y}{Use <\code{\link[dplyr:dplyr_tidy_select]{tidy-selections}}> to specify x and y within
-the data record.}
+\item{x, y}{Use <\code{\link[dplyr:dplyr_tidy_select]{tidy-selections}}> to specify x
+and y within the data record.}
 
 \item{fit.rep}{Repetitions of random sub-sampling and fitting.}
 
@@ -62,10 +62,10 @@ algorithm will use several random sub-samples of the data to find the best
 estimate for the fit-range within the data.
 }
 \note{
-The function can use parallel processing via the \link{furrr-package}. To use
-this feature, set up a plan other than the default sequential strategy
-beforehand. As random values are drawn, set a random seed (\code{\link[=set.seed]{set.seed()}})
-beforehand to get reproducible results.
+The function can use parallel processing via the
+\link[furrr:furrr-package]{furrr::furrr-package}. To use this feature, set up a plan other than the
+default sequential strategy beforehand. As random values are drawn, set a
+random seed (see: \code{\link[=set.seed]{set.seed()}}) beforehand to get reproducible results.
 }
 \examples{
 # Synthesize a test record resembling Al 6060 T66

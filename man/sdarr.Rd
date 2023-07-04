@@ -10,8 +10,8 @@ sdarr(data, x, y, verbose = "report", showPlots = "report", savePlots = FALSE)
 \item{data}{Data record to analyze. Labels of the data columns will be used
 as units.}
 
-\item{x, y}{Use <\code{\link[dplyr:dplyr_tidy_select]{tidy-selections}}> to specify x and y within
-the data record.}
+\item{x, y}{Use <\code{\link[dplyr:dplyr_tidy_select]{tidy-selections}}> to specify x
+and y within the data record.}
 
 \item{verbose, showPlots}{Give informational messages and plots during
 computation. Defaults to \code{"report"} to only show a report and a plot of the
@@ -28,13 +28,13 @@ lists with the quality- and fit-metrics, and a list containing the
 }
 \description{
 Run the SDAR algorithm as standardized in ASTM E3076-18. Will
-use numerous linear regressions (\code{.lm.fit()} from the stats-package) and can be
-painfully slow for test data with high resolution.
+use numerous linear regressions (\code{.lm.fit()} from the stats-package) and
+can be painfully slow for test data with high resolution.
 }
 \note{
-The function can use parallel processing via the \link{furrr-package}. To use
-this feature, set up a plan other than the default sequential strategy
-beforehand.
+The function can use parallel processing via the
+\link[furrr:furrr-package]{furrr::furrr-package}. To use this feature, set up a plan other than the
+default sequential strategy beforehand.
 }
 \examples{
 # Synthesize a test record resembling Al 6060 T66

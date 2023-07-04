@@ -335,10 +335,10 @@ sdarr_execute.lazy <- function(prepared_data,
 #'   algorithm will use several random sub-samples of the data to find the best
 #'   estimate for the fit-range within the data.
 #'
-#' @note The function can use parallel processing via the [furrr-package]. To use
-#'   this feature, set up a plan other than the default sequential strategy
-#'   beforehand. As random values are drawn, set a random seed ([set.seed()])
-#'   beforehand to get reproducible results.
+#' @note The function can use parallel processing via the
+#'   [furrr::furrr-package]. To use this feature, set up a plan other than the
+#'   default sequential strategy beforehand. As random values are drawn, set a
+#'   random seed (see: [set.seed()]) beforehand to get reproducible results.
 #'
 #' @references Lucon, E. (2019). Use and validation of the slope determination
 #'   by the analysis of residuals (SDAR) algorithm (NIST TN 2050; p. NIST TN

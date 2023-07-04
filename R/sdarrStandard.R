@@ -139,12 +139,12 @@ sdarr_execute <- function(prepared_data, otr.info,
 #' @title SDAR-algorithm
 #'
 #' @description Run the SDAR algorithm as standardized in ASTM E3076-18. Will
-#'   use numerous linear regressions (`.lm.fit()` from the stats-package) and can be
-#'   painfully slow for test data with high resolution.
+#'   use numerous linear regressions (`.lm.fit()` from the stats-package) and
+#'   can be painfully slow for test data with high resolution.
 #'
-#' @note The function can use parallel processing via the [furrr-package]. To use
-#'   this feature, set up a plan other than the default sequential strategy
-#'   beforehand.
+#' @note The function can use parallel processing via the
+#'   [furrr::furrr-package]. To use this feature, set up a plan other than the
+#'   default sequential strategy beforehand.
 #'
 #' @references Lucon, E. (2019). Use and validation of the slope determination
 #'   by the analysis of residuals (SDAR) algorithm (NIST TN 2050; p. NIST TN
@@ -162,8 +162,8 @@ sdarr_execute <- function(prepared_data, otr.info,
 #' @param data Data record to analyze. Labels of the data columns will be used
 #'   as units.
 #'
-#' @param x,y Use <[`tidy-selections`][dplyr::dplyr_tidy_select]> to specify x and y within
-#'   the data record.
+#' @param x,y Use <[`tidy-selections`][dplyr::dplyr_tidy_select]> to specify x
+#'   and y within the data record.
 #'
 #' @param verbose,showPlots Give informational messages and plots during
 #'   computation. Defaults to `"report"` to only show a report and a plot of the

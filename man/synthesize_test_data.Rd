@@ -88,8 +88,8 @@ n of the Ramberg-Osgood equation are calculated from the yield-strength
 (e.g. the point of ultimate stress) as proposed by Hill.
 }
 \note{
-As random values are drawn, set a random seed (\code{\link[=set.seed]{set.seed()}}) beforehand
-to get reproducible results.
+As random values are drawn, set a random seed (see: \code{\link[=set.seed]{set.seed()}})
+beforehand to get reproducible results.
 }
 \examples{
 # Synthesize a test record resembling Al 6060 T66

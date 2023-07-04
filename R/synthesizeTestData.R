@@ -2,8 +2,8 @@
 #'
 #' @description Synthesize Test Data by Ramberg-Osgood equation.
 #'
-#' @note As random values are drawn, set a random seed ([set.seed()]) beforehand
-#'   to get reproducible results.
+#' @note As random values are drawn, set a random seed (see: [set.seed()])
+#'   beforehand to get reproducible results.
 #'
 #' @details Use the Ramberg-Osgood equation in the formulation of Hill to create
 #'   synthetic data similar to quasi-static mechanical testing. Parameters K and
