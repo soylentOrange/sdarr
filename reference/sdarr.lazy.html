@@ -20,7 +20,7 @@ estimate for the fit-range within the data."><!-- mathjax --><script src="https:
     
     <a class="navbar-brand me-2" href="../index.html">sdarr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.4</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -147,9 +147,10 @@ list with the quality- and fit-metrics, and a list containing the
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
     <p>The function can use parallel processing via the
-<a href="https://furrr.futureverse.org/reference/furrr-package.html" class="external-link">furrr::furrr-package</a>. To use this feature, set up a plan other than the
-default sequential strategy beforehand. As random values are drawn, set a
-random seed (see: <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code>) beforehand to get reproducible results.</p>
+<code><a href="https://furrr.futureverse.org/reference/furrr-package.html" class="external-link">furrr-package</a></code>. To use this feature, set up a plan
+other than the default sequential strategy beforehand. As random values are
+drawn, set a random seed (see: <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code>) beforehand to get reproducible
+results.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -185,13 +186,14 @@ Evaluation - J TEST EVAL, 39. https://doi.org/10.1520/JTE103038</p>
 <span class="r-in"><span><span class="co"># use sdarr.lazy() to analyze the synthetic test record</span></span></span>
 <span class="r-in"><span><span class="co"># (using relaxed settings for the noise-free synthetic data)</span></span></span>
 <span class="r-in"><span><span class="co"># will print a report and give a plot of the final fit</span></span></span>
+<span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu">sdarr.lazy</span><span class="op">(</span><span class="va">Al_6060_T66</span>, <span class="va">strain</span>, <span class="va">stress</span>,</span></span>
 <span class="r-in"><span>                     cutoff_probability <span class="op">=</span> <span class="fl">0.8</span>,</span></span>
 <span class="r-in"><span>                     fit.rep <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Determination of Slope in the Linear Region of a Test Record:</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Random sub-sampling modification of the SDAR-algorithm</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   Random sub-sampling information:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       222 points of 337 points in the normalized range were used.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       229 points of 337 points in the normalized range were used.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>       0 % of sub-sampled normalized ranges passed the data quality checks.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>       100 % of linear regressions passed the fit quality checks.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>       0 % of linear regressions passed all quality checks.</span>
@@ -216,21 +218,22 @@ Evaluation - J TEST EVAL, 39. https://doi.org/10.1520/JTE103038</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>       --&gt; pass</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   Fit Quality Metric: Curvature</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>     1st Quartile</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       Relative Residual Slope: 0.000393716025082578</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       Relative Residual Slope: 0.000179775304545843</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>       Number of Points:        50</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>       --&gt; pass</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>     4th Quartile</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       Relative Residual Slope: -0.00604623757345536</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       Relative Residual Slope: -0.00605997860775069</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>       Number of Points:        50</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>       --&gt; pass</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   Fit Quality Metric: Fit Range</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>       relative fit range:      0.661797553625244</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>       --&gt; pass</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   Un-normalized fit</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       Final Slope:             68001.2074151202 MPa</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       True Intercept:          0.000966882874381148 MPa</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       y-Range:                 0 MPa - 74.0243530273438 MPa</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       Final Slope:             68001.1406632664 MPa</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       True Intercept:          0.00100121873037546 MPa</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       y-Range:                 0.38055419921875 MPa - 74.4049072265625 MPa</span>
 <span class="r-plt img"><img src="sdarr.lazy-1.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
