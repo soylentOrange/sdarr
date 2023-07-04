@@ -10,7 +10,7 @@ sdarr(data, x, y, verbose = "report", showPlots = "report", savePlots = FALSE)
 \item{data}{Data record to analyze. Labels of the data columns will be used
 as units.}
 
-\item{x, y}{Use <\code{\link[=dplyr_tidy_select]{tidy-selections}}> to specify x and y within
+\item{x, y}{Use <\code{\link[dplyr:dplyr_tidy_select]{tidy-selections}}> to specify x and y within
 the data record.}
 
 \item{verbose, showPlots}{Give informational messages and plots during
@@ -24,7 +24,7 @@ later use.}
 \value{
 A list containing a data-frame with the results of the final fit,
 lists with the quality- and fit-metrics, and a list containing the
-<\code{\link[=crate]{crated}}> plot-functions (if \code{savePlots = TRUE}).
+<\code{\link[carrier:crate]{crated}}> plot-functions (if \code{savePlots = TRUE}).
 }
 \description{
 Run the SDAR algorithm as standardized in ASTM E3076-18. Will
@@ -53,7 +53,7 @@ Al_6060_T66 <- synthesize_test_data(slope = 68000,
 
 # use sdarr() to analyze the synthetic test record
 # will print a report and give a plot of the final fit
-sdarr(Al_6060_T66, strain, stress)
+result <- sdarr(Al_6060_T66, strain, stress)
 
 }
 \references{

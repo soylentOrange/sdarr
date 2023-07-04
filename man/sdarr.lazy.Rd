@@ -22,7 +22,7 @@ sdarr.lazy(
 \item{data}{Data record to analyze. Labels of the data columns will be used
 as units.}
 
-\item{x, y}{Use <\code{\link[=dplyr_tidy_select]{tidy-selections}}> to specify x and y within
+\item{x, y}{Use <\code{\link[dplyr:dplyr_tidy_select]{tidy-selections}}> to specify x and y within
 the data record.}
 
 \item{fit.rep}{Repetitions of random sub-sampling and fitting.}
@@ -51,7 +51,7 @@ later use.}
 \value{
 A list containing a data-frame with the results of the final fit, a
 list with the quality- and fit-metrics, and a list containing the
-<\code{\link[=crate]{crated}}> plot-functions (if \code{savePlots = TRUE}).
+<\code{\link[carrier:crate]{crated}}> plot-functions (if \code{savePlots = TRUE}).
 }
 \description{
 Run a random sub-sampling modification of the SDAR algorithm as
@@ -66,6 +66,27 @@ The function can use parallel processing via the \link{furrr-package}. To use
 this feature, set up a plan other than the default sequential strategy
 beforehand. As random values are drawn, set a random seed (\code{\link[=set.seed]{set.seed()}})
 beforehand to get reproducible results.
+}
+\examples{
+# Synthesize a test record resembling Al 6060 T66
+# (Values according to Metallic Material Properties
+# Development and Standardization (MMPDS) Handbook).
+# Explicitly set names to "strain" and "stress",
+# set effective number of bits in the x-data to 12
+# to limit the number of data points.
+Al_6060_T66 <- synthesize_test_data(slope = 68000,
+                                    yield.y = 160,
+                                    ultimate.y = 215,
+                                    ultimate.x = 0.091,
+                                    x.name = "strain",
+                                    y.name = "stress",
+                                    enob.x = 12)
+
+# use sdarr.lazy() to analyze the synthetic test record
+# will print a report and give a plot of the final fit
+result <- sdarr.lazy(Al_6060_T66, strain, stress,
+                     enforce_subsampling = TRUE)
+
 }
 \references{
 Lucon, E. (2019). Use and validation of the slope determination

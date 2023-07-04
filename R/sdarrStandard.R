@@ -162,7 +162,7 @@ sdarr_execute <- function(prepared_data, otr.info,
 #' @param data Data record to analyze. Labels of the data columns will be used
 #'   as units.
 #'
-#' @param x,y Use <[`tidy-selections`][dplyr_tidy_select]> to specify x and y within
+#' @param x,y Use <[`tidy-selections`][dplyr::dplyr_tidy_select]> to specify x and y within
 #'   the data record.
 #'
 #' @param verbose,showPlots Give informational messages and plots during
@@ -193,11 +193,11 @@ sdarr_execute <- function(prepared_data, otr.info,
 #'
 #' # use sdarr() to analyze the synthetic test record
 #' # will print a report and give a plot of the final fit
-#' sdarr(Al_6060_T66, strain, stress)
+#' result <- sdarr(Al_6060_T66, strain, stress)
 #'
 #' @returns A list containing a data-frame with the results of the final fit,
 #'   lists with the quality- and fit-metrics, and a list containing the
-#'   <[`crated`][crate]> plot-functions (if `savePlots = TRUE`).
+#'   <[`crated`][carrier::crate]> plot-functions (if `savePlots = TRUE`).
 #'
 #' @export
 sdarr <- function(data,
