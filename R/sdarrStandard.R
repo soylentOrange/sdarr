@@ -139,10 +139,10 @@ sdarr_execute <- function(prepared_data, otr.info,
 #' @title SDAR-algorithm
 #'
 #' @description Run the SDAR algorithm as standardized in ASTM E3076-18. Will
-#'   use numerous linear regressions (.lm.fit from the stats-package) and can be
+#'   use numerous linear regressions (`.lm.fit()` from the stats-package) and can be
 #'   painfully slow for test data with high resolution.
 #'
-#' @note The function will use parallel processing via the furrr-package. To use
+#' @note The function can use parallel processing via the [furrr-package]. To use
 #'   this feature, set up a plan other than the default sequential strategy
 #'   beforehand.
 #'
@@ -162,18 +162,16 @@ sdarr_execute <- function(prepared_data, otr.info,
 #' @param data Data record to analyze. Labels of the data columns will be used
 #'   as units.
 #'
-#' @param x,y Use tidy selection to specify x & y within the data.
+#' @param x,y Use <[`tidy-selections`][dplyr_tidy_select]> to specify x and y within
+#'   the data record.
 #'
-#' @param verbose Give informational messages during computation defaults to
-#'   "report" to only show a summarizing information set to "all" to also give
-#'   messages from the individual steps set to "none" to be quiet. Can be
-#'   abbreviated.
+#' @param verbose,showPlots Give informational messages and plots during
+#'   computation. Defaults to `"report"` to only show a report and a plot of the
+#'   final fit. Set to `"all"` to also give messages from the individual steps.
+#'   Set to `"none"` to be quiet. Can be abbreviated.
 #'
-#' @param showPlots Show plots during computation defaults to "report" to only
-#'   show the plot of the final fit set to "all" to also show plots from the
-#'   individual steps set to "none" to be quiet. Can be abbreviated.
-#'
-#' @param savePlots Give plot functions with the result.
+#' @param savePlots Set to `TRUE` to get plot-functions with the result for
+#'   later use.
 #'
 #' @seealso [sdarr.lazy()] for the random sub-sampling modification of the
 #'   SDAR-algorithm.
@@ -197,9 +195,10 @@ sdarr_execute <- function(prepared_data, otr.info,
 #' # will print a report and give a plot of the final fit
 #' sdarr(Al_6060_T66, strain, stress)
 #'
-#' @returns A list containing a data-frame with the results of the final fit, a
-#'   list with the quality- and fit-metrics, and a list containing the crated
-#'   plot-functions (if savePlots was set to TRUE).
+#' @returns A list containing a data-frame with the results of the final fit,
+#'   lists with the quality- and fit-metrics, and a list containing the
+#'   <[`crated`][crate]> plot-functions (if `savePlots = TRUE`).
+#'
 #' @export
 sdarr <- function(data,
                  x,

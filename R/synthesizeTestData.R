@@ -1,12 +1,16 @@
 #' @title Synthesize Test Data
 #'
-#' @description Synthesize Test Data by Ramberg-Osgood-Equation.
+#' @description Synthesize Test Data by Ramberg-Osgood equation.
 #'
-#' @note As random values are drawn, set a random seed beforehand to get
-#'   reproducible results.
+#' @note As random values are drawn, set a random seed ([set.seed()]) beforehand
+#'   to get reproducible results.
 #'
-#' @details
-#' Additional details...
+#' @details Use the Ramberg-Osgood equation in the formulation of Hill to create
+#'   synthetic data similar to quasi-static mechanical testing. Parameters K and
+#'   n of the Ramberg-Osgood equation are calculated from the yield-strength
+#'   (typically at 0.2% offset) and a second point in the post-yield region
+#'   (e.g. the point of ultimate stress) as proposed by Hill.
+#'
 #'
 #' @references Hill, H. N. (1944). Determination of stress-strain relations
 #'   from" offset" yield strength values. Aluminum Co of America Pittsburgh Pa.
@@ -29,7 +33,7 @@
 #'
 #' @param ultimate.x Maximum x-value in the post-linear region.
 #'
-#' @param offset Y-value of offset.
+#' @param offset Value of y-offset.
 #'
 #' @param toe.initial.y Intersection of toe-region with y-axis (before adding an
 #'   offset).
@@ -57,13 +61,13 @@
 #' @param enob.y_noise Add noise to y-data. Give the effective number of bits
 #'   for the full-scale y-range.
 #'
-#' @param x.name Name for x-values. Defaults to "strain".
+#' @param x.name Name for x-values. Defaults to `"strain"`.
 #'
-#' @param y.name Name for y-values. Defaults to "stress".
+#' @param y.name Name for y-values. Defaults to `"stress"`.
 #'
-#' @param x.unit Unit for x-values. Can be NULL.
+#' @param x.unit Unit for x-values. Can be `NULL`.
 #'
-#' @param y.unit Unit for y-values. Can be NULL. Defaults to "MPa".
+#' @param y.unit Unit for y-values. Can be `NULL`. Defaults to `"MPa"`.
 #'
 #' @returns A data.frame with the synthetic data. Units (when provided) are
 #'   given as variable labels.

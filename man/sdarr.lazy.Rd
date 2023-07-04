@@ -22,7 +22,8 @@ sdarr.lazy(
 \item{data}{Data record to analyze. Labels of the data columns will be used
 as units.}
 
-\item{x, y}{Use tidy selection to specify x & y within the data.}
+\item{x, y}{Use <\code{\link[=dplyr_tidy_select]{tidy-selections}}> to specify x and y within
+the data record.}
 
 \item{fit.rep}{Repetitions of random sub-sampling and fitting.}
 
@@ -36,52 +37,50 @@ sub-sampled data range via logistic regression.}
 \item{quality_penalty}{Factor to down-weight fits with inferior data- and
 fit-quality metrics.}
 
-\item{enforce_subsampling}{Set to TRUE, to use sub-sampling method even when
-it is computationally more expensive than the standard SDAR-algorithm.}
+\item{enforce_subsampling}{Set to \code{TRUE}, to use sub-sampling method even
+when it is computationally more expensive than the standard SDAR-algorithm.}
 
-\item{verbose}{Give informational messages during computation defaults to
-"report" to only show a summarizing information set to "all" to also give
-messages from the individual steps set to "none" to be quiet. Can be
-abbreviated.}
+\item{verbose, showPlots}{Give informational messages and plots during
+computation. Defaults to \code{"report"} to only show a report and a plot of the
+final fit. Set to \code{"all"} to also give messages from the individual steps.
+Set to \code{"none"} to be quiet. Can be abbreviated.}
 
-\item{showPlots}{Show plots during computation defaults to "report" to only
-show the plot of the final fit set to "all" to also show plots from the
-individual steps set to "none" to be quiet. Can be abbreviated.}
-
-\item{savePlots}{Give plot functions with the result.}
+\item{savePlots}{Set to \code{TRUE} to get plot-functions with the result for
+later use.}
 }
 \value{
 A list containing a data-frame with the results of the final fit, a
-  list with the quality- and fit-metrics, and a list containing the crated
-  plot-functions (if savePlots was set to TRUE).
+list with the quality- and fit-metrics, and a list containing the
+<\code{\link[=crate]{crated}}> plot-functions (if \code{savePlots = TRUE}).
 }
 \description{
 Run a random sub-sampling modification of the SDAR algorithm as
-  originally standardized in ASTM E3076-18. As the original version uses
-  numerous linear regressions (.lm.fit from the stats-package), can be
-  painfully slow for test data with high resolution. The lazy variant of the
-  algorithm will use several random sub-samples of the data to find the best
-  estimate for the fit-range within the data.
+originally standardized in ASTM E3076-18. As the original version uses
+numerous linear regressions (\code{.lm.fit()} from the stats-package), can be
+painfully slow for test data with high resolution. The lazy variant of the
+algorithm will use several random sub-samples of the data to find the best
+estimate for the fit-range within the data.
 }
 \note{
-The function will use parallel processing via the furrr-package. To use
-  this feature, set up a plan other than the default sequential strategy
-  beforehand.
+The function can use parallel processing via the \link{furrr-package}. To use
+this feature, set up a plan other than the default sequential strategy
+beforehand. As random values are drawn, set a random seed (\code{\link[=set.seed]{set.seed()}})
+beforehand to get reproducible results.
 }
 \references{
 Lucon, E. (2019). Use and validation of the slope determination
-  by the analysis of residuals (SDAR) algorithm (NIST TN 2050; p. NIST TN
-  2050). National Institute of Standards and Technology.
-  https://doi.org/10.6028/NIST.TN.2050
+by the analysis of residuals (SDAR) algorithm (NIST TN 2050; p. NIST TN
+2050). National Institute of Standards and Technology.
+https://doi.org/10.6028/NIST.TN.2050
 
 Standard Practice for Determination of the Slope in the Linear
-  Region of a Test Record (ASTM E3076-18). (2018).
-  https://doi.org/10.1520/E3076-18
+Region of a Test Record (ASTM E3076-18). (2018).
+https://doi.org/10.1520/E3076-18
 
 Graham, S., & Adler, M. (2011). Determining the Slope and Quality
-  of Fit for the Linear Part of a Test Record. Journal of Testing and
-  Evaluation - J TEST EVAL, 39. https://doi.org/10.1520/JTE103038
+of Fit for the Linear Part of a Test Record. Journal of Testing and
+Evaluation - J TEST EVAL, 39. https://doi.org/10.1520/JTE103038
 }
 \seealso{
-[sdarr()] for the standard SDAR-algorithm.
+\code{\link[=sdarr]{sdarr()}} for the standard SDAR-algorithm.
 }

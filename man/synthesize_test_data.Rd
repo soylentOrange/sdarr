@@ -37,7 +37,7 @@ synthesize_test_data(
 
 \item{ultimate.x}{Maximum x-value in the post-linear region.}
 
-\item{offset}{Y-value of offset.}
+\item{offset}{Value of y-offset.}
 
 \item{toe.initial.y}{Intersection of toe-region with y-axis (before adding an
 offset).}
@@ -65,27 +65,31 @@ for the full-scale x-range.}
 \item{enob.y_noise}{Add noise to y-data. Give the effective number of bits
 for the full-scale y-range.}
 
-\item{x.name}{Name for x-values. Defaults to "strain".}
+\item{x.name}{Name for x-values. Defaults to \code{"strain"}.}
 
-\item{y.name}{Name for y-values. Defaults to "stress".}
+\item{y.name}{Name for y-values. Defaults to \code{"stress"}.}
 
-\item{x.unit}{Unit for x-values. Can be NULL.}
+\item{x.unit}{Unit for x-values. Can be \code{NULL}.}
 
-\item{y.unit}{Unit for y-values. Can be NULL. Defaults to "MPa".}
+\item{y.unit}{Unit for y-values. Can be \code{NULL}. Defaults to \code{"MPa"}.}
 }
 \value{
 A data.frame with the synthetic data. Units (when provided) are
-  given as variable labels.
+given as variable labels.
 }
 \description{
-Synthesize Test Data by Ramberg-Osgood-Equation.
+Synthesize Test Data by Ramberg-Osgood equation.
 }
 \details{
-Additional details...
+Use the Ramberg-Osgood equation in the formulation of Hill to create
+synthetic data similar to quasi-static mechanical testing. Parameters K and
+n of the Ramberg-Osgood equation are calculated from the yield-strength
+(typically at 0.2\% offset) and a second point in the post-yield region
+(e.g. the point of ultimate stress) as proposed by Hill.
 }
 \note{
-As random values are drawn, set a random seed beforehand to get
-  reproducible results.
+As random values are drawn, set a random seed (\code{\link[=set.seed]{set.seed()}}) beforehand
+to get reproducible results.
 }
 \examples{
 # Synthesize a test record resembling Al 6060 T66
@@ -103,13 +107,13 @@ plot(x = Al_6060_T66$strain, y = Al_6060_T66$stress,
 }
 \references{
 Hill, H. N. (1944). Determination of stress-strain relations
-  from" offset" yield strength values. Aluminum Co of America Pittsburgh Pa.
+from" offset" yield strength values. Aluminum Co of America Pittsburgh Pa.
 
 Ramberg, W., & Osgood, W. R. (1943). Description of Stress-Strain
-  Curves by Three Parameters; National Advisory Committee for Aeronautics
-  Technical Note. NACA-TN-902.
+Curves by Three Parameters; National Advisory Committee for Aeronautics
+Technical Note. NACA-TN-902.
 
 Rice, R. C., Jackson, J. L., Bakuckas, J., & Thompson, S. (2003).
-  Metallic Materials Properties Development and Standardization (MMPDS)
-  (DOT/FAA/AR-MMPDS-01).
+Metallic Materials Properties Development and Standardization (MMPDS)
+(DOT/FAA/AR-MMPDS-01).
 }

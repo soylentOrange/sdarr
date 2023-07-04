@@ -19,5 +19,10 @@ Useful links:
 \author{
 \strong{Maintainer}: Robert Wendlandt \email{robert.wendlandt@uksh.de} (\href{https://orcid.org/0000-0001-6368-1622}{ORCID})
 
+Other contributors:
+\itemize{
+  \item UKSH [copyright holder, funder]
+}
+
 }
 \keyword{internal}

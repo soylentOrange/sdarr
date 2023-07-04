@@ -330,14 +330,15 @@ sdarr_execute.lazy <- function(prepared_data,
 #'
 #' @description Run a random sub-sampling modification of the SDAR algorithm as
 #'   originally standardized in ASTM E3076-18. As the original version uses
-#'   numerous linear regressions (.lm.fit from the stats-package), can be
+#'   numerous linear regressions (`.lm.fit()` from the stats-package), can be
 #'   painfully slow for test data with high resolution. The lazy variant of the
 #'   algorithm will use several random sub-samples of the data to find the best
 #'   estimate for the fit-range within the data.
 #'
-#' @note The function will use parallel processing via the furrr-package. To use
+#' @note The function can use parallel processing via the [furrr-package]. To use
 #'   this feature, set up a plan other than the default sequential strategy
-#'   beforehand.
+#'   beforehand. As random values are drawn, set a random seed ([set.seed()])
+#'   beforehand to get reproducible results.
 #'
 #' @references Lucon, E. (2019). Use and validation of the slope determination
 #'   by the analysis of residuals (SDAR) algorithm (NIST TN 2050; p. NIST TN
@@ -352,10 +353,7 @@ sdarr_execute.lazy <- function(prepared_data,
 #'   of Fit for the Linear Part of a Test Record. Journal of Testing and
 #'   Evaluation - J TEST EVAL, 39. https://doi.org/10.1520/JTE103038
 #'
-#' @param data Data record to analyze. Labels of the data columns will be used
-#'   as units.
-#'
-#' @param x,y Use tidy selection to specify x & y within the data.
+#' @inheritParams sdarr
 #'
 #' @param fit.rep Repetitions of random sub-sampling and fitting.
 #'
@@ -369,25 +367,14 @@ sdarr_execute.lazy <- function(prepared_data,
 #' @param quality_penalty Factor to down-weight fits with inferior data- and
 #'   fit-quality metrics.
 #'
-#' @param enforce_subsampling Set to TRUE, to use sub-sampling method even when
-#'   it is computationally more expensive than the standard SDAR-algorithm.
-#'
-#' @param verbose Give informational messages during computation defaults to
-#'   "report" to only show a summarizing information set to "all" to also give
-#'   messages from the individual steps set to "none" to be quiet. Can be
-#'   abbreviated.
-#'
-#' @param showPlots Show plots during computation defaults to "report" to only
-#'   show the plot of the final fit set to "all" to also show plots from the
-#'   individual steps set to "none" to be quiet. Can be abbreviated.
-#'
-#' @param savePlots Give plot functions with the result.
+#' @param enforce_subsampling Set to `TRUE`, to use sub-sampling method even
+#'   when it is computationally more expensive than the standard SDAR-algorithm.
 #'
 #' @seealso [sdarr()] for the standard SDAR-algorithm.
 #'
 #' @returns A list containing a data-frame with the results of the final fit, a
-#'   list with the quality- and fit-metrics, and a list containing the crated
-#'   plot-functions (if savePlots was set to TRUE).
+#'   list with the quality- and fit-metrics, and a list containing the
+#'   <[`crated`][crate]> plot-functions (if `savePlots = TRUE`).
 #'
 #' @export
 sdarr.lazy <- function(data, x, y, fit.rep = 5,
