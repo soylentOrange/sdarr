@@ -14,7 +14,7 @@ painfully slow for test data with high resolution."><!-- mathjax --><script src=
     
     <a class="navbar-brand me-2" href="../index.html">sdarr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -74,7 +74,7 @@ as units.</p></dd>
 
 
 <dt>x, y</dt>
-<dd><p>Use &lt;<code>tidy-selections</code>&gt; to specify x and y within
+<dd><p>Use &lt;<code><a href="https://dplyr.tidyverse.org/reference/dplyr_tidy_select.html" class="external-link">tidy-selections</a></code>&gt; to specify x and y within
 the data record.</p></dd>
 
 
@@ -96,7 +96,7 @@ later use.</p></dd>
 
 <p>A list containing a data-frame with the results of the final fit,
 lists with the quality- and fit-metrics, and a list containing the
-&lt;<code>crated</code>&gt; plot-functions (if <code>savePlots = TRUE</code>).</p>
+&lt;<code><a href="https://rdrr.io/pkg/carrier/man/crate.html" class="external-link">crated</a></code>&gt; plot-functions (if <code>savePlots = TRUE</code>).</p>
     </div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
@@ -141,7 +141,7 @@ SDAR-algorithm.</p></div>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># use sdarr() to analyze the synthetic test record</span></span></span>
 <span class="r-in"><span><span class="co"># will print a report and give a plot of the final fit</span></span></span>
-<span class="r-in"><span><span class="fu">sdarr</span><span class="op">(</span><span class="va">Al_6060_T66</span>, <span class="va">strain</span>, <span class="va">stress</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu">sdarr</span><span class="op">(</span><span class="va">Al_6060_T66</span>, <span class="va">strain</span>, <span class="va">stress</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Determination of Slope in the Linear Region of a Test Record:</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> SDAR-algorithm</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   Data Quality Metric: Digital Resolution</span>
@@ -179,115 +179,6 @@ SDAR-algorithm.</p></div>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>       True Intercept:          0.000123506433826068 MPa</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>       y-Range:                 0 MPa - 74.0374755859375 MPa</span>
 <span class="r-plt img"><img src="sdarr-1.png" alt="" width="700" height="433"></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $sdar</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   finalSlope finalSlope.conf.low finalSlope.conf.high trueIntercept</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1   68015.76            68012.32              68019.2  0.0001235064</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   trueIntercept.conf.low trueIntercept.conf.high y.lowerBound y.upperBound</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1           -0.002050679             0.002297692            0     74.03748</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   x.lowerBound x.upperBound Num.Obs.fit Num.Obs.normalized passed.check</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1            0  0.001088623          50                 85         TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   passed.check.data passed.check.fit</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1              TRUE             TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Data_Quality_Metrics</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Data_Quality_Metrics$passed.check</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Data_Quality_Metrics$Num.Obs.normalized</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 85</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Data_Quality_Metrics$digitalResolution</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Data_Quality_Metrics$digitalResolution$passed.check</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Data_Quality_Metrics$digitalResolution$x</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Data_Quality_Metrics$digitalResolution$x$Relative_resolution</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.3333333</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Data_Quality_Metrics$digitalResolution$x$Percent_at_this_resolution</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Data_Quality_Metrics$digitalResolution$x$Percent_in_zeroth_bin</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 100</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Data_Quality_Metrics$digitalResolution$x$passed.check</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Data_Quality_Metrics$digitalResolution$y</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Data_Quality_Metrics$digitalResolution$y$Relative_resolution</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.3333333</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Data_Quality_Metrics$digitalResolution$y$Percent_at_this_resolution</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 14.45783</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Data_Quality_Metrics$digitalResolution$y$Percent_in_zeroth_bin</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 85.54217</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Data_Quality_Metrics$digitalResolution$y$passed.check</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Data_Quality_Metrics$Noise</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Data_Quality_Metrics$Noise$passed.check</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Data_Quality_Metrics$Noise$x</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Data_Quality_Metrics$Noise$x$Relative_noise</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1.108679e-14</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Data_Quality_Metrics$Noise$x$passed.check</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Data_Quality_Metrics$Noise$y</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Data_Quality_Metrics$Noise$y$Relative_noise</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.1802686</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Data_Quality_Metrics$Noise$y$passed.check</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Fit_Quality_Metrics</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Fit_Quality_Metrics$passed.check</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Fit_Quality_Metrics$Curvature</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Fit_Quality_Metrics$Curvature$first_quartile</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Fit_Quality_Metrics$Curvature$first_quartile$relative_residual_slope</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.005045454</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Fit_Quality_Metrics$Curvature$first_quartile$Number_of_points</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 13</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Fit_Quality_Metrics$Curvature$first_quartile$passed.check</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Fit_Quality_Metrics$Curvature$fourth_quartile</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Fit_Quality_Metrics$Curvature$fourth_quartile$relative_residual_slope</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -0.006406177</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Fit_Quality_Metrics$Curvature$fourth_quartile$Number_of_points</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 13</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Fit_Quality_Metrics$Curvature$fourth_quartile$passed.check</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Fit_Quality_Metrics$Fit_range</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Fit_Quality_Metrics$Fit_range$relative_fit_range</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.6617512</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Fit_Quality_Metrics$Fit_range$passed.check</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

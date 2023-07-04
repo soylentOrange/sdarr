@@ -20,7 +20,7 @@ estimate for the fit-range within the data."><!-- mathjax --><script src="https:
     
     <a class="navbar-brand me-2" href="../index.html">sdarr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -95,7 +95,7 @@ as units.</p></dd>
 
 
 <dt>x, y</dt>
-<dd><p>Use &lt;<code>tidy-selections</code>&gt; to specify x and y within
+<dd><p>Use &lt;<code><a href="https://dplyr.tidyverse.org/reference/dplyr_tidy_select.html" class="external-link">tidy-selections</a></code>&gt; to specify x and y within
 the data record.</p></dd>
 
 
@@ -142,7 +142,7 @@ later use.</p></dd>
 
 <p>A list containing a data-frame with the results of the final fit, a
 list with the quality- and fit-metrics, and a list containing the
-&lt;<code>crated</code>&gt; plot-functions (if <code>savePlots = TRUE</code>).</p>
+&lt;<code><a href="https://rdrr.io/pkg/carrier/man/crate.html" class="external-link">crated</a></code>&gt; plot-functions (if <code>savePlots = TRUE</code>).</p>
     </div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
@@ -169,6 +169,77 @@ Evaluation - J TEST EVAL, 39. https://doi.org/10.1520/JTE103038</p>
     <div class="dont-index"><p><code><a href="sdarr.html">sdarr()</a></code> for the standard SDAR-algorithm.</p></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Synthesize a test record resembling Al 6060 T66</span></span></span>
+<span class="r-in"><span><span class="co"># (Values according to Metallic Material Properties</span></span></span>
+<span class="r-in"><span><span class="co"># Development and Standardization (MMPDS) Handbook).</span></span></span>
+<span class="r-in"><span><span class="co"># Explicitly set names to "strain" and "stress",</span></span></span>
+<span class="r-in"><span><span class="co"># set effective number of bits in the x-data to 12</span></span></span>
+<span class="r-in"><span><span class="co"># to limit the number of data points.</span></span></span>
+<span class="r-in"><span><span class="va">Al_6060_T66</span> <span class="op">&lt;-</span> <span class="fu"><a href="synthesize_test_data.html">synthesize_test_data</a></span><span class="op">(</span>slope <span class="op">=</span> <span class="fl">68000</span>,</span></span>
+<span class="r-in"><span>                                    yield.y <span class="op">=</span> <span class="fl">160</span>,</span></span>
+<span class="r-in"><span>                                    ultimate.y <span class="op">=</span> <span class="fl">215</span>,</span></span>
+<span class="r-in"><span>                                    ultimate.x <span class="op">=</span> <span class="fl">0.091</span>,</span></span>
+<span class="r-in"><span>                                    x.name <span class="op">=</span> <span class="st">"strain"</span>,</span></span>
+<span class="r-in"><span>                                    y.name <span class="op">=</span> <span class="st">"stress"</span>,</span></span>
+<span class="r-in"><span>                                    enob.x <span class="op">=</span> <span class="fl">12</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># use sdarr.lazy() to analyze the synthetic test record</span></span></span>
+<span class="r-in"><span><span class="co"># will print a report and give a plot of the final fit</span></span></span>
+<span class="r-in"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu">sdarr.lazy</span><span class="op">(</span><span class="va">Al_6060_T66</span>, <span class="va">strain</span>, <span class="va">stress</span>,</span></span>
+<span class="r-in"><span>                     enforce_subsampling <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Determination of Slope in the Linear Region of a Test Record:</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Failed to determine optimum size by given cutoff_probability.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   Failed to satisfy cutoff_probability. Lowering our expectations...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   lazy algorithm requires more fits than standard SDAR-algorithm:  </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     12075 vs. 2415 fits.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   Anyways, random sub-sampling will be used...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Random sub-sampling modification of the SDAR-algorithm</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   Random sub-sampling information:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       85 points of 85 points in the normalized range were used.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       100 % of sub-sampled normalized ranges passed the data quality checks.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       100 % of linear regressions passed the fit quality checks.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       100 % of linear regressions passed all quality checks.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   Data Quality Metric: Digital Resolution</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     x</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       Relative x-Resolution:   0.333333333333333</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       % at this resolution:    0</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       % in zeroth bin:         100</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       --&gt; pass</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     y</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       Relative y-Resolution:   0.333333333333333</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       % at this resolution:    14.4578313253012</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       % in zeroth bin:         85.5421686746988</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       --&gt; pass</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   Data Quality Metric: Noise</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     x</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       Relative x-Noise:        1.10867931147058e-14</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       --&gt; pass</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     y</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       Relative y-Noise:        0.180268584275293</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       --&gt; pass</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   Fit Quality Metric: Curvature</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     1st Quartile</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       Relative Residual Slope: 0.00504962510896092</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       Number of Points:        13</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       --&gt; pass</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     4th Quartile</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       Relative Residual Slope: -0.00640200850747487</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       Number of Points:        13</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       --&gt; pass</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   Fit Quality Metric: Fit Range</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       relative fit range:      0.675520173692781</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       --&gt; pass</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   Un-normalized fit</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       Final Slope:             68015.7490468715 MPa</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       True Intercept:          0.000133903659122304 MPa</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       y-Range:                 1.50909423828125 MPa - 74.0374755859375 MPa</span>
+<span class="r-plt img"><img src="sdarr.lazy-1.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
 
