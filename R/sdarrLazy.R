@@ -380,21 +380,20 @@ sdarr_execute.lazy <- function(prepared_data,
 #' # Synthesize a test record resembling Al 6060 T66
 #' # (Values according to Metallic Material Properties
 #' # Development and Standardization (MMPDS) Handbook).
-#' # Explicitly set names to "strain" and "stress",
-#' # set effective number of bits in the x-data to 12
-#' # to limit the number of data points.
+#' # Explicitly set names to "strain" and "stress".
 #' Al_6060_T66 <- synthesize_test_data(slope = 68000,
 #'                                     yield.y = 160,
 #'                                     ultimate.y = 215,
 #'                                     ultimate.x = 0.091,
 #'                                     x.name = "strain",
-#'                                     y.name = "stress",
-#'                                     enob.x = 12)
+#'                                     y.name = "stress")
 #'
 #' # use sdarr.lazy() to analyze the synthetic test record
+#' # (using relaxed settings for the noise-free synthetic data)
 #' # will print a report and give a plot of the final fit
 #' result <- sdarr.lazy(Al_6060_T66, strain, stress,
-#'                      enforce_subsampling = TRUE)
+#'                      cutoff_probability = 0.8,
+#'                      fit.rep = 2)
 #'
 #' @export
 sdarr.lazy <- function(data, x, y, fit.rep = 5,
