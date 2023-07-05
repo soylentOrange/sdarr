@@ -36,10 +36,10 @@ optimum_size_for_subsampling <- function(data.normalized,
   normalized.ranges <- seq.int(50, nrow(data.normalized), (nrow(data.normalized) - 50) / 99) %>%
     round(0) %>%
     {
-      data.frame(idx = seq.int(length(.)), range.size = .)
+      data.frame("idx" = seq.int(length(.)), "range.size" = .)
     } %>%
-    tidyr::nest(.by = idx, .key = "range.size") %>%
-    dplyr::mutate(otr.idcs = purrr::map(range.size, carrier::crate(
+    tidyr::nest(.by = "idx", .key = "range.size") %>%
+    dplyr::mutate("otr.idcs" = purrr::map(.data$range.size, carrier::crate(
       function(value) {
         # satisfy pipe addiction...
         `%>%` <- magrittr::`%>%`
@@ -58,7 +58,7 @@ optimum_size_for_subsampling <- function(data.normalized,
       otr.idx = data.normalized$otr.idx %>%
         unlist(TRUE, FALSE)
     ))) %>%
-    dplyr::mutate(data.quality.passed = furrr::future_map(otr.idcs, carrier::crate(
+    dplyr::mutate("data.quality.passed" = furrr::future_map(.$otr.idcs, carrier::crate(
       function(value) {
         # satisfy pipe addiction...
         `%>%` <- magrittr::`%>%`
@@ -79,9 +79,9 @@ optimum_size_for_subsampling <- function(data.normalized,
     ),
     .options = furrr::furrr_options(globals = FALSE)
     )) %>%
-    dplyr::select(idx, range.size, data.quality.passed) %>%
-    tidyr::unnest(c(range.size, data.quality.passed)) %>%
-    dplyr::select(range.size, data.quality.passed) %>%
+    dplyr::select(c("idx", "range.size", "data.quality.passed")) %>%
+    tidyr::unnest(cols = c("range.size", "data.quality.passed")) %>%
+    dplyr::select(c("range.size", "data.quality.passed")) %>%
     data.frame()
 
   # find logistic regression of data quality passed over sub-sampled range-size
@@ -91,7 +91,8 @@ optimum_size_for_subsampling <- function(data.normalized,
   )
 
   # predict probability of passing data quality check over all possible range-sizes
-  normalized.ranges.modelpredictions <- data.frame(range.size = seq.int(50, nrow(data.normalized), 1)) %>%
+  normalized.ranges.modelpredictions <- data.frame(
+    "range.size" = seq.int(50, nrow(data.normalized), 1)) %>%
     {
       probs <- stats::predict(normalized.ranges.model,
         newdata = .,

@@ -98,7 +98,7 @@ sdarr_execute.lazy <- function(prepared_data,
     dplyr::filter(.data$offset_raise_required == FALSE) %>%
     dplyr::mutate("norm.residual" = dplyr::case_when(
       .data$norm.residual < 10 * .Machine$double.eps ~ 10 * .Machine$double.eps,
-      TRUE ~ norm.residual
+      TRUE ~ .data$norm.residual
     ))
 
   # calculate success rate of quality checks
@@ -131,27 +131,28 @@ sdarr_execute.lazy <- function(prepared_data,
   # get numerically stable fits and add weights
   optimum_fits <- optimum_fits %>%
     # penalize by fit quality metrics
-    dplyr::mutate(fit.quality.penalty = 1.0) %>%
-    dplyr::mutate(fit.quality.penalty = dplyr::case_when(
-      fit.quality.passed.Fit_range == FALSE ~ fit.quality.penalty * quality_penalty,
-      TRUE ~ fit.quality.penalty
+    dplyr::mutate("fit.quality.penalty" = 1.0) %>%
+    dplyr::mutate("fit.quality.penalty" = dplyr::case_when(
+      fit.quality.passed.Fit_range == FALSE ~ .data$fit.quality.penalty * quality_penalty,
+      TRUE ~ .data$fit.quality.penalty
     )) %>%
-    dplyr::mutate(fit.quality.penalty = dplyr::case_when(
-      fit.quality.passed.fourth_quartile == FALSE ~ fit.quality.penalty * quality_penalty,
-      TRUE ~ fit.quality.penalty
+    dplyr::mutate("fit.quality.penalty" = dplyr::case_when(
+      .data$fit.quality.passed.fourth_quartile == FALSE ~ .data$fit.quality.penalty * quality_penalty,
+      TRUE ~ .data$fit.quality.penalty
     )) %>%
-    dplyr::mutate(fit.quality.penalty = dplyr::case_when(
-      fit.quality.passed.first_quartile == FALSE ~ fit.quality.penalty * quality_penalty,
-      TRUE ~ fit.quality.penalty
+    dplyr::mutate("fit.quality.penalty" = dplyr::case_when(
+      .data$fit.quality.passed.first_quartile == FALSE ~ .data$fit.quality.penalty * quality_penalty,
+      TRUE ~ .data$fit.quality.penalty
     )) %>%
-    dplyr::mutate(quality.penalty = fit.quality.penalty * data.quality.penalty) %>%
+    dplyr::mutate("quality.penalty" = .data$fit.quality.penalty * .data$data.quality.penalty) %>%
     dplyr::mutate("weight" = .data$quality.penalty / .data$norm.residual) %>%
-    dplyr::select(-c("offset_raise_required",
-                     "data.quality.penalty",
-                     "fit.quality.penalty",
-                     "quality.penalty",
-                     "offset_raise.weighed")
-    )
+    dplyr::select(-c(
+      "offset_raise_required",
+      "data.quality.penalty",
+      "fit.quality.penalty",
+      "quality.penalty",
+      "offset_raise.weighed"
+    ))
 
   # re-do normalization without de-noising
   if (denoise.x || denoise.y) {
@@ -175,24 +176,22 @@ sdarr_execute.lazy <- function(prepared_data,
 
   # Un-normalize fits
   optimum_fits <- optimum_fits %>%
-    dplyr::mutate(y.min = normalized_data$data.normalized[otr.idx.start, "y.normalized"]) %>%
-    dplyr::mutate(y.max = normalized_data$data.normalized[otr.idx.end, "y.normalized"]) %>%
-    dplyr::mutate(x.min = normalized_data$data.normalized[otr.idx.start, "x.normalized"]) %>%
-    dplyr::mutate(x.max = normalized_data$data.normalized[otr.idx.end, "x.normalized"]) %>%
-    dplyr::mutate(y.lowerBound = y.min * y.tangent + y.shift) %>%
-    dplyr::mutate(y.upperBound = y.max * y.tangent + y.shift) %>%
-    dplyr::mutate(x.lowerBound = x.min * x.tangent + x.shift) %>%
-    dplyr::mutate(x.upperBound = x.max * x.tangent + x.shift)
+    dplyr::mutate(y.min = normalized_data$data.normalized[.data$otr.idx.start, "y.normalized"]) %>%
+    dplyr::mutate(y.max = normalized_data$data.normalized[.data$otr.idx.end, "y.normalized"]) %>%
+    dplyr::mutate(x.min = normalized_data$data.normalized[.data$otr.idx.start, "x.normalized"]) %>%
+    dplyr::mutate(x.max = normalized_data$data.normalized[.data$otr.idx.end, "x.normalized"]) %>%
+    dplyr::mutate(y.lowerBound = .data$y.min * y.tangent + y.shift) %>%
+    dplyr::mutate(y.upperBound = .data$y.max * y.tangent + y.shift) %>%
+    dplyr::mutate(x.lowerBound = .data$x.min * x.tangent + x.shift) %>%
+    dplyr::mutate(x.upperBound = .data$x.max * x.tangent + x.shift)
 
   # use linear regression to find weighed means of results
   # (otr.idx.start and .end, y and x bounds)
   # will be used for reporting the results and one final fit
   weighed.results <- optimum_fits %>%
-    dplyr::select(
-      weight, otr.idx.start, otr.idx.end,
-      y.lowerBound, y.upperBound,
-      x.lowerBound, x.upperBound
-    ) %>%
+    dplyr::select(c("weight", "otr.idx.start", "otr.idx.end",
+      "y.lowerBound", "y.upperBound",
+      "x.lowerBound", "x.upperBound")) %>%
     as.list() %>%
     {
       res <- .
@@ -376,10 +375,10 @@ sdarr_execute.lazy <- function(prepared_data,
 #'   algorithm will use several random sub-samples of the data to find the best
 #'   estimate for the fit-range within the data.
 #'
-#' @note The function can use parallel processing via the
-#'   [`furrr-package`][furrr::furrr-package]. To use this feature, set up a plan
-#'   other than the default sequential strategy beforehand. As random values are
-#'   drawn, set a random seed beforehand to get reproducible results.
+#' @note The function can use parallel processing via the furrr-package. To use
+#'   this feature, set up a plan other than the default sequential strategy
+#'   beforehand. As random values are drawn, set a random seed beforehand to get
+#'   reproducible results.
 #'
 #' @references Lucon, E. (2019). Use and validation of the slope determination
 #'   by the analysis of residuals (SDAR) algorithm (NIST TN 2050; p. NIST TN
@@ -413,9 +412,9 @@ sdarr_execute.lazy <- function(prepared_data,
 #'
 #' @seealso [sdarr()] for the standard SDAR-algorithm.
 #'
-#' @returns A list containing a data-frame with the results of the final fit, a
-#'   list with the quality- and fit-metrics, and a list containing the
-#'   crated plot-functions (if `savePlots = TRUE`).
+#' @returns A list containing a data-frame with the results of the final fit,
+#'   lists with the quality- and fit-metrics, and a list containing the crated
+#'   plot-functions (if `savePlots = TRUE`).
 #'
 #' @examples
 #' # Synthesize a test record resembling Al 6060 T66

@@ -199,8 +199,8 @@ assemble_report <- function(normalized_data,
 
         # add the fit
         data.fit <- plot.data %>%
-          dplyr::filter(y.fit <= max(.data$y.data)) %>%
-          dplyr::filter(y.fit >= min(.data$y.data))
+          dplyr::filter(.data$y.fit <= max(.data$y.data)) %>%
+          dplyr::filter(.data$y.fit >= min(.data$y.data))
         graphics::lines(data.fit$x.data, data.fit$y.fit,
           type = "l",
           lwd = 1.25,

@@ -57,7 +57,7 @@ find_linear_regressions.lazy <- function(data.normalized, nCandidates) {
       )
     }, Nmin = Nmin))) %>%
     dplyr::select(c("round", "limits")) %>%
-    tidyr::unnest(cols = limits) %>%
+    tidyr::unnest(cols = "limits") %>%
     dplyr::select(c("start", "end")) %>%
     dplyr::mutate("fit.idx" = seq.int(nrow(.))) %>%
     tidyr::nest(.by = "fit.idx", .key = "bounds") %>%

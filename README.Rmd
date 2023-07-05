@@ -170,7 +170,7 @@ Al_6060_T66.result$plots$final.fit()
     geom_line() +
     geom_line(
       data = plot.data %>%
-        dplyr::filter(.data$y.fit <= y.data.max),
+        dplyr::filter(y.fit <= y.data.max),
       aes(x = x.data, y = y.fit, color = "fit (sdarr)")
     ) +
     theme_bw() +

@@ -155,9 +155,9 @@ sdarr_execute <- function(prepared_data, otr.info,
 #'   use numerous linear regressions (`.lm.fit()` from the stats-package) and
 #'   can be painfully slow for test data with high resolution.
 #'
-#' @note The function can use parallel processing via the
-#'   [`furrr-package`][furrr::furrr-package]. To use this feature, set up a plan
-#'   other than the default sequential strategy beforehand.
+#' @note The function can use parallel processing via the furrr-package. To use
+#'   this feature, set up a plan other than the default sequential strategy
+#'   beforehand.
 #'
 #' @references Lucon, E. (2019). Use and validation of the slope determination
 #'   by the analysis of residuals (SDAR) algorithm (NIST TN 2050; p. NIST TN
@@ -215,8 +215,8 @@ sdarr_execute <- function(prepared_data, otr.info,
 #' }
 #'
 #' @returns A list containing a data-frame with the results of the final fit,
-#'   lists with the quality- and fit-metrics, and a list containing the
-#'   <[`crated`][carrier::crate]> plot-functions (if `savePlots = TRUE`).
+#'   lists with the quality- and fit-metrics, and a list containing the crated
+#'   plot-functions (if `savePlots = TRUE`).
 #'
 #' @export
 sdarr <- function(data,

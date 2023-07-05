@@ -49,9 +49,9 @@ Set to \code{"none"} to be quiet. Can be abbreviated.}
 later use.}
 }
 \value{
-A list containing a data-frame with the results of the final fit, a
-list with the quality- and fit-metrics, and a list containing the
-<\code{\link[carrier:crate]{crated}}> plot-functions (if \code{savePlots = TRUE}).
+A list containing a data-frame with the results of the final fit,
+lists with the quality- and fit-metrics, and a list containing the crated
+plot-functions (if \code{savePlots = TRUE}).
 }
 \description{
 Run a random sub-sampling modification of the SDAR algorithm as
@@ -62,11 +62,10 @@ algorithm will use several random sub-samples of the data to find the best
 estimate for the fit-range within the data.
 }
 \note{
-The function can use parallel processing via the
-\code{\link[furrr:furrr-package]{furrr-package}}. To use this feature, set up a plan
-other than the default sequential strategy beforehand. As random values are
-drawn, set a random seed (see: \code{\link[=set.seed]{set.seed()}}) beforehand to get reproducible
-results.
+The function can use parallel processing via the furrr-package. To use
+this feature, set up a plan other than the default sequential strategy
+beforehand. As random values are drawn, set a random seed beforehand to get
+reproducible results.
 }
 \examples{
 # Synthesize a test record resembling Al 6060 T66

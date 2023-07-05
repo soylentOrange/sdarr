@@ -202,7 +202,8 @@ check_data_quality.resolution <- function(data.normalized,
   if (savePlots) {
     hist.x <- carrier::crate(
       function(value) {
-        graphics::hist(x = ddx.scaled,
+        graphics::hist(
+          x = ddx.scaled,
           breaks,
           main = plot.main,
           xlab = plot.xlab
@@ -216,7 +217,8 @@ check_data_quality.resolution <- function(data.normalized,
 
     hist.y <- carrier::crate(
       function(value) {
-        graphics::hist(x = ddy.scaled,
+        graphics::hist(
+          x = ddy.scaled,
           breaks,
           main = plot.main,
           xlab = plot.xlab
