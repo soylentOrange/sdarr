@@ -73,12 +73,14 @@ results.
 # (Values according to Metallic Material Properties
 # Development and Standardization (MMPDS) Handbook).
 # Explicitly set names to "strain" and "stress".
+
 Al_6060_T66 <- synthesize_test_data(slope = 68000,
                                     yield.y = 160,
                                     ultimate.y = 215,
                                     ultimate.x = 0.091,
                                     x.name = "strain",
                                     y.name = "stress")
+
 
 # use sdarr.lazy() to analyze the synthetic test record
 # (using relaxed settings for the noise-free synthetic data)

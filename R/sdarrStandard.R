@@ -183,6 +183,7 @@ sdarr_execute <- function(prepared_data, otr.info,
 #' # Explicitly set names to "strain" and "stress",
 #' # set effective number of bits in the x-data to 12
 #' # to limit the number of data points.
+#'
 #' Al_6060_T66 <- synthesize_test_data(slope = 68000,
 #'                                     yield.y = 160,
 #'                                     ultimate.y = 215,
@@ -191,9 +192,12 @@ sdarr_execute <- function(prepared_data, otr.info,
 #'                                     y.name = "stress",
 #'                                     enob.x = 12)
 #'
+#'
 #' # use sdarr() to analyze the synthetic test record
 #' # will print a report and give a plot of the final fit
+#' \donttest{
 #' result <- sdarr(Al_6060_T66, strain, stress)
+#' }
 #'
 #' @returns A list containing a data-frame with the results of the final fit,
 #'   lists with the quality- and fit-metrics, and a list containing the

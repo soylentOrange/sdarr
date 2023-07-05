@@ -40,23 +40,22 @@ A plot of the Reference Data Set (after downloading, unpacking and labelling) is
 
 ```{r Reference_Data_Set, message=FALSE, warning=FALSE, include=FALSE, echo=FALSE}
 # Get Data from Reference Data Set E3076-DS1(2018)
-sdarr.get_DS1.data <- carrier::crate(function(localFileName = NULL) {
+sdarr.get_DS1.data <- function() {
   # satisfy pipe addiction...
   `%>%` <- magrittr::`%>%`
   
-  # local file name supplied?
-  filename <- localFileName
-  if(is.null(filename)) {
-    # otherwise download file from the Internet 
-    utils::download.file("https://web.archive.org/web/20190905162007/https://www.astm.org/COMMIT/E3076-DS1(2018).zip",
-                         "E3076_DS1_2018.zip")
+  # download file from the Internet into the temp-folder 
+  Reference_Data_Set.zip <- tempfile(fileext = ".zip")
+  utils::download.file(
+    "https://web.archive.org/web/20190905162007/https://www.astm.org/COMMIT/E3076-DS1(2018).zip",
+    destfile = Reference_Data_Set.zip)
     
-    # Extract the Zip Archive
-    filename <- utils::unzip("E3076_DS1_2018.zip")
-  }
+  # Extract the Zip Archive
+  Reference_Data_Set.file <- utils::unzip(Reference_Data_Set.zip, 
+                                          exdir = tempdir())
   
   # read Data Set from unzipped file
-  E3076_DS1_2018.rowwise <- readr::read_csv(filename,
+  E3076_DS1_2018.rowwise <- readr::read_csv(Reference_Data_Set.file,
                                             col_names = FALSE,
                                             trim_ws = FALSE,
                                             show_col_types = FALSE) %>%
@@ -73,13 +72,13 @@ sdarr.get_DS1.data <- carrier::crate(function(localFileName = NULL) {
     dplyr::filter(data.end) %>% {.$rownum %>% as.numeric}
   
   # read the names and units from test record
-  E3076_DS1_2018.names <- readr::read_table(filename, 
+  E3076_DS1_2018.names <- readr::read_table(Reference_Data_Set.file, 
                                       show_col_types = FALSE,
                                       skip = data.startIdx + 3, 
                                       n_max = 1)
   
   # read the data-points from the test record
-  E3076_DS1_2018.data <- readr::read_table(filename,
+  E3076_DS1_2018.data <- readr::read_table(Reference_Data_Set.file,
                                            col_names = FALSE,
                                            show_col_types = FALSE,
                                            skip = data.startIdx + 5, 
@@ -87,14 +86,17 @@ sdarr.get_DS1.data <- carrier::crate(function(localFileName = NULL) {
     magrittr::set_names(E3076_DS1_2018.names %>% names) %>% 
     labelled::set_variable_labels(.labels = E3076_DS1_2018.names) %>%
     magrittr::set_attr("spec", NULL)
-})
+  
+  # remove temporary files
+  unlink(Reference_Data_Set.file)
+  unlink(Reference_Data_Set.zip)
+  
+  # return the read and parsed data
+  return(E3076_DS1_2018.data)
+}
 
 # Get Data from Reference Data Set E3076-DS1(2018)
-E3076_DS1_2018 <- if(!file.exists("E3076-DS1(2018).txt")) {
-  sdarr.get_DS1.data()
-} else {
-  sdarr.get_DS1.data("E3076-DS1(2018).txt")
-}
+E3076_DS1_2018 <- sdarr.get_DS1.data()
 ```
 
 ```{r plot-Reference_Data_Set, message=FALSE, warning=FALSE, fig.height=4, fig.width=6}

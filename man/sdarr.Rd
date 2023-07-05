@@ -42,6 +42,7 @@ other than the default sequential strategy beforehand.
 # Explicitly set names to "strain" and "stress",
 # set effective number of bits in the x-data to 12
 # to limit the number of data points.
+
 Al_6060_T66 <- synthesize_test_data(slope = 68000,
                                     yield.y = 160,
                                     ultimate.y = 215,
@@ -50,9 +51,12 @@ Al_6060_T66 <- synthesize_test_data(slope = 68000,
                                     y.name = "stress",
                                     enob.x = 12)
 
+
 # use sdarr() to analyze the synthetic test record
 # will print a report and give a plot of the final fit
+\donttest{
 result <- sdarr(Al_6060_T66, strain, stress)
+}
 
 }
 \references{
