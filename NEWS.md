@@ -2,6 +2,7 @@
 
 * Fixed typos.
 * Use tidyverse_style
+* Reduced use of globals to minimum (?)
 * Modified (lengthy) example of sdarr() with "donttest". 
 
 # sdarr 0.4.4
