@@ -1,6 +1,7 @@
 # sdarr 0.4.5
 
 * Fixed typos.
+* Use tidyverse_style
 * Modified (lengthy) example of sdarr() with "donttest". 
 
 # sdarr 0.4.4

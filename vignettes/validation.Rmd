@@ -23,10 +23,11 @@ library(stats)
 library(ggplot2)
 library(plotly)
 
-# setup multisession calculations with a maximum of 8 cores 
+# setup multisession calculations with a maximum of 8 cores
 # (or however many cores are available...)
-future::plan(future::multisession, 
-             workers = min(c(parallelly::availableCores(), 8)))
+future::plan(future::multisession,
+  workers = min(c(parallelly::availableCores(), 8))
+)
 ```
 
 # Validation of sdarr and sdarr.lazy
@@ -43,54 +44,65 @@ A plot of the Reference Data Set (after downloading, unpacking and labelling) is
 sdarr.get_DS1.data <- function() {
   # satisfy pipe addiction...
   `%>%` <- magrittr::`%>%`
-  
-  # download file from the Internet into the temp-folder 
+
+  # download file from the Internet into the temp-folder
   Reference_Data_Set.zip <- tempfile(fileext = ".zip")
   utils::download.file(
     "https://web.archive.org/web/20190905162007/https://www.astm.org/COMMIT/E3076-DS1(2018).zip",
-    destfile = Reference_Data_Set.zip)
-    
+    destfile = Reference_Data_Set.zip
+  )
+
   # Extract the Zip Archive
-  Reference_Data_Set.file <- utils::unzip(Reference_Data_Set.zip, 
-                                          exdir = tempdir())
-  
+  Reference_Data_Set.file <- utils::unzip(Reference_Data_Set.zip,
+    exdir = tempdir()
+  )
+
   # read Data Set from unzipped file
   E3076_DS1_2018.rowwise <- readr::read_csv(Reference_Data_Set.file,
-                                            col_names = FALSE,
-                                            trim_ws = FALSE,
-                                            show_col_types = FALSE) %>%
-    dplyr::mutate(rownum = dplyr::row_number()) 
+    col_names = FALSE,
+    trim_ws = FALSE,
+    show_col_types = FALSE
+  ) %>%
+    dplyr::mutate(rownum = dplyr::row_number())
 
   # find start of the data section
   data.startIdx <- E3076_DS1_2018.rowwise %>%
-    dplyr::mutate(data.start = stringr::str_detect(X1, stringr::coll("<Data>"))) %>%
-    dplyr::filter(data.start) %>% {.$rownum %>% as.numeric}
-  
-  # find end of the data section 
+    dplyr::mutate(data.start = stringr::str_detect(.data$X1, stringr::coll("<Data>"))) %>%
+    dplyr::filter(data.start) %>%
+    {
+      .$rownum %>% as.numeric()
+    }
+
+  # find end of the data section
   data.endIdx <- E3076_DS1_2018.rowwise %>%
-    dplyr::mutate(data.end = stringr::str_detect(X1, stringr::coll("</Data>"))) %>%
-    dplyr::filter(data.end) %>% {.$rownum %>% as.numeric}
-  
+    dplyr::mutate(data.end = stringr::str_detect(.data$X1, stringr::coll("</Data>"))) %>%
+    dplyr::filter(data.end) %>%
+    {
+      .$rownum %>% as.numeric()
+    }
+
   # read the names and units from test record
-  E3076_DS1_2018.names <- readr::read_table(Reference_Data_Set.file, 
-                                      show_col_types = FALSE,
-                                      skip = data.startIdx + 3, 
-                                      n_max = 1)
-  
+  E3076_DS1_2018.names <- readr::read_table(Reference_Data_Set.file,
+    show_col_types = FALSE,
+    skip = data.startIdx + 3,
+    n_max = 1
+  )
+
   # read the data-points from the test record
   E3076_DS1_2018.data <- readr::read_table(Reference_Data_Set.file,
-                                           col_names = FALSE,
-                                           show_col_types = FALSE,
-                                           skip = data.startIdx + 5, 
-                                           n_max = data.endIdx - data.startIdx - 5) %>%
-    magrittr::set_names(E3076_DS1_2018.names %>% names) %>% 
+    col_names = FALSE,
+    show_col_types = FALSE,
+    skip = data.startIdx + 5,
+    n_max = data.endIdx - data.startIdx - 5
+  ) %>%
+    magrittr::set_names(E3076_DS1_2018.names %>% names()) %>%
     labelled::set_variable_labels(.labels = E3076_DS1_2018.names) %>%
     magrittr::set_attr("spec", NULL)
-  
+
   # remove temporary files
   unlink(Reference_Data_Set.file)
   unlink(Reference_Data_Set.zip)
-  
+
   # return the read and parsed data
   return(E3076_DS1_2018.data)
 }
@@ -101,15 +113,20 @@ E3076_DS1_2018 <- sdarr.get_DS1.data()
 
 ```{r plot-Reference_Data_Set, message=FALSE, warning=FALSE, fig.height=4, fig.width=6}
 # plot of the data
-E3076_DS1_2018 %>% {
-  ggplot(data = ., aes(x = extensometer, y = force, 
-                       color = "E3076_DS1_2018")) +
-    geom_line() +
-    theme_bw() +
-    labs(title = "Plot of the Reference Data Set",
-       x = "extensometer (in mm)",
-       y = "force (in kN)")
-} %>% 
+E3076_DS1_2018 %>%
+  {
+    ggplot(data = ., aes(
+      x = extensometer, y = force,
+      color = "E3076_DS1_2018"
+    )) +
+      geom_line() +
+      theme_bw() +
+      labs(
+        title = "Plot of the Reference Data Set",
+        x = "extensometer (in mm)",
+        y = "force (in kN)"
+      )
+  } %>%
   ggplotly(dynamicTicks = TRUE) %>%
   config(displaylogo = FALSE, showSendToCloud = FALSE)
 ```
@@ -118,37 +135,44 @@ E3076_DS1_2018 %>% {
 
 ```{r sdarr_check, fig.height=4, fig.width=6}
 # Run the algorithm
-sdarr.results <- E3076_DS1_2018 %>% 
+sdarr.results <- E3076_DS1_2018 %>%
   sdarr(extensometer, force,
-        showPlots = "n",
-        savePlots = TRUE)
+    showPlots = "n",
+    savePlots = TRUE
+  )
 
 # show the plot of the final fit
-sdarr.results$plots$final.fit %>% {
-  
-  # tap the environment of the crated plot-function
-  plot.env <- rlang::fn_env(.)
-  
-  # get data and labels
-  plot.data <- plot.env$plot.data
-  plot.main <- plot.env$plot.main
-  plot.xlab <- plot.env$plot.xlab
-  plot.ylab <- plot.env$plot.ylab
-  y.data.max <- plot.data$y.data %>% max()
-  
-  # create the ggplot2
-  plot.data %>% ggplot(aes(x = x.data, 
-                           y = y.data, 
-                           color = "E3076_DS1_2018")) +
-    geom_line() +
-    geom_line(data = plot.data %>% 
-                dplyr::filter(y.fit <= y.data.max),
-              aes(x = x.data, y = y.fit, color = "fit (sdarr)")) +
-    theme_bw() +
-    labs(title = plot.main,
-       x = plot.xlab,
-       y = plot.ylab)
-} %>% 
+sdarr.results$plots$final.fit %>%
+  {
+    # tap the environment of the crated plot-function
+    plot.env <- rlang::fn_env(.)
+
+    # get data and labels
+    plot.data <- plot.env$plot.data
+    plot.main <- plot.env$plot.main
+    plot.xlab <- plot.env$plot.xlab
+    plot.ylab <- plot.env$plot.ylab
+    y.data.max <- plot.data$y.data %>% max()
+
+    # create the ggplot2
+    plot.data %>% ggplot(aes(
+      x = x.data,
+      y = y.data,
+      color = "E3076_DS1_2018"
+    )) +
+      geom_line() +
+      geom_line(
+        data = plot.data %>%
+          dplyr::filter(y.fit <= y.data.max),
+        aes(x = x.data, y = y.fit, color = "fit (sdarr)")
+      ) +
+      theme_bw() +
+      labs(
+        title = plot.main,
+        x = plot.xlab,
+        y = plot.ylab
+      )
+  } %>%
   ggplotly(dynamicTicks = TRUE) %>%
   config(displaylogo = FALSE, showSendToCloud = FALSE)
 ```
@@ -161,37 +185,44 @@ The results of the analysis using `sdarr()` are practically identical to the res
 ```{r sdarr.lazy_check, fig.height=4, fig.width=6}
 # Run the algorithm (after setting a random seed)
 set.seed(50041180)
-sdarr.lazy.results <- E3076_DS1_2018 %>% 
+sdarr.lazy.results <- E3076_DS1_2018 %>%
   sdarr.lazy(extensometer, force,
-             enforce_subsampling = TRUE,
-             showPlots = "n", savePlots = TRUE)
+    enforce_subsampling = TRUE,
+    showPlots = "n", savePlots = TRUE
+  )
 
 # show the plot of the final fit
-sdarr.lazy.results$plots$final.fit %>% {
-  
-  # tap the environment of the crated plot-function
-  plot.env <- rlang::fn_env(.)
-  
-  # get data and labels
-  plot.data <- plot.env$plot.data
-  plot.main <- plot.env$plot.main
-  plot.xlab <- plot.env$plot.xlab
-  plot.ylab <- plot.env$plot.ylab
-  y.data.max <- plot.data$y.data %>% max()
-  
-  # create the ggplot2
-  plot.data %>% 
-    ggplot(aes(x = x.data, y = y.data, color = "E3076_DS1_2018")) +
-    geom_line() +
-    geom_line(data = plot.data %>%
-                dplyr::filter(y.fit <= y.data.max),
-              aes(x = x.data, y = y.fit, 
-                  color = "fit (sdarr.lazy)")) +
-    theme_bw() +
-    labs(title = plot.main,
-       x = plot.xlab,
-       y = plot.ylab)
-} %>% 
+sdarr.lazy.results$plots$final.fit %>%
+  {
+    # tap the environment of the crated plot-function
+    plot.env <- rlang::fn_env(.)
+
+    # get data and labels
+    plot.data <- plot.env$plot.data
+    plot.main <- plot.env$plot.main
+    plot.xlab <- plot.env$plot.xlab
+    plot.ylab <- plot.env$plot.ylab
+    y.data.max <- plot.data$y.data %>% max()
+
+    # create the ggplot2
+    plot.data %>%
+      ggplot(aes(x = x.data, y = y.data, color = "E3076_DS1_2018")) +
+      geom_line() +
+      geom_line(
+        data = plot.data %>%
+          dplyr::filter(y.fit <= y.data.max),
+        aes(
+          x = x.data, y = y.fit,
+          color = "fit (sdarr.lazy)"
+        )
+      ) +
+      theme_bw() +
+      labs(
+        title = plot.main,
+        x = plot.xlab,
+        y = plot.ylab
+      )
+  } %>%
   ggplotly(dynamicTicks = TRUE) %>%
   config(displaylogo = FALSE, showSendToCloud = FALSE)
 ```
@@ -202,91 +233,125 @@ However, when considering the 95% confidence intervals (additionally given with 
 Comparing the regression curves of `sdarr.lazy()` and `sdarr()` over the mechanical data, you see that there is practically no difference (zoom in ...a lot... to see a difference).
 
 ```{r sdarr.lazy_comparison, fig.height=4, fig.width=6}
-
 # plot fit (with 95% CI) and lazy fit against original test record
 {
-  
   # tap the environment of the crated plot-functions
   plot.env <- rlang::fn_env(sdarr.results$plots$final.fit)
   plot.env.lazy <- rlang::fn_env(sdarr.lazy.results$plots$final.fit)
-  
+
   # get data and labels
-  plot.data <- plot.env$plot.data %>% 
+  plot.data <- plot.env$plot.data %>%
     dplyr::select(x.data, y.data)
   plot.main <- plot.env$plot.main
   plot.xlab <- plot.env$plot.xlab
   plot.ylab <- plot.env$plot.ylab
-  
+
   # get fit ranges
   x.lowerBound <- sdarr.results$sdar$x.lowerBound
   x.upperBound <- sdarr.results$sdar$x.upperBound
   x.lowerBound.lazy <- sdarr.lazy.results$sdar$x.lowerBound
   x.upperBound.lazy <- sdarr.lazy.results$sdar$x.upperBound
-  
+
   # re-fit for plotting
-  y.data.prediction <- plot.data %>% 
-    dplyr::filter(dplyr::between(x.data, x.lowerBound, x.upperBound)) %>% {
+  y.data.prediction <- plot.data %>%
+    dplyr::filter(dplyr::between(x.data, x.lowerBound, x.upperBound)) %>%
+    {
       data <- .
       lm(y.data ~ x.data, data = data) %>%
-      predict(newdata = dplyr::bind_rows(data.frame(x.data = 0),
-                                         plot.data %>% dplyr::select(x.data)),
-              interval = "confidence")
+        predict(
+          newdata = dplyr::bind_rows(
+            data.frame(x.data = 0),
+            plot.data %>% dplyr::select(x.data)
+          ),
+          interval = "confidence"
+        )
     }
-  
-  y.data.prediction.lazy <- plot.data %>% 
-    dplyr::filter(dplyr::between(x.data, 
-                                 x.lowerBound.lazy, 
-                                 x.upperBound.lazy)) %>% {
+
+  y.data.prediction.lazy <- plot.data %>%
+    dplyr::filter(dplyr::between(
+      x.data,
+      x.lowerBound.lazy,
+      x.upperBound.lazy
+    )) %>%
+    {
       data <- .
       lm(y.data ~ x.data, data = data) %>%
-      predict(newdata = dplyr::bind_rows(data.frame(x.data = 0), 
-                                         plot.data %>% 
-                                           dplyr::select(x.data))) %>% 
-        as.data.frame() %>% 
+        predict(newdata = dplyr::bind_rows(
+          data.frame(x.data = 0),
+          plot.data %>%
+            dplyr::select(x.data)
+        )) %>%
+        as.data.frame() %>%
         set_names("fit.lazy")
     }
-  
+
   # add an empty data point at 0 extension to see the difference in intercept
-  plot.data <- data.frame(x.data = 0, y.data = NA) %>% 
-    dplyr::bind_rows(plot.data) %>% 
-    dplyr::bind_cols(y.data.prediction,
-                     y.data.prediction.lazy)
-  
+  plot.data <- data.frame(x.data = 0, y.data = NA) %>%
+    dplyr::bind_rows(plot.data) %>%
+    dplyr::bind_cols(
+      y.data.prediction,
+      y.data.prediction.lazy
+    )
+
   y.data.max <- plot.data$y.data %>% max(na.rm = TRUE)
-  
-  ggplot(data = plot.data, 
-         aes(x = x.data, y = y.data, color = "E3076_DS1_2018")) +
+
+  ggplot(
+    data = plot.data,
+    aes(x = x.data, y = y.data, color = "E3076_DS1_2018")
+  ) +
     geom_line() +
-    geom_line(data = plot.data %>% 
-                dplyr::filter(dplyr::between(x.data, 
-                                             x.lowerBound, 
-                                             x.upperBound)),
-              aes(x = x.data, y = y.data, 
-                  color = "fit-range (sdarr)"), 
-              linewidth = 1.5, alpha = 0.5) +
-    geom_line(data = plot.data %>% 
-                dplyr::filter(dplyr::between(x.data, 
-                                             x.lowerBound.lazy, 
-                                             x.upperBound.lazy)),
-              aes(x = x.data, y = y.data, 
-                  color = "fit-range (sdarr.lazy)"), 
-              linewidth = 1.5, alpha = 0.5) +
-    geom_line(data = plot.data %>% 
-                dplyr::filter(fit <= y.data.max),
-              aes(x = x.data, y = fit, color = "fit (sdarr)")) +
-    geom_ribbon(data = plot.data %>% 
-                dplyr::filter(fit <= y.data.max),
-                aes(x = x.data, y = NULL, ymin = lwr, ymax = upr, 
-                    color = "fit (sdarr)"),
-                linewidth = 0, alpha = 0.25) +
-    geom_line(data = plot.data %>% 
-                dplyr::filter(fit.lazy <= y.data.max),
-              aes(x = x.data, y = fit.lazy, color = "fit (sdarr.lazy)")) +
+    geom_line(
+      data = plot.data %>%
+        dplyr::filter(dplyr::between(
+          x.data,
+          x.lowerBound,
+          x.upperBound
+        )),
+      aes(
+        x = x.data, y = y.data,
+        color = "fit-range (sdarr)"
+      ),
+      linewidth = 1.5, alpha = 0.5
+    ) +
+    geom_line(
+      data = plot.data %>%
+        dplyr::filter(dplyr::between(
+          x.data,
+          x.lowerBound.lazy,
+          x.upperBound.lazy
+        )),
+      aes(
+        x = x.data, y = y.data,
+        color = "fit-range (sdarr.lazy)"
+      ),
+      linewidth = 1.5, alpha = 0.5
+    ) +
+    geom_line(
+      data = plot.data %>%
+        dplyr::filter(fit <= y.data.max),
+      aes(x = x.data, y = fit, color = "fit (sdarr)")
+    ) +
+    geom_ribbon(
+      data = plot.data %>%
+        dplyr::filter(fit <= y.data.max),
+      aes(
+        x = x.data, y = NULL, ymin = lwr, ymax = upr,
+        color = "fit (sdarr)"
+      ),
+      linewidth = 0, alpha = 0.25
+    ) +
+    geom_line(
+      data = plot.data %>%
+        dplyr::filter(fit.lazy <= y.data.max),
+      aes(x = x.data, y = fit.lazy, color = "fit (sdarr.lazy)")
+    ) +
     theme_bw() +
-    labs(title = "Final fit (with 95% CI) vs. final lazy fit",
-       x = plot.xlab,
-       y = plot.ylab) 
-  } %>% 
+    labs(
+      title = "Final fit (with 95% CI) vs. final lazy fit",
+      x = plot.xlab,
+      y = plot.ylab
+    )
+} %>%
   ggplotly(dynamicTicks = TRUE) %>%
   config(displaylogo = FALSE, showSendToCloud = FALSE)
 ```

@@ -1,78 +1,89 @@
 #' Run the SDAR algorithm on prepared data
 #' @noRd
 sdarr_execute <- function(prepared_data, otr.info,
-                         verbose.all = FALSE,
-                         verbose.report = TRUE,
-                         showPlots.all = FALSE,
-                         showPlots.report = TRUE,
-                         savePlots = FALSE) {
-
+                          verbose.all = FALSE,
+                          verbose.report = TRUE,
+                          showPlots.all = FALSE,
+                          showPlots.report = TRUE,
+                          savePlots = FALSE) {
   # maybe the offset for step 1 needs to be raised later
   raise_offset_times <- 0
   optimum_fit_is_found <- FALSE
 
   # Give a welcome message
-  if(verbose.report) {
+  if (verbose.report) {
     message("SDAR-algorithm\n")
   }
 
   # do step 1, check data quality, and get optimum fit
   # repeat until the upper index is not the last point in the optimum region
-  while(!optimum_fit_is_found) {
+  while (!optimum_fit_is_found) {
     # do step 1:
-    normalized_data <- normalize_data(data = prepared_data,
-                                      otr.info = otr.info,
-                                      raise_offset_times = raise_offset_times,
-                                      denoise.x = FALSE,
-                                      denoise.y = FALSE,
-                                      verbose = verbose.all,
-                                      showPlots = showPlots.all,
-                                      savePlots = savePlots)
+    normalized_data <- normalize_data(
+      data = prepared_data,
+      otr.info = otr.info,
+      raise_offset_times = raise_offset_times,
+      denoise.x = FALSE,
+      denoise.y = FALSE,
+      verbose = verbose.all,
+      showPlots = showPlots.all,
+      savePlots = savePlots
+    )
 
     # check data quality
-    data_quality_metrics <- check_data_quality(normalized_data$data.normalized,
-                                               verbose.all,
-                                               showPlots.all,
-                                               savePlots)
+    data_quality_metrics <- check_data_quality(
+      normalized_data$data.normalized,
+      verbose.all,
+      showPlots.all,
+      savePlots
+    )
 
     # find best fit
-    optimum_fit <- find_linear_regressions(normalized_data$data.normalized,
-                                           verbose.all)
+    optimum_fit <- find_linear_regressions(
+      normalized_data$data.normalized,
+      verbose.all
+    )
 
     # check if the offset needs to be raised
     optimum_fit_is_found <- !optimum_fit$offset_raise_required
 
-    if(!optimum_fit_is_found) {
+    if (!optimum_fit_is_found) {
       raise_offset_times <- raise_offset_times + 1
     }
 
     # next offset is out of data range
-    if(raise_offset_times > 17) {
+    if (raise_offset_times > 17) {
       stop("Data is unfit for processing: upper index of the optimum fit region is beyond the last point in the truncated test record.")
     }
   }
 
   # check fit quality
-  fit_quality_metrics <- check_fit_quality(normalized_data$data.normalized,
-                                           optimum_fit,
-                                           verbose.all,
-                                           showPlots.all,
-                                           savePlots)
+  fit_quality_metrics <- check_fit_quality(
+    normalized_data$data.normalized,
+    optimum_fit,
+    verbose.all,
+    showPlots.all,
+    savePlots
+  )
 
   # un-normalize data and summarize
-  assembled_results <- assemble_report(normalized_data,
-                                       otr.info,
-                                       data_quality_metrics,
-                                       optimum_fit,
-                                       fit_quality_metrics,
-                                       verbose.report,
-                                       showPlots.report,
-                                       savePlots)
+  assembled_results <- assemble_report(
+    normalized_data,
+    otr.info,
+    data_quality_metrics,
+    optimum_fit,
+    fit_quality_metrics,
+    verbose.report,
+    showPlots.report,
+    savePlots
+  )
 
   # re-do the final fit to find confidence intervals for slope and intercepts
-  final.fit.confint <- prepared_data[optimum_fit$otr.idx.start:optimum_fit$otr.idx.end,] %>% {
-    prepared_data.fit.lm <- stats::lm(y.data ~ x.data, data = .)
-  } %>% stats::confint()
+  final.fit.confint <- prepared_data[optimum_fit$otr.idx.start:optimum_fit$otr.idx.end, ] %>%
+    {
+      prepared_data.fit.lm <- stats::lm(y.data ~ x.data, data = .)
+    } %>%
+    stats::confint()
 
   results.labels <- list(
     "finalSlope" = assembled_results$Slope_Determination_Results$finalSlope.unit,
@@ -103,7 +114,7 @@ sdarr_execute <- function(prepared_data, otr.info,
     "y.upperBound" = assembled_results$Slope_Determination_Results$y.upperBound,
     "x.lowerBound" = assembled_results$Slope_Determination_Results$x.lowerBound,
     "x.upperBound" = assembled_results$Slope_Determination_Results$x.upperBound,
-    "Num.Obs.fit" = nrow(prepared_data[optimum_fit$otr.idx.start:optimum_fit$otr.idx.end,]),
+    "Num.Obs.fit" = nrow(prepared_data[optimum_fit$otr.idx.start:optimum_fit$otr.idx.end, ]),
     "Num.Obs.normalized" = assembled_results$Data_Quality_Metrics$Num.Obs.normalized,
     "passed.check" = assembled_results$Slope_Determination_Results$passed.check,
     "passed.check.data" = assembled_results$Data_Quality_Metrics$passed.check,
@@ -112,12 +123,14 @@ sdarr_execute <- function(prepared_data, otr.info,
     labelled::set_variable_labels(.labels = results.labels)
 
   # return full results
-  results <- list("sdar" = sdarr.results,
-                  "Data_Quality_Metrics" = assembled_results$Data_Quality_Metrics,
-                  "Fit_Quality_Metrics" = assembled_results$Fit_Quality_Metrics)
+  results <- list(
+    "sdar" = sdarr.results,
+    "Data_Quality_Metrics" = assembled_results$Data_Quality_Metrics,
+    "Fit_Quality_Metrics" = assembled_results$Fit_Quality_Metrics
+  )
 
   # append/sort plots to the results
-  if(savePlots) {
+  if (savePlots) {
     results <- results %>% append(list("plots" = list(
       "final.fit" = assembled_results$plots$plot.fit,
       "otr" = assembled_results$plots$plot.otr,
@@ -142,7 +155,7 @@ sdarr_execute <- function(prepared_data, otr.info,
 #'   use numerous linear regressions (`.lm.fit()` from the stats-package) and
 #'   can be painfully slow for test data with high resolution.
 #'
-#'  @note The function can use parallel processing via the
+#' @note The function can use parallel processing via the
 #'   [`furrr-package`][furrr::furrr-package]. To use this feature, set up a plan
 #'   other than the default sequential strategy beforehand.
 #'
@@ -184,13 +197,15 @@ sdarr_execute <- function(prepared_data, otr.info,
 #' # set effective number of bits in the x-data to 12
 #' # to limit the number of data points.
 #'
-#' Al_6060_T66 <- synthesize_test_data(slope = 68000,
-#'                                     yield.y = 160,
-#'                                     ultimate.y = 215,
-#'                                     ultimate.x = 0.091,
-#'                                     x.name = "strain",
-#'                                     y.name = "stress",
-#'                                     enob.x = 12)
+#' Al_6060_T66 <- synthesize_test_data(
+#'   slope = 68000,
+#'   yield.y = 160,
+#'   ultimate.y = 215,
+#'   ultimate.x = 0.091,
+#'   x.name = "strain",
+#'   y.name = "stress",
+#'   enob.x = 12
+#' )
 #'
 #'
 #' # use sdarr() to analyze the synthetic test record
@@ -205,12 +220,11 @@ sdarr_execute <- function(prepared_data, otr.info,
 #'
 #' @export
 sdarr <- function(data,
-                 x,
-                 y,
-                 verbose = "report",
-                 showPlots = "report",
-                 savePlots = FALSE) {
-
+                  x,
+                  y,
+                  verbose = "report",
+                  showPlots = "report",
+                  savePlots = FALSE) {
   # to be furrr-safe, enquote the tidy arguments here
   x <- rlang::enquo(x)
   y <- rlang::enquo(y)
@@ -226,17 +240,39 @@ sdarr <- function(data,
   showPlots.report <- showPlots.report || showPlots.all
 
   # get units for data
-  x.label.unit <- data %>% dplyr::select(!!x) %>% labelled::var_label() %>% {.[[1]]}
-  y.label.unit <- data %>% dplyr::select(!!y) %>% labelled::var_label() %>% {.[[1]]}
+  x.label.unit <- data %>%
+    dplyr::select(!!x) %>%
+    labelled::var_label() %>%
+    {
+      .[[1]]
+    }
+  y.label.unit <- data %>%
+    dplyr::select(!!y) %>%
+    labelled::var_label() %>%
+    {
+      .[[1]]
+    }
 
   # get names of data
-  x.name <- data %>% dplyr::select(!!x) %>% names() %>% {.[[1]]}
-  y.name <- data %>% dplyr::select(!!y) %>% names() %>% {.[[1]]}
+  x.name <- data %>%
+    dplyr::select(!!x) %>%
+    names() %>%
+    {
+      .[[1]]
+    }
+  y.name <- data %>%
+    dplyr::select(!!y) %>%
+    names() %>%
+    {
+      .[[1]]
+    }
 
   # prepare data, add an index and remove NA from data
-  prepared_data <- data.frame(x.data = data %>% dplyr::select(!!x) %>% unlist(TRUE,FALSE),
-                              y.data = data %>% dplyr::select(!!y) %>% unlist(TRUE,FALSE),
-                              otr.idx = seq.int(nrow(data))) %>%
+  prepared_data <- data.frame(
+    x.data = data %>% dplyr::select(!!x) %>% unlist(TRUE, FALSE),
+    y.data = data %>% dplyr::select(!!y) %>% unlist(TRUE, FALSE),
+    otr.idx = seq.int(nrow(data))
+  ) %>%
     tidyr::drop_na()
 
   # assemble information of the original test record
@@ -252,17 +288,19 @@ sdarr <- function(data,
   )
 
   # Give a welcome message
-  if(verbose.report) {
+  if (verbose.report) {
     message("Determination of Slope in the Linear Region of a Test Record:")
   }
 
   # execute the SDAR-algorithm
-  sdarr_execute(prepared_data,
-                otr.info,
-                verbose.all,
-                verbose.report,
-                showPlots.all,
-                showPlots.report,
-                savePlots) %>%
+  sdarr_execute(
+    prepared_data,
+    otr.info,
+    verbose.all,
+    verbose.report,
+    showPlots.all,
+    showPlots.report,
+    savePlots
+  ) %>%
     return()
 }

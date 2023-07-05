@@ -7,16 +7,17 @@ Authors@R: c(
            comment = c(ORCID = "0000-0001-6368-1622")),
     person("UKSH", role = c("cph", "fnd"))
   )
-BugReports: https://github.com/soylentOrange/sdarr/issues
-Description: Slope Determination by Analysis of Residuals (SDAR) for automated 
-    and objective linear-fitting of mechanical test-data 
-    (see: standard ASTM E3076-18 <doi:10.1520/E3076-18> or a detailed 
-    description in E. Lucon (2019) <doi:10.6028/NIST.TN.2050>). As the 
-    SDAR-algorithm heavily uses linear regressions, a faster version is 
-    additionally available to find the optimum region for the (one) final 
-    linear regression by random sub-sampling within the normalized range of the 
-    test-data.
+Description: Slope Determination by Analysis of Residuals (SDAR) for
+    automated and objective linear-fitting of mechanical test-data (see:
+    standard ASTM E3076-18 <doi:10.1520/E3076-18> or a detailed
+    description in E. Lucon (2019) <doi:10.6028/NIST.TN.2050>). As the
+    SDAR-algorithm heavily uses linear regressions, a faster version is
+    additionally available to find the optimum region for the (one) final
+    linear regression by random sub-sampling within the normalized range
+    of the test-data.
 License: MIT + file LICENSE
+URL: https://soylentorange.github.io/sdarr/
+BugReports: https://github.com/soylentOrange/sdarr/issues
 Imports:
     carrier,
     dplyr,
@@ -33,15 +34,17 @@ Imports:
     utils,
     VMDecomp
 Suggests:
-    ggplot2,
     future,
-    parallelly,
+    ggplot2,
     knitr,
-    rmarkdown,
+    parallelly,
     plotly,
-    readr
+    readr,
+    rmarkdown,
+    spelling
+VignetteBuilder: 
+    knitr
 Encoding: UTF-8
-RoxygenNote: 7.2.3
-URL: https://soylentorange.github.io/sdarr/
-VignetteBuilder: knitr
+Language: en-US
 Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3

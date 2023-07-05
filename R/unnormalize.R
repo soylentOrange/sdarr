@@ -14,7 +14,6 @@ unnormalize_results <- function(normalized_data,
                                 fitQualityMetrics,
                                 verbose = FALSE,
                                 warn = TRUE) {
-
   # shorthands for calculations
   y.tangent <- normalized_data[["tangency.point"]][["y.tangent"]]
   x.tangent <- normalized_data[["tangency.point"]][["x.tangent"]]
@@ -28,12 +27,12 @@ unnormalize_results <- function(normalized_data,
   b <- fit[["b"]]
 
   # get units if available
-  if(!is.null(otr.info)) {
+  if (!is.null(otr.info)) {
     x.unit <- otr.info$x$unit
     y.unit <- otr.info$y$unit
-    if(!is.null(x.unit) && !is.null(y.unit)) {
-      slope.unit <- paste0(y.unit , "/", x.unit)
-    } else if(is.null(x.unit) && !is.null(y.unit)) {
+    if (!is.null(x.unit) && !is.null(y.unit)) {
+      slope.unit <- paste0(y.unit, "/", x.unit)
+    } else if (is.null(x.unit) && !is.null(y.unit)) {
       slope.unit <- y.unit
     } else {
       slope.unit <- ""
@@ -59,22 +58,26 @@ unnormalize_results <- function(normalized_data,
   all.checks.passed <- dataQualityMetrics[["passed.check"]] && fitQualityMetrics[["passed.check"]]
 
   # print messages
-  if(verbose) {
+  if (verbose) {
     message("  Un-normalized fit")
     message(paste0("      Final Slope:             ", finalSlope, " ", slope.unit))
     message(paste0("      True Intercept:          ", trueIntercept, " ", y.unit))
-    if(length(y.unit) > 0) {
-      message(paste0("      y-Range:                 ", y.lowerBound, " ", y.unit,
-                     " - ", y.upperBound, " ", y.unit, "\n"))
+    if (length(y.unit) > 0) {
+      message(paste0(
+        "      y-Range:                 ", y.lowerBound, " ", y.unit,
+        " - ", y.upperBound, " ", y.unit, "\n"
+      ))
     } else {
-      message(paste0("      y-Range:                 ", y.lowerBound,
-                     " - ", y.upperBound, "\n"))
+      message(paste0(
+        "      y-Range:                 ", y.lowerBound,
+        " - ", y.upperBound, "\n"
+      ))
     }
   }
 
   # give a warning when quality checks have failed
-  if(warn) {
-    if(!all.checks.passed) {
+  if (warn) {
+    if (!all.checks.passed) {
       warning("Some quality checks failed: result might be inaccurate or completely wrong!\n")
     }
   }

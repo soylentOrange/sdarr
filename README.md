@@ -50,22 +50,27 @@ MPa. To make use of multi-core processing, configure
 ``` r
 library(sdarr)
 
-# setup multisession calculations with a maximum of 8 cores 
+# setup multisession calculations with a maximum of 8 cores
 # (or however many cores are available...)
-future::plan(future::multisession, 
-             workers = min(c(parallelly::availableCores(), 8)))
+future::plan(future::multisession,
+  workers = min(c(parallelly::availableCores(), 8))
+)
 
 # Synthesize a test record resembling Al 6060 T66
 # (Values from MMPDS Handbook, with a toe region added)
-Al_6060_T66 <- synthesize_test_data(slope = 68000, yield.y = 160, 
-                                    ultimate.y = 215, ultimate.x = 0.091,
-                                    offset = 10,
-                                    toe.initial.y = 3, toe.max.y = 15,
-                                    toe.initial.slope = 34000)
+Al_6060_T66 <- synthesize_test_data(
+  slope = 68000, yield.y = 160,
+  ultimate.y = 215, ultimate.x = 0.091,
+  offset = 10,
+  toe.initial.y = 3, toe.max.y = 15,
+  toe.initial.slope = 34000
+)
 
 # Analyze the test record
-Al_6060_T66.result <- sdarr(Al_6060_T66, x = strain, y = stress,
-                            verbose = "r", showPlots = "r")
+Al_6060_T66.result <- sdarr(Al_6060_T66,
+  x = strain, y = stress,
+  verbose = "r", showPlots = "r"
+)
 #> Determination of Slope in the Linear Region of a Test Record:
 #> SDAR-algorithm
 #>   Data Quality Metric: Digital Resolution
@@ -128,28 +133,33 @@ To make use of multi-core processing, configure
 ``` r
 library(sdarr)
 
-# setup multisession calculations with a maximum of 8 cores 
+# setup multisession calculations with a maximum of 8 cores
 # (or however many cores are available...)
-future::plan(future::multisession, 
-             workers = min(c(parallelly::availableCores(), 8)))
+future::plan(future::multisession,
+  workers = min(c(parallelly::availableCores(), 8))
+)
 
 # Synthesize a test record resembling Al 6060 T66
 # (Values from MMPDS Handbook, with a toe region added)
-Al_6060_T66 <- synthesize_test_data(slope = 68000, yield.y = 160, 
-                                    ultimate.y = 215, ultimate.x = 0.091,
-                                    offset = 10,
-                                    toe.initial.y = 3, toe.max.y = 15,
-                                    toe.initial.slope = 34000)
+Al_6060_T66 <- synthesize_test_data(
+  slope = 68000, yield.y = 160,
+  ultimate.y = 215, ultimate.x = 0.091,
+  offset = 10,
+  toe.initial.y = 3, toe.max.y = 15,
+  toe.initial.slope = 34000
+)
 
 # set a random seed
 set.seed(50041180)
 
-# Analyze the test record 
+# Analyze the test record
 # (using a relaxed cutoff_probability for the noise-free synthetic data)
-Al_6060_T66.result.lazy <- sdarr.lazy(Al_6060_T66, x = strain, y = stress,
-                                      cutoff_probability = 0.8,
-                                      enforce_subsampling = TRUE,
-                                      verbose = "r", showPlots = "r")
+Al_6060_T66.result.lazy <- sdarr.lazy(Al_6060_T66,
+  x = strain, y = stress,
+  cutoff_probability = 0.8,
+  enforce_subsampling = TRUE,
+  verbose = "r", showPlots = "r"
+)
 #> Determination of Slope in the Linear Region of a Test Record:
 #>   lazy algorithm requires more fits than standard SDAR-algorithm:  
 #>     99500 vs. 36856 fits.
@@ -218,22 +228,27 @@ library(magrittr)
 # make nice and shiny graphics withh ggplot2...
 library(ggplot2)
 
-# setup multisession calculations with a maximum of 8 cores 
+# setup multisession calculations with a maximum of 8 cores
 # (or however many cores are available...)
-future::plan(future::multisession, 
-             workers = min(c(parallelly::availableCores(), 8)))
+future::plan(future::multisession,
+  workers = min(c(parallelly::availableCores(), 8))
+)
 
 # Synthesize a test record resembling Al 6060 T66
 # (Values from MMPDS Handbook, with a toe region added)
-Al_6060_T66 <- synthesize_test_data(slope = 68000, yield.y = 160, 
-                                    ultimate.y = 215, ultimate.x = 0.091,
-                                    offset = 10,
-                                    toe.initial.y = 3, toe.max.y = 15,
-                                    toe.initial.slope = 34000)
+Al_6060_T66 <- synthesize_test_data(
+  slope = 68000, yield.y = 160,
+  ultimate.y = 215, ultimate.x = 0.091,
+  offset = 10,
+  toe.initial.y = 3, toe.max.y = 15,
+  toe.initial.slope = 34000
+)
 
 # Analyze the test record using the standard algorithm
-Al_6060_T66.result <- sdarr(Al_6060_T66, x = strain, y = stress,
-                            verbose = "n", showPlots = "n", savePlots = TRUE)
+Al_6060_T66.result <- sdarr(Al_6060_T66,
+  x = strain, y = stress,
+  verbose = "n", showPlots = "n", savePlots = TRUE
+)
 
 # show plot of final fit using the plot function from the result
 Al_6060_T66.result$plots$final.fit()
@@ -243,28 +258,32 @@ Al_6060_T66.result$plots$final.fit()
 
 ``` r
 
-# plot the final fit using ggplot2 
+# plot the final fit using ggplot2
 {
   # tap the environment of the crated plot-function
   plot.env <- rlang::fn_env(Al_6060_T66.result$plots$final.fit)
-  
+
   # get data and labels
   plot.data <- plot.env$plot.data
   plot.main <- plot.env$plot.main
   plot.xlab <- plot.env$plot.xlab
   plot.ylab <- plot.env$plot.ylab
   y.data.max <- plot.data$y.data %>% max()
-  
+
   # create the ggplot2
   plot.data %>% ggplot(aes(x = x.data, y = y.data, color = "Al_6060_T66")) +
     geom_line() +
-    geom_line(data = plot.data %>% 
-                dplyr::filter(y.fit <= y.data.max),
-              aes(x = x.data, y = y.fit, color = "fit (sdarr)")) +
+    geom_line(
+      data = plot.data %>%
+        dplyr::filter(.data$y.fit <= y.data.max),
+      aes(x = x.data, y = y.fit, color = "fit (sdarr)")
+    ) +
     theme_bw() +
-    labs(title = plot.main,
-       x = plot.xlab,
-       y = plot.ylab)
+    labs(
+      title = plot.main,
+      x = plot.xlab,
+      y = plot.ylab
+    )
 }
 ```
 
