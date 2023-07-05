@@ -189,9 +189,11 @@ sdarr_execute.lazy <- function(prepared_data,
   # (otr.idx.start and .end, y and x bounds)
   # will be used for reporting the results and one final fit
   weighed.results <- optimum_fits %>%
-    dplyr::select(c("weight", "otr.idx.start", "otr.idx.end",
+    dplyr::select(c(
+      "weight", "otr.idx.start", "otr.idx.end",
       "y.lowerBound", "y.upperBound",
-      "x.lowerBound", "x.upperBound")) %>%
+      "x.lowerBound", "x.upperBound"
+    )) %>%
     as.list() %>%
     {
       res <- .

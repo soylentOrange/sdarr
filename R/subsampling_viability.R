@@ -8,10 +8,12 @@
 subsampling_viability <- function(rangeSize.original, rangeSize.optimum,
                                   rep = 1, verbose = FALSE) {
   Nmin.plain <- max(floor(rangeSize.original * 0.2), 10)
-  Nfits.plain <- 0.5 * ((rangeSize.original - Nmin.plain + 1)^2 + (rangeSize.original - Nmin.plain + 1))
+  Nfits.plain <- 0.5 * ((rangeSize.original - Nmin.plain + 1)^2 +
+    (rangeSize.original - Nmin.plain + 1))
 
   Nmin.optimum <- max(floor(rangeSize.optimum * 0.2), 10)
-  Nfits.subsampling <- rep * 0.5 * ((rangeSize.optimum - Nmin.optimum + 1)^2 + (rangeSize.optimum - Nmin.optimum + 1))
+  Nfits.subsampling <- rep * 0.5 * ((rangeSize.optimum - Nmin.optimum + 1)^2 +
+    (rangeSize.optimum - Nmin.optimum + 1))
 
   list(
     "viable" = (Nfits.subsampling < Nfits.plain),
@@ -24,7 +26,7 @@ subsampling_viability <- function(rangeSize.original, rangeSize.optimum,
 #'
 #' @description
 #' Find the optimum size for sub-sampling.
-#' It might be a wise idea to set the random seed beforehand for reproducible results.
+#' Set a random seed beforehand for reproducible results.
 #'
 #' @noRd
 optimum_size_for_subsampling <- function(data.normalized,
@@ -33,7 +35,11 @@ optimum_size_for_subsampling <- function(data.normalized,
                                          showPlots = FALSE,
                                          savePlots = FALSE) {
   # find optimum fit-range for sub-sampling
-  normalized.ranges <- seq.int(50, nrow(data.normalized), (nrow(data.normalized) - 50) / 99) %>%
+  normalized.ranges <- seq.int(
+    50,
+    nrow(data.normalized),
+    (nrow(data.normalized) - 50) / 99
+  ) %>%
     round(0) %>%
     {
       data.frame("idx" = seq.int(length(.)), "range.size" = .)
@@ -48,7 +54,8 @@ optimum_size_for_subsampling <- function(data.normalized,
         c(
           otr.idx[1],
           otr.idx[length(otr.idx)],
-          sample(otr.idx[2:length(otr.idx) - 1], size = value[1, 1] %>% as.numeric() - 2)
+          sample(otr.idx[2:length(otr.idx) - 1], size = value[1, 1] %>%
+            as.numeric() - 2)
         ) %>%
           sort() %>%
           {
@@ -58,26 +65,27 @@ optimum_size_for_subsampling <- function(data.normalized,
       otr.idx = data.normalized$otr.idx %>%
         unlist(TRUE, FALSE)
     ))) %>%
-    dplyr::mutate("data.quality.passed" = furrr::future_map(.$otr.idcs, carrier::crate(
-      function(value) {
-        # satisfy pipe addiction...
-        `%>%` <- magrittr::`%>%`
+    dplyr::mutate("data.quality.passed" = furrr::future_map(
+      .$otr.idcs, carrier::crate(
+        function(value) {
+          # satisfy pipe addiction...
+          `%>%` <- magrittr::`%>%`
 
-        # select data by index
-        data.normalized %>%
-          dplyr::filter(.data$otr.idx %in% value$otr.idx) %>%
-          check_data_quality.lazy() %>%
-          {
-            1.0 - ifelse(.$passed.check.resolution.y == TRUE, 0, 0.25) -
-              ifelse(.$passed.check.resolution.x == TRUE, 0, 0.25) -
-              ifelse(.$passed.check.noise.y == TRUE, 0, 0.25) -
-              ifelse(.$passed.check.noise.x == TRUE, 0, 0.25)
-          }
-      },
-      data.normalized = data.normalized,
-      check_data_quality.lazy = check_data_quality.lazy
-    ),
-    .options = furrr::furrr_options(globals = FALSE)
+          # select data by index
+          data.normalized %>%
+            dplyr::filter(.data$otr.idx %in% value$otr.idx) %>%
+            check_data_quality.lazy() %>%
+            {
+              1.0 - ifelse(.$passed.check.resolution.y == TRUE, 0, 0.25) -
+                ifelse(.$passed.check.resolution.x == TRUE, 0, 0.25) -
+                ifelse(.$passed.check.noise.y == TRUE, 0, 0.25) -
+                ifelse(.$passed.check.noise.x == TRUE, 0, 0.25)
+            }
+        },
+        data.normalized = data.normalized,
+        check_data_quality.lazy = check_data_quality.lazy
+      ),
+      .options = furrr::furrr_options(globals = FALSE)
     )) %>%
     dplyr::select(c("idx", "range.size", "data.quality.passed")) %>%
     tidyr::unnest(cols = c("range.size", "data.quality.passed")) %>%
@@ -90,9 +98,11 @@ optimum_size_for_subsampling <- function(data.normalized,
     family = stats::quasibinomial(link = "logit")
   )
 
-  # predict probability of passing data quality check over all possible range-sizes
+  # predict probability of passing data quality check over all...
+  # ...possible range-sizes
   normalized.ranges.modelpredictions <- data.frame(
-    "range.size" = seq.int(50, nrow(data.normalized), 1)) %>%
+    "range.size" = seq.int(50, nrow(data.normalized), 1)
+  ) %>%
     {
       probs <- stats::predict(normalized.ranges.model,
         newdata = .,
@@ -114,7 +124,9 @@ optimum_size_for_subsampling <- function(data.normalized,
   max.pm <- normalized.ranges.modelpredictions$pm %>% max(na.rm = TRUE)
   cutoff_probability.matched <- TRUE
   if (max.pm < cutoff_probability) {
-    warning("Failed to determine optimum size by given cutoff_probability.", call. = FALSE)
+    warning("Failed to determine optimum size by given cutoff_probability.",
+      call. = FALSE
+    )
     cutoff_probability <- max.pm
     cutoff_probability.matched <- FALSE
   }
@@ -176,10 +188,14 @@ optimum_size_for_subsampling <- function(data.normalized,
         # graphics::abline(h = cutoff_probability, lty= "dotdash")
       },
       plot.data = data.frame(
-        "range.size" = normalized.ranges.modelpredictions$range.size %>% unlist(TRUE, FALSE),
-        pm = normalized.ranges.modelpredictions$pm %>% unlist(TRUE, FALSE),
-        pu = normalized.ranges.modelpredictions$pu %>% unlist(TRUE, FALSE),
-        pl = normalized.ranges.modelpredictions$pl %>% unlist(TRUE, FALSE)
+        "range.size" = normalized.ranges.modelpredictions$range.size %>%
+          unlist(TRUE, FALSE),
+        pm = normalized.ranges.modelpredictions$pm %>%
+          unlist(TRUE, FALSE),
+        pu = normalized.ranges.modelpredictions$pu %>%
+          unlist(TRUE, FALSE),
+        pl = normalized.ranges.modelpredictions$pl %>%
+          unlist(TRUE, FALSE)
       ),
       # cutoff_probability = cutoff_probability,
       plot.x = "range.size",
