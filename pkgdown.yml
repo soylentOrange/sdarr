@@ -3,8 +3,8 @@ pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
   excessive_noise_levels: excessive_noise_levels.html
-  validation: validation.html
-last_built: 2023-07-06T13:50Z
+  sdarr_validation: sdarr_validation.html
+last_built: 2023-07-06T15:36Z
 urls:
   reference: https://soylentorange.github.io/sdarr/reference
   article: https://soylentorange.github.io/sdarr/articles
