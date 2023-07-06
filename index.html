@@ -86,7 +86,7 @@
 <div class="section level1">
 <div class="page-header"><h1 id="sdarr">sdarr<a class="anchor" aria-label="anchor" href="#sdarr"></a>
 </h1></div>
-<p>The sdarr-package provides a R implementation of the SDAR algorithm for Slope Determination by Analysis of Residuals as standardized in <a href="https://doi.org/10.1520/E3076-18" class="external-link">ASTM E3076-18</a>.<br>
+<p>The sdarr-package provides a R implementation of the algorithm for Slope Determination by Analysis of Residuals (SDAR) as standardized in <a href="https://doi.org/10.1520/E3076-18" class="external-link">ASTM E3076-18</a>.<br>
 It allows for automated and objective linear-fitting of mechanical test-data. See a detailed description of the algorithm in the <a href="https://doi.org/10.6028/NIST.TN.2050" class="external-link">NIST Technical Note 2050 by E. Lucon</a> or in <a href="https://doi.org/10.1520/JTE103038" class="external-link">Graham &amp; Adler (2011)</a>.</p>
 <p>As the SDAR-algorithm, implemented in <code><a href="reference/sdarr.html">sdarr()</a></code>, heavily uses linear regressions, a faster version <code><a href="reference/sdarr.lazy.html">sdarr.lazy()</a></code> was implemented, which finds the optimum region for the (one) final linear regression by random sub-sampling within the normalized range of the test-data.</p>
 <div class="section level2">
@@ -232,7 +232,7 @@ It allows for automated and objective linear-fitting of mechanical test-data. Se
 <span><span class="co">#&gt;       y-Range:                 25.484619140625 MPa - 84.7723388671875 MPa</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="plot-functions">plot functions<a class="anchor" aria-label="anchor" href="#plot-functions"></a>
+<h3 id="plot-functions">Plot Functions<a class="anchor" aria-label="anchor" href="#plot-functions"></a>
 </h3>
 <p><code><a href="reference/sdarr.html">sdarr()</a></code> and <code><a href="reference/sdarr.lazy.html">sdarr.lazy()</a></code> will create diagnostic plots throughout calculations, which will only be shown when requested (i.e. set <code>showPlots = "all</code>). To have a plot drawn later, you can call the provided plot-functions from the results, when you set <code>savePlots = TRUE</code>.</p>
 <p>The plot-functions are <a href="https://github.com/r-lib/carrier" class="external-link">crated</a>, so you can easily tap their environment to convert it into e.g. a <a href="https://ggplot2.tidyverse.org/" class="external-link">ggplot2-graphic</a>.</p>
@@ -293,11 +293,11 @@ It allows for automated and objective linear-fitting of mechanical test-data. Se
 <p><img src="reference/figures/README-example-plot-fun-gg-1.png" width="100%"></p>
 </div>
 </div>
-<div class="section level2">
-<h2 id="acknowledgements">Acknowledgements<a class="anchor" aria-label="anchor" href="#acknowledgements"></a>
-</h2>
-<p>The sdarr-package was created for the analysis of mechanical test data for the project LOBio, which is funded by the German ministry of education and research (BMBF) under grant number 13XP5174C.</p>
 </div>
+<div class="section level1">
+<h1 id="acknowledgements">Acknowledgements<a class="anchor" aria-label="anchor" href="#acknowledgements"></a>
+</h1>
+<p>The sdarr-package was created for the analysis of mechanical test data for the project LOBio, which is funded by the German ministry of education and research (BMBF) under grant number 13XP5174C.</p>
 </div>
 
   </main><aside class="col-md-3"><div class="links">
