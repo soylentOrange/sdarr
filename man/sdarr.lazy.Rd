@@ -69,6 +69,9 @@ numerous linear regressions (\code{.lm.fit()} from the stats-package), can be
 painfully slow for test data with high resolution. The lazy variant of the
 algorithm will use several random sub-samples of the data to find the best
 estimate for the fit-range within the data.
+See the articles on \href{https://soylentorange.github.io/sdarr/articles/sdarr_validation.html}{validation} and
+\href{https://soylentorange.github.io/sdarr/articles/excessive_noise_levels.html}{robustness against noise}
+on the \href{https://soylentorange.github.io/sdarr/}{package-website} for further information.
 }
 \note{
 The function can use parallel processing via the furrr-package. To use

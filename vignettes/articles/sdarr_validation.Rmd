@@ -1,13 +1,8 @@
 ---
 title: "Validation against Reference Data Set"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Validation against Reference Data Set}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE, echo=FALSE}
+```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
@@ -15,6 +10,7 @@ knitr::opts_chunk$set(
 )
 ```
 
+`
 ```{r setup, message=FALSE, warning=FALSE}
 # attach required packages
 library(sdarr)
@@ -371,4 +367,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-

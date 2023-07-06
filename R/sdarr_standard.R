@@ -154,6 +154,10 @@ sdarr_execute <- function(prepared_data, otr.info,
 #' @description Run the SDAR algorithm as standardized in ASTM E3076-18. Will
 #'   use numerous linear regressions (`.lm.fit()` from the stats-package) and
 #'   can be painfully slow for test data with high resolution.
+#'   See the articles on [validation](
+#'   https://soylentorange.github.io/sdarr/articles/sdarr_validation.html) and
+#'   [robustness against noise](https://soylentorange.github.io/sdarr/articles/excessive_noise_levels.html)
+#'   on the [package-website](https://soylentorange.github.io/sdarr/) for further information.
 #'
 #' @note The function can use parallel processing via the furrr-package. To use
 #'   this feature, set up a plan other than the default sequential strategy
