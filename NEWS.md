@@ -5,7 +5,8 @@
 * Reduced use of global variables to minimum (?)
 * Modified (lengthy) example of sdarr() with "donttest". 
 * Added (web-only) article for de-noising feature. 
-* Moved the vignette on validation to (web-only) articles. 
+* Moved the vignette on validation to (web-only) articles.
+* Update documentation.
 
 # sdarr 0.4.4
 

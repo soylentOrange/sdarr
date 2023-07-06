@@ -166,7 +166,7 @@ Next to the warnings raised by `sdarr()`, in the reporting message you can see a
 
 ## De-noising in sdarr.lazy
 
-A second modification to the original SDAR-algorithm is de-noising of the test record within `sdarr.lazy()` in case data quality checks have failed.  
+A second modification to the original SDAR-algorithm is de-noising of the test record within `sdarr.lazy()` in case the initial data quality checks have failed.  
 The quasi-static component of the noisy test record is identified by Variational Mode Decomposition (see: [Dragomiretskiy & Zosso (2014)](https://doi.org/10.1109/TSP.2013.2288675)) using the [VMDecomp-package](https://CRAN.R-project.org/package=VMDecomp). Finding the range for final fitting with the random sub-sampling approach is conducted on the de-noised data. The final fit will be calculated on the original (noisy) data. Still, warning messages will be given and careful inspection of the results is advisable.    
 
 ```{r low_data_quality with sdarr.lazy, fig.height=4, fig.width=6}

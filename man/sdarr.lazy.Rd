@@ -68,10 +68,12 @@ originally standardized in ASTM E3076-18. As the original version uses
 numerous linear regressions (\code{.lm.fit()} from the stats-package), can be
 painfully slow for test data with high resolution. The lazy variant of the
 algorithm will use several random sub-samples of the data to find the best
-estimate for the fit-range within the data.
-See the articles on \href{https://soylentorange.github.io/sdarr/articles/sdarr_validation.html}{validation} and
+estimate for the fit-range within the data. Additionally, the test data
+will be de-noised using Variational Mode Decomposition in case initial data
+quality checks have failed. See the articles on \href{https://soylentorange.github.io/sdarr/articles/sdarr_validation.html}{validation} and
 \href{https://soylentorange.github.io/sdarr/articles/excessive_noise_levels.html}{robustness against noise}
-on the \href{https://soylentorange.github.io/sdarr/}{package-website} for further information.
+on the \href{https://soylentorange.github.io/sdarr/}{package-website} for
+further information.
 }
 \note{
 The function can use parallel processing via the furrr-package. To use
@@ -119,6 +121,10 @@ https://doi.org/10.1520/E3076-18
 Graham, S., & Adler, M. (2011). Determining the Slope and Quality
 of Fit for the Linear Part of a Test Record. Journal of Testing and
 Evaluation - J TEST EVAL, 39. https://doi.org/10.1520/JTE103038
+
+Dragomiretskiy, K., & Zosso, D. (2014). Variational Mode
+Decomposition. IEEE Transactions on Signal Processing, 62(3), 531–544.
+https://doi.org/10.1109/TSP.2013.2288675
 }
 \seealso{
 \code{\link[=sdarr]{sdarr()}} for the standard SDAR-algorithm.
