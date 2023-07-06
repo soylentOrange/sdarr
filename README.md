@@ -8,8 +8,8 @@
 
 # sdarr
 
-The sdarr-package provides a R implementation of the SDAR algorithm for
-Slope Determination by Analysis of Residuals as standardized in [ASTM
+The sdarr-package provides a R implementation of the algorithm for Slope
+Determination by Analysis of Residuals (SDAR) as standardized in [ASTM
 E3076-18](https://doi.org/10.1520/E3076-18).  
 It allows for automated and objective linear-fitting of mechanical
 test-data. See a detailed description of the algorithm in the [NIST
@@ -190,7 +190,7 @@ Al_6060_T66.result.lazy <- sdarr.lazy(Al_6060_T66,
 #>       y-Range:                 25.484619140625 MPa - 84.7723388671875 MPa
 ```
 
-### plot functions
+### Plot Functions
 
 `sdarr()` and `sdarr.lazy()` will create diagnostic plots throughout
 calculations, which will only be shown when requested (i.e. set
@@ -263,7 +263,7 @@ Al_6060_T66.result %>% {
 
 <img src="man/figures/README-example-plot-fun-gg-1.png" width="100%" />
 
-## Acknowledgements
+# Acknowledgements
 
 The sdarr-package was created for the analysis of mechanical test data
 for the project LOBio, which is funded by the German ministry of

@@ -10,7 +10,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup, message=FALSE, warning=FALSE, include = FALSE}
+```{r setup, message = FALSE, warning = FALSE, include = FALSE}
 # attach required packages
 library(sdarr)
 library(magrittr)
@@ -28,11 +28,11 @@ future::plan(future::multisession,
 set.seed(50041180)
 ```
 
-As one of the first steps in the SDAR-algorithm, the test data is checked for digital resolution and excessive noise (see: [NIST Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050) or [ASTM E3076-18](https://doi.org/10.1520/E3076-18)). As stated in [NIST Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050) *...our analyses show that the use of SDAR is not advisable in case of noisy unloading/reloading cycles and/or in the presence of significant hysteresis, since the most linear portion identified by the algorithm may not necessarily represent the true elastic behavior of the specimen...*.  
+As one of the first steps in the Slope Determination by Analysis of Residuals (SDAR) algorithm, the test data is checked for digital resolution and excessive noise (see: [NIST Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050) or [ASTM E3076-18](https://doi.org/10.1520/E3076-18)). As stated in [NIST Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050) *...our analyses show that the use of SDAR is not advisable in case of noisy unloading/reloading cycles and/or in the presence of significant hysteresis, since the most linear portion identified by the algorithm may not necessarily represent the true elastic behavior of the specimen...*.  
 
 `sdarr.lazy()` thus includes a de-noising feature using Variational Mode Decomposition to be more robust against noise in the test data.  
 
-### Preparation of synthetic noisy test data
+## Preparation of Synthetic Noisy Test Data
 
 `synthesize_test_data()` is used to prepare a noisy and noise-free test record resembling tensile mechanical testing of aluminium (Al 6060 T66, values from the [MMPDS Handbook](https://ntrl.ntis.gov/NTRL/dashboard/searchResults/titleDetail/PB2003106632.xhtml), with a toe region added).
 
@@ -88,7 +88,7 @@ Gaussian noise is added to the synthetic test data when setting `enob.y_noise` o
 ```
 
 
-## Analysis of noisy data with sdarr  
+# Analysis of Noisy Data with sdarr  
 
 When failing to pass the tests for data quality, `sdarr()` will continue the evaluation of the data record but will issue a warning message as the results of fitting the linear regressions might be flawed by insufficient data quality. 
 
@@ -98,7 +98,7 @@ noisy_result <- Al_6060_T66.noisy %>%
   sdarr(strain, stress, showPlots = "n", savePlots = T)
 ```
 
-### Analysis results of (noisy) data with sdarr  
+## Analysis Results of Noisy Data with sdarr  
 
 Next to the warnings raised by `sdarr()`, in the reporting message you can see a deviation of the slope and offset from the parameters used to create the synthetic data. The slope is off by `r round(abs(slope.reference - as.numeric(noisy_result$sdar$finalSlope)), 0)` MPa (or `r round(abs(slope.reference - as.numeric(noisy_result$sdar$finalSlope))/slope.reference*100, 1)` %) and the intercept by `r round(abs(offset.reference - as.numeric(noisy_result$sdar$trueIntercept)), 2)` MPa (or `r round(abs(offset.reference - as.numeric(noisy_result$sdar$trueIntercept))/offset.reference*100, 1)` %).  
 
@@ -164,7 +164,7 @@ Next to the warnings raised by `sdarr()`, in the reporting message you can see a
   config(displaylogo = FALSE, showSendToCloud = FALSE)
 ```
 
-## De-noising in sdarr.lazy
+# De-noising in sdarr.lazy
 
 A second modification to the original SDAR-algorithm is de-noising of the test record within `sdarr.lazy()` in case the initial data quality checks have failed.  
 The quasi-static component of the noisy test record is identified by Variational Mode Decomposition (see: [Dragomiretskiy & Zosso (2014)](https://doi.org/10.1109/TSP.2013.2288675)) using the [VMDecomp-package](https://CRAN.R-project.org/package=VMDecomp). Finding the range for final fitting with the random sub-sampling approach is conducted on the de-noised data. The final fit will be calculated on the original (noisy) data. Still, warning messages will be given and careful inspection of the results is advisable.    
@@ -177,7 +177,7 @@ noisy_result.lazy <- Al_6060_T66.noisy %>%
              enforce_subsampling = TRUE, cutoff_probability = 0.9)
 ```
 
-### Analysis results of (noisy) data with sdarr.lazy  
+## Analysis Results of Noisy Data with sdarr.lazy  
 
 Next to the warnings raised from `sdarr.lazy()`, in the reporting message you can see a (a little less) deviation of the slope and offset from the parameters used to create the synthetic data. The slope is off by `r round(abs(slope.reference - as.numeric(noisy_result.lazy$sdar$finalSlope)), 0)` MPa (or `r round(abs(slope.reference - as.numeric(noisy_result.lazy$sdar$finalSlope))/slope.reference*100, 1)` %) and the intercept by `r round(abs(offset.reference - as.numeric(noisy_result.lazy$sdar$trueIntercept)), 2)` MPa (or `r round(abs(offset.reference - as.numeric(noisy_result.lazy$sdar$trueIntercept))/offset.reference*100, 1)` %).  
 
@@ -245,7 +245,7 @@ Next to the warnings raised from `sdarr.lazy()`, in the reporting message you ca
   config(displaylogo = FALSE, showSendToCloud = FALSE)
 ```
 
-## Summary
+# Summary
 
 The de-noising feature in `sdarr.lazy()` can improve the outcome of the analysis quite a bit. In the example provided, the deviation of the final slope is reduced from `r round(abs(slope.reference - as.numeric(noisy_result$sdar$finalSlope))/slope.reference*100, 1)` % using `sdarr()` to `r round(abs(slope.reference - as.numeric(noisy_result.lazy$sdar$finalSlope))/slope.reference*100, 1)` % when using `sdarr.lazy()`. Still, when noise levels are considered "excessive" by the standard, you might want to re-consider your testing approach...
   

@@ -11,7 +11,7 @@ knitr::opts_chunk$set(
 ```
 
 `
-```{r setup, message=FALSE, warning=FALSE}
+```{r setup, message = FALSE, warning = FALSE, include = FALSE}
 # attach required packages
 library(sdarr)
 library(magrittr)
@@ -26,14 +26,12 @@ future::plan(future::multisession,
 )
 ```
 
-# Validation of sdarr and sdarr.lazy
-
-Though no exhaustive validation has been conducted, the Reference Data Set *E3076-DS1(2018) File 01* mentioned in [ASTM E3076-18](https://doi.org/10.1520/E3076-18) as *...available for download from ASTM at https://www.astm.org/ COMMITTEE/E08.htm, under the heading, Additional Information...* has been used to check the results of this implementation. The Reference Data Set *E3076-DS1(2018) File 01* was also analyzed as benchmark in [NIST Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050) with minor differences to the expected results listed in the standard.
+Though no exhaustive validation has been conducted, the Reference Data Set *E3076-DS1(2018) File 01* mentioned in [ASTM E3076-18](https://doi.org/10.1520/E3076-18) as *...available for download from ASTM...* has been used to check the results of this implementation. The Reference Data Set *E3076-DS1(2018) File 01* was also analyzed as benchmark in [NIST Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050) with minor differences to the expected results listed in the standard.
   
   
 ## Reference Data Set
 
-A plot of the Reference Data Set (after downloading, unpacking and labelling) is given below.
+A plot of the Reference Data Set (after downloading, unpacking and labeling) for validation of the Slope Determination by Analysis of Residuals (SDAR) algorithm is given below.
 
 ```{r Reference_Data_Set, message=FALSE, warning=FALSE, include=FALSE, echo=FALSE}
 # Get Data from Reference Data Set E3076-DS1(2018)
@@ -127,7 +125,7 @@ E3076_DS1_2018 %>%
   config(displaylogo = FALSE, showSendToCloud = FALSE)
 ```
 
-## Standard algorithm (sdarr)
+# Validation of the standard SDAR-algorithm (sdarr)
 
 ```{r sdarr_check, fig.height=4, fig.width=6}
 # Run the algorithm
@@ -173,10 +171,11 @@ sdarr.results$plots$final.fit %>%
   config(displaylogo = FALSE, showSendToCloud = FALSE)
 ```
 
-### Validation Result
-The results of the analysis using `sdarr()` are practically identical to the results given in [ASTM E3076-18](https://doi.org/10.1520/E3076-18) and perfectly match the results from [NIST Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050) (except for omitting any rounding in sdarr). As stated in [NIST Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050) *...The few small discrepancies are most likely attributable to rounding errors...*.
+## Validation Result of the standard SDAR-algorithm (sdarr)
 
-## Random sub-sampling modification of the SDAR-algorithm (sdarr.lazy)
+The results of the analysis using `sdarr()` are practically identical to the results given in [ASTM E3076-18](https://doi.org/10.1520/E3076-18) and perfectly match the results from [NIST Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050) (except for omitting any rounding). As stated in [NIST Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050) *...The few small discrepancies are most likely attributable to rounding errors...*.
+
+# Validation of the Random Sub-sampling Modification of the SDAR-algorithm (sdarr.lazy)
 
 ```{r sdarr.lazy_check, fig.height=4, fig.width=6}
 # Run the algorithm (after setting a random seed)
@@ -223,7 +222,8 @@ sdarr.lazy.results$plots$final.fit %>%
   config(displaylogo = FALSE, showSendToCloud = FALSE)
 ```
 
-### Validation Result
+## Validation Result of the Random Sub-sampling Modification of the SDAR-algorithm (sdarr.lazy)
+
 At first glimpse, the results of the analysis using the random sub-sampling variant of the SDAR-algorithm `sdarr.lazy()` are not identical to the results given in [ASTM E3076-18](https://doi.org/10.1520/E3076-18) or the results from [NIST Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050) (except for omitting any rounding).  
 However, when considering the 95% confidence intervals (additionally given with the result from `sdarr()` and `sdarr.lazy()`) obtained from the final fitting in the standard SDAR-algorithm, the results of the lazy variant are well within the 95%-CI of the standard variant. There is only a minor difference in the y-range of the final fits resulting in slightly different final results.  
 Comparing the regression curves of `sdarr.lazy()` and `sdarr()` over the mechanical data, you see that there is practically no difference (zoom in ...a lot... to see a difference).
@@ -352,7 +352,7 @@ Comparing the regression curves of `sdarr.lazy()` and `sdarr()` over the mechani
   config(displaylogo = FALSE, showSendToCloud = FALSE)
 ```
 
-## Conclusions
+# Conclusions
 
 Even though this is more a benchmarking than a *real* validation, the results of `sdarr()` are practically identical to the results listed in [ASTM E3076-18](https://doi.org/10.1520/E3076-18) and in [NIST Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050). Considering the 95% confidence intervals of the fitting results, same seems true for the random sub-sampling modification used in `sdarr.lazy()`.
 
