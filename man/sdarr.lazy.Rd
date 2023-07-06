@@ -13,6 +13,8 @@ sdarr.lazy(
   cutoff_probability = 0.975,
   quality_penalty = 0.1,
   enforce_subsampling = FALSE,
+  enforce_denoising = FALSE,
+  vmd.alpha = 1000,
   verbose = "report",
   showPlots = "report",
   savePlots = FALSE
@@ -22,8 +24,8 @@ sdarr.lazy(
 \item{data}{Data record to analyze. Labels of the data columns will be used
 as units.}
 
-\item{x, y}{Use <\code{\link[dplyr:dplyr_tidy_select]{tidy-selections}}> to specify x
-and y within the data record.}
+\item{x, y}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Columns with x and y
+within data.}
 
 \item{fit.rep}{Repetitions of random sub-sampling and fitting.}
 
@@ -39,6 +41,13 @@ fit-quality metrics.}
 
 \item{enforce_subsampling}{Set to \code{TRUE}, to use sub-sampling method even
 when it is computationally more expensive than the standard SDAR-algorithm.}
+
+\item{enforce_denoising}{Set to \code{TRUE}, to enforce de-noising of the test
+record for finding the final fitting range.}
+
+\item{vmd.alpha}{A numeric value specifying the balancing parameter of the
+data-fidelity constraint in \link[VMDecomp:vmd]{VMDecomp::vmd} for de-noising when original
+data is failing the data quality checks.}
 
 \item{verbose, showPlots}{Give informational messages and plots during
 computation. Defaults to \code{"report"} to only show a report and a plot of the

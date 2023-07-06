@@ -63,13 +63,13 @@ Al_6060_T66 <- synthesize_test_data(
   ultimate.y = 215, ultimate.x = 0.091,
   offset = 10,
   toe.initial.y = 3, toe.max.y = 15,
-  toe.initial.slope = 34000
+  toe.initial.slope = 13600
 )
 
 # Analyze the test record
 Al_6060_T66.result <- sdarr(Al_6060_T66,
   x = strain, y = stress,
-  verbose = "r", showPlots = "r"
+  verbose = "r", showPlots = "r", savePlots = TRUE
 )
 #> Determination of Slope in the Linear Region of a Test Record:
 #> SDAR-algorithm
@@ -89,7 +89,7 @@ Al_6060_T66.result <- sdarr(Al_6060_T66,
 #>       Relative x-Noise:        1.12835262887974e-14
 #>       --> pass
 #>     y
-#>       Relative y-Noise:        0.0590566035999252
+#>       Relative y-Noise:        0.0628385403382046
 #>       --> pass
 #>   Fit Quality Metric: Curvature
 #>     1st Quartile
@@ -119,7 +119,7 @@ on a synthetic data set, which is based on the properties of aluminium
 and Standardization (MMPDS)
 Handbook](https://ntrl.ntis.gov/NTRL/dashboard/searchResults/titleDetail/PB2003106632.xhtml).
 A toe-region and a non-zero intercept are added to make the test data
-less boring.
+less boring (see above).
 
 `sdarr.lazy()` analyzes the data for the optimum size of the fitting
 region via random sub-sampling. It will give a small report as a message
@@ -128,27 +128,10 @@ after finding the optimum fit. It should confirm the Young’s-modulus of
 enforce random sub-sampling by setting `enforce_subsampling = TRUE`.
 
 To make use of multi-core processing, configure
-[furrr](https://furrr.futureverse.org/) to use a multisession strategy.
+[furrr](https://furrr.futureverse.org/) to use a multisession strategy
+(see above).
 
 ``` r
-library(sdarr)
-
-# setup multisession calculations with a maximum of 8 cores
-# (or however many cores are available...)
-future::plan(future::multisession,
-  workers = min(c(parallelly::availableCores(), 8))
-)
-
-# Synthesize a test record resembling Al 6060 T66
-# (Values from MMPDS Handbook, with a toe region added)
-Al_6060_T66 <- synthesize_test_data(
-  slope = 68000, yield.y = 160,
-  ultimate.y = 215, ultimate.x = 0.091,
-  offset = 10,
-  toe.initial.y = 3, toe.max.y = 15,
-  toe.initial.slope = 34000
-)
-
 # set a random seed
 set.seed(50041180)
 
@@ -158,7 +141,7 @@ Al_6060_T66.result.lazy <- sdarr.lazy(Al_6060_T66,
   x = strain, y = stress,
   cutoff_probability = 0.8,
   enforce_subsampling = TRUE,
-  verbose = "r", showPlots = "r"
+  verbose = "r", showPlots = "n"
 )
 #> Determination of Slope in the Linear Region of a Test Record:
 #>   lazy algorithm requires more fits than standard SDAR-algorithm:  
@@ -187,7 +170,7 @@ Al_6060_T66.result.lazy <- sdarr.lazy(Al_6060_T66,
 #>       Relative x-Noise:        1.12835262887974e-14
 #>       --> pass
 #>     y
-#>       Relative y-Noise:        0.0590566035999252
+#>       Relative y-Noise:        0.0628385403382046
 #>       --> pass
 #>   Fit Quality Metric: Curvature
 #>     1st Quartile
@@ -207,8 +190,6 @@ Al_6060_T66.result.lazy <- sdarr.lazy(Al_6060_T66,
 #>       y-Range:                 25.484619140625 MPa - 84.7723388671875 MPa
 ```
 
-<img src="man/figures/README-example-sdar.lazy-1.png" width="100%" />
-
 ### plot functions
 
 `sdarr()` and `sdarr.lazy()` will create diagnostic plots throughout
@@ -222,72 +203,65 @@ you can easily tap their environment to convert it into e.g. a
 [ggplot2-graphic](https://ggplot2.tidyverse.org/).
 
 ``` r
-library(sdarr)
-# satisfy pipe addiction...
-library(magrittr)
-# make nice and shiny graphics withh ggplot2...
-library(ggplot2)
 
-# setup multisession calculations with a maximum of 8 cores
-# (or however many cores are available...)
-future::plan(future::multisession,
-  workers = min(c(parallelly::availableCores(), 8))
-)
-
-# Synthesize a test record resembling Al 6060 T66
-# (Values from MMPDS Handbook, with a toe region added)
-Al_6060_T66 <- synthesize_test_data(
-  slope = 68000, yield.y = 160,
-  ultimate.y = 215, ultimate.x = 0.091,
-  offset = 10,
-  toe.initial.y = 3, toe.max.y = 15,
-  toe.initial.slope = 34000
-)
-
-# Analyze the test record using the standard algorithm
-Al_6060_T66.result <- sdarr(Al_6060_T66,
-  x = strain, y = stress,
-  verbose = "n", showPlots = "n", savePlots = TRUE
-)
-
-# show plot of final fit using the plot function from the result
+# show plot of final fit using the plot function from the result (see above)
 Al_6060_T66.result$plots$final.fit()
 ```
 
 <img src="man/figures/README-example-plot-fun-1.png" width="100%" />
 
 ``` r
+# satisfy pipe addiction...
+library(magrittr)
+# make nice and shiny graphics withh ggplot2...
+library(ggplot2) 
 
 # plot the final fit using ggplot2
-{
+Al_6060_T66.result %>% {
+  
   # tap the environment of the crated plot-function
-  plot.env <- rlang::fn_env(Al_6060_T66.result$plots$final.fit)
+  plot.env <- rlang::fn_env(.$plots$final.fit)
 
   # get data and labels
   plot.data <- plot.env$plot.data
   plot.main <- plot.env$plot.main
   plot.xlab <- plot.env$plot.xlab
   plot.ylab <- plot.env$plot.ylab
-  y.data.max <- plot.data$y.data %>% max()
+  plot.y.data.max <- plot.data$y.data %>% max()
+  plot.y.lowerBound <- plot.env$y.lowerBound
+  plot.y.upperBound <- plot.env$y.upperBound
 
   # create the ggplot2
   plot.data %>% ggplot(aes(x = x.data, y = y.data, color = "Al_6060_T66")) +
     geom_line() +
     geom_line(
       data = plot.data %>%
-        dplyr::filter(y.fit <= y.data.max),
+        dplyr::filter(y.fit <= plot.y.data.max),
       aes(x = x.data, y = y.fit, color = "fit (sdarr)")
     ) +
+    geom_hline(aes(color = "fit range", 
+                   yintercept = plot.y.lowerBound),
+               linetype = "dashed",
+               show.legend = TRUE) +
+    geom_hline(aes(color = "fit range", 
+                   yintercept = plot.y.upperBound),
+               linetype = "dashed",
+               show.legend = TRUE) +
     theme_bw() +
     labs(
       title = plot.main,
       x = plot.xlab,
-      y = plot.ylab
+      y = plot.ylab,
+      caption = paste0("Result of the SDAR-algorithm:\n\nFinal Slope: ",
+                       round(.$sdar$finalSlope/1000, 1), " GPa\nTrue Offset: ",
+                       round(.$sdar$trueIntercept, 1), " MPa\n\nFit Range: ",
+                       round(plot.y.lowerBound, 1), " MPa - ",
+                       round(plot.y.upperBound, 1), " MPa")
     )
 }
 ```
 
-<img src="man/figures/README-example-plot-fun-2.png" width="100%" />
+<img src="man/figures/README-example-plot-fun-gg-1.png" width="100%" />
 
 ## Acknowledgements
 

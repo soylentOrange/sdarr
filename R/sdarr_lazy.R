@@ -5,6 +5,7 @@ sdarr_execute.lazy <- function(prepared_data,
                                normalized_data.hint = NULL,
                                denoise.x = FALSE,
                                denoise.y = FALSE,
+                               vmd.alpha = 1000,
                                fit.rep, fit.candidates,
                                optimum.range.size,
                                cutoff_probability,
@@ -38,13 +39,13 @@ sdarr_execute.lazy <- function(prepared_data,
         otr.info = otr.info,
         raise_offset_times = raise_offset_times,
         denoise.x = denoise.x,
-        denoise.y = denoise.x,
+        denoise.y = denoise.y,
+        vmd.alpha = vmd.alpha,
         verbose = verbose.all,
         showPlots = showPlots.all,
         savePlots = savePlots
       )
     }
-
 
     # find optimum fits and determine summary of data & fit quality metrics
     optimum_fits <- find_linear_regressions.subsampled(
@@ -155,7 +156,13 @@ sdarr_execute.lazy <- function(prepared_data,
     ))
 
   # re-do normalization without de-noising
+  plot.otr.denoised <- NULL
   if (denoise.x || denoise.y) {
+    if(savePlots) {
+      # save the plot of de-noised data
+      plot.otr.denoised <- normalized_data$plots$plot.otr.denoised
+    }
+
     normalized_data <- normalize_data(
       data = prepared_data,
       otr.info = otr.info,
@@ -359,6 +366,13 @@ sdarr_execute.lazy <- function(prepared_data,
       "residuals" = assembled_results$Fit_Quality_Metrics$plots$plot.residuals
     )))
 
+    # append plot of de-noised (partial) data, if available
+    if(!is.null(plot.otr.denoised)) {
+      results$plots <- results$plots %>% append(list(
+        "otr.denoised" = plot.otr.denoised
+      ))
+    }
+
     results$Data_Quality_Metrics$digitalResolution$plots <- NULL
     results$Fit_Quality_Metrics$plots <- NULL
   }
@@ -412,6 +426,13 @@ sdarr_execute.lazy <- function(prepared_data,
 #' @param enforce_subsampling Set to `TRUE`, to use sub-sampling method even
 #'   when it is computationally more expensive than the standard SDAR-algorithm.
 #'
+#' @param enforce_denoising Set to `TRUE`, to enforce de-noising of the test
+#'   record for finding the final fitting range.
+#'
+#' @param vmd.alpha A numeric value specifying the balancing parameter of the
+#'   data-fidelity constraint in [VMDecomp::vmd] for de-noising when original
+#'   data is failing the data quality checks.
+#'
 #' @seealso [sdarr()] for the standard SDAR-algorithm.
 #'
 #' @returns A list containing a data-frame with the results of the final fit,
@@ -450,6 +471,8 @@ sdarr.lazy <- function(data, x, y, fit.rep = 5,
                        cutoff_probability = 0.975,
                        quality_penalty = 0.1,
                        enforce_subsampling = FALSE,
+                       enforce_denoising = FALSE,
+                       vmd.alpha = 1000,
                        verbose = "report",
                        showPlots = "report",
                        savePlots = FALSE) {
@@ -520,67 +543,89 @@ sdarr.lazy <- function(data, x, y, fit.rep = 5,
     message("Determination of Slope in the Linear Region of a Test Record:")
   }
 
-  # normalize data for initial quality check
-  normalized_data <- normalize_data(
-    data = prepared_data,
-    otr.info = otr.info,
-    raise_offset_times = 0,
-    denoise.x = FALSE,
-    denoise.y = FALSE,
-    verbose = verbose.all,
-    showPlots = showPlots.all,
-    savePlots = savePlots
-  )
+  if(enforce_denoising) {
+    if (verbose.report) {
+      message("  Proceeding with de-noised data...\n")
+      denoise.x <- TRUE
+      denoise.y <- TRUE
 
-  # get initial data quality metrics
-  data_quality_metrics <- check_data_quality.lazy(normalized_data$data.normalized)
-  denoise.x <- !(data_quality_metrics$passed.check.noise.x &&
-    data_quality_metrics$passed.check.resolution.x)
-  denoise.y <- !(data_quality_metrics$passed.check.noise.y &&
-    data_quality_metrics$passed.check.resolution.y)
-
-  # Check for noise in data quality metrics
-  if (denoise.x || denoise.y) {
-    # normalize data for fall-back quality check
-    # use de-noising, when quality-metrics indicate a problem
+      # use de-noising, as requested
+      normalized_data <- normalize_data(
+        data = prepared_data,
+        otr.info = otr.info,
+        raise_offset_times = 0,
+        denoise.x = denoise.x,
+        denoise.y = denoise.y,
+        vmd.alpha = vmd.alpha,
+        verbose = FALSE,
+        showPlots = FALSE,
+        savePlots = TRUE
+      )
+    }
+  } else {
+    # normalize data for initial quality check
     normalized_data <- normalize_data(
       data = prepared_data,
       otr.info = otr.info,
       raise_offset_times = 0,
-      denoise.x = denoise.x,
-      denoise.y = denoise.y,
-      verbose = FALSE,
-      showPlots = FALSE,
-      savePlots = FALSE
+      denoise.x = FALSE,
+      denoise.y = FALSE,
+      verbose = verbose.all,
+      showPlots = showPlots.all,
+      savePlots = savePlots
     )
 
-    # get data quality metrics of de-noised data
+    # get initial data quality metrics
     data_quality_metrics <- check_data_quality.lazy(normalized_data$data.normalized)
+    denoise.x <- !(data_quality_metrics$passed.check.noise.x &&
+                     data_quality_metrics$passed.check.resolution.x)
+    denoise.y <- !(data_quality_metrics$passed.check.noise.y &&
+                     data_quality_metrics$passed.check.resolution.y)
 
-    # check results...
-    if (data_quality_metrics$passed.check) {
-      if (verbose.report) {
-        message("  Data quality checks of original test record failed!")
-        message("  Proceeding with de-noised data...\n")
+    # Check for noise in data quality metrics
+    if (denoise.x || denoise.y) {
+      # normalize data for fall-back quality check
+      # use de-noising, when quality-metrics indicate a problem
+      normalized_data <- normalize_data(
+        data = prepared_data,
+        otr.info = otr.info,
+        raise_offset_times = 0,
+        denoise.x = denoise.x,
+        denoise.y = denoise.y,
+        vmd.alpha = vmd.alpha,
+        verbose = FALSE,
+        showPlots = FALSE,
+        savePlots = TRUE
+      )
+
+      # get data quality metrics of de-noised data
+      data_quality_metrics <- check_data_quality.lazy(normalized_data$data.normalized)
+
+      # check results...
+      if (data_quality_metrics$passed.check) {
+        if (verbose.report) {
+          message("  Data quality checks of original test record failed!")
+          message("  Proceeding with de-noised data...\n")
+        }
       }
     }
-  }
 
-  # Check data quality metrics and use standard-variant in case of failing to
-  # pass check (again)
-  if (!data_quality_metrics$passed.check) {
-    if (verbose.report) {
-      message("  Data quality checks of original test record failed!")
-      message("  Examine plots of Standard SDAR-algorithm to determine how to proceed.\n")
+    # Check data quality metrics and use standard-variant in case of failing to
+    # pass check (again)
+    if (!data_quality_metrics$passed.check) {
+      if (verbose.report) {
+        message("  Data quality checks of de-noised test record failed!")
+        message("  Examine plots of Standard SDAR-algorithm to determine how to proceed.\n")
+      }
+
+      # execute the standard SDAR-algorithm
+      result <- sdarr_execute(
+        prepared_data, otr.info, verbose.all, verbose.report,
+        showPlots.all, showPlots.report, savePlots
+      )
+      result$sdar <- result$sdar %>% dplyr::mutate("method" = "SDAR")
+      return(result)
     }
-
-    # execute the standard SDAR-algorithm
-    result <- sdarr_execute(
-      prepared_data, otr.info, verbose.all, verbose.report,
-      showPlots.all, showPlots.report, savePlots
-    )
-    result$sdar <- result$sdar %>% dplyr::mutate("method" = "SDAR")
-    return(result)
   }
 
   # find optimum range for sub-sampling
@@ -654,6 +699,7 @@ sdarr.lazy <- function(data, x, y, fit.rep = 5,
     normalized_data.hint = normalized_data,
     denoise.x = denoise.x,
     denoise.y = denoise.y,
+    vmd.alpha = vmd.alpha,
     fit.rep = fit.rep,
     fit.candidates = fit.candidates,
     optimum.range.size = optimum_size$optimum.range.size,

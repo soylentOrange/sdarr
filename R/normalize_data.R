@@ -98,9 +98,11 @@ normalize_data <- function(data, otr.info = NULL,
                            raise_offset_times = 0,
                            denoise.x = FALSE,
                            denoise.y = FALSE,
+                           vmd.alpha = 1500,
                            verbose = FALSE,
                            showPlots = FALSE,
                            savePlots = FALSE) {
+
   # just normalize and return normalized data (with info and (possibly) plots)
   if (denoise.x == FALSE && denoise.y == FALSE) {
     normalized_data <- normalize_data.execute(
@@ -126,6 +128,7 @@ normalize_data <- function(data, otr.info = NULL,
       data_denoised$x.data <- denoise_vector(
         data_denoised$x.data %>%
           as.numeric(),
+        vmd.alpha = vmd.alpha,
         verbose = FALSE
       )
     }
@@ -134,6 +137,7 @@ normalize_data <- function(data, otr.info = NULL,
       data_denoised$y.data <- denoise_vector(
         data_denoised$y.data %>%
           as.numeric(),
+        vmd.alpha = vmd.alpha,
         verbose = FALSE
       )
     }
@@ -224,6 +228,38 @@ normalize_data <- function(data, otr.info = NULL,
       plot.otr()
     }
 
+    # create function for plot of de-noised Original Test Record
+    if(denoise.y || denoise.x) {
+      plot.otr.denoised <- carrier::crate(
+        function(value) {
+          plot(
+            x = unlist(plot.data$x.data.denoised, TRUE, FALSE),
+            y = unlist(plot.data$y.data.denoised, TRUE, FALSE),
+            type = "l",
+            col = "red",
+            lwd = 1.25,
+            main = plot.main,
+            xlab = plot.xlab,
+            ylab = plot.ylab
+          )
+        },
+        plot.data = data.frame(
+          "x.data.denoised" = data_denoised$x.data %>% unlist(TRUE, FALSE),
+          "y.data.denoised" = data_denoised$y.data %>% unlist(TRUE, FALSE)
+        ),
+        plot.x = "x.data.denoised",
+        plot.y = "y.data.denoised",
+        plot.xlab = x.lab,
+        plot.ylab = y.lab,
+        plot.main = "De-noised Original Test Record (limited range)"
+      )
+
+      # Plot Original Test Record
+      if (showPlots) {
+        plot.otr.denoised()
+      }
+    }
+
     # create function for plot of Shifted, Truncated and Normalized Test Record
     plot.normalized <- carrier::crate(
       function(value) {
@@ -265,6 +301,13 @@ normalize_data <- function(data, otr.info = NULL,
         "plot.normalized" = plot.normalized
       )
     ))
+
+    # append plot of de-noised (partial) data, if available
+    if(denoise.y || denoise.x) {
+      results$plots <- results$plots %>% append(list(
+        "plot.otr.denoised" = plot.otr.denoised
+      ))
+    }
   }
 
   # return results

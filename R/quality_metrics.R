@@ -1,20 +1,23 @@
 #' First Data Quality Metric
 #'
-#' @note
-#' Refer to chapter 6.4 in ASTM E3076-18
+#' @note Refer to chapter 6.4 in ASTM E3076-18
 #'
-#' @description
-#' Check for noise and resolution of the normalized data
-#' pass the normalized test-data and make sure that x and y are in columns "x.normalized" and "y.normalized"
+#' @description Check for noise and resolution of the normalized data pass the
+#' normalized test-data and make sure that x and y are in columns "x.normalized"
+#' and "y.normalized"
 #'
 #' @returns a list with noise metrics for normalized x and y
 #'
 #' @noRd
-check_data_quality.noise <- function(data.normalized, verbose = FALSE, warn = TRUE) {
+check_data_quality.noise <- function(data.normalized,
+                                     verbose = FALSE,
+                                     warn = TRUE) {
   # calculate noise for x and y
   normalized.noise <- data.normalized %>%
-    dplyr::mutate("delta.x" = dplyr::lead(.data$x.normalized) - .data$x.normalized) %>%
-    dplyr::mutate("delta.y" = dplyr::lead(.data$y.normalized) - .data$y.normalized) %>%
+    dplyr::mutate("delta.x" = dplyr::lead(.data$x.normalized) -
+                    .data$x.normalized) %>%
+    dplyr::mutate("delta.y" = dplyr::lead(.data$y.normalized) -
+                    .data$y.normalized) %>%
     utils::head(-1) %>%
     dplyr::mutate("delta.x.r" = .data$delta.x - mean(.data$delta.x)) %>%
     dplyr::mutate("delta.y.r" = .data$delta.y - mean(.data$delta.y)) %>%
@@ -25,8 +28,10 @@ check_data_quality.noise <- function(data.normalized, verbose = FALSE, warn = TR
       )
     }
 
-  normalized.noise.x <- normalized.noise[1, "normalized.noise.x"] %>% unlist(TRUE, FALSE)
-  normalized.noise.y <- normalized.noise[1, "normalized.noise.y"] %>% unlist(TRUE, FALSE)
+  normalized.noise.x <- normalized.noise[1, "normalized.noise.x"] %>%
+    unlist(TRUE, FALSE)
+  normalized.noise.y <- normalized.noise[1, "normalized.noise.y"] %>%
+    unlist(TRUE, FALSE)
   relative.noise.x <- normalized.noise.x / 0.005
   relative.noise.y <- normalized.noise.y / 0.005
   passed.check.noise.x <- ifelse(relative.noise.x <= 1, TRUE, FALSE)
@@ -45,11 +50,15 @@ check_data_quality.noise <- function(data.normalized, verbose = FALSE, warn = TR
   # Warn in case of excessive noise
   if (warn) {
     if (!passed.check.noise.x) {
-      warning(paste0("excessive relative noise for x-values (", round(relative.noise.x * 100, 1), " %)\n"), call. = FALSE)
+      warning(paste0("Excessive relative noise for x-values (",
+                     round(relative.noise.x * 100, 1), " %)\n"),
+              call. = FALSE)
     }
 
     if (!passed.check.noise.y) {
-      warning(paste0("excessive relative noise for y-values (", round(relative.noise.y * 100, 1), " %)\n"), call. = FALSE)
+      warning(paste0("Excessive relative noise for y-values (",
+                     round(relative.noise.y * 100, 1), " %)\n"),
+              call. = FALSE)
     }
   }
 
@@ -72,12 +81,11 @@ check_data_quality.noise <- function(data.normalized, verbose = FALSE, warn = TR
 
 #' Second Data Quality Metric
 #'
-#' @note
-#' Refer to chapter 6.5 in ASTM E3076-18
+#' @note Refer to chapter 6.5 in ASTM E3076-18
 #'
-#' @description
-#' Check for noise and resolution of the normalized data
-#' pass the normalized test-data and make sure that x and y are in columns "x.normalized" and "y.normalized"
+#' @description Check for noise and resolution of the normalized data pass the
+#' normalized test-data and make sure that x and y are in columns "x.normalized"
+#' and "y.normalized"
 #'
 #' @returns a list with resolution metrics for x and y
 #'
@@ -87,16 +95,21 @@ check_data_quality.resolution <- function(data.normalized,
                                           showPlots = FALSE,
                                           savePlots = FALSE,
                                           warn = TRUE) {
-  # The optimum digital resolution, δ (delta.optimal), for the normalized data set is:
+  # The optimum digital resolution, δ (delta.optimal), for the normalized data
+  # set is:
   delta.optimal <- 2^-12
 
   # calculate resolution for x and y
   normalized.resolution <- data.normalized %>%
-    dplyr::mutate("delta.x" = dplyr::lead(.data$x.normalized) - .data$x.normalized) %>%
-    dplyr::mutate("delta.y" = dplyr::lead(.data$y.normalized) - .data$y.normalized) %>%
+    dplyr::mutate("delta.x" = dplyr::lead(.data$x.normalized) -
+                    .data$x.normalized) %>%
+    dplyr::mutate("delta.y" = dplyr::lead(.data$y.normalized) -
+                    .data$y.normalized) %>%
     utils::head(-1) %>%
-    dplyr::mutate("delta.delta.x" = abs(dplyr::lead(.data$delta.x) - .data$delta.x)) %>%
-    dplyr::mutate("delta.delta.y" = abs(dplyr::lead(.data$delta.y) - .data$delta.y)) %>%
+    dplyr::mutate("delta.delta.x" = abs(dplyr::lead(.data$delta.x) -
+                                          .data$delta.x)) %>%
+    dplyr::mutate("delta.delta.y" = abs(dplyr::lead(.data$delta.y) -
+                                          .data$delta.y)) %>%
     utils::head(-1) %>%
     {
       data.frame(
@@ -113,7 +126,8 @@ check_data_quality.resolution <- function(data.normalized,
   n_bins.delta.delta.x <- ceiling(max.delta.delta.x / delta.optimal)
   bin.breaks.x <- seq(-.5, n_bins.delta.delta.x + 1, 1)
 
-  sdar.hist.x <- graphics::hist(normalized.resolution$delta.delta.x / delta.optimal,
+  sdar.hist.x <- graphics::hist(
+    normalized.resolution$delta.delta.x / delta.optimal,
     breaks = bin.breaks.x, plot = showPlots,
     main = "Histogram for assessment of x-Resolution",
     xlab = "\u2206\u2206xi (binned by \u03B4)", warn.unused = FALSE
@@ -124,15 +138,18 @@ check_data_quality.resolution <- function(data.normalized,
     which.max()
   relativeResolution.x <- z.delta.delta.x / 3
   passed.check.resolution.x <- ifelse(relativeResolution.x <= 1, TRUE, FALSE)
-  passed.check.binz.ratio.x <- ifelse((sdar.hist.x[["counts"]][z.delta.delta.x + 1]) / samples > 0.25, FALSE, TRUE)
-  passed.check.bin0.ratio.x <- ifelse((sdar.hist.x[["counts"]][1]) / samples > 0.25, FALSE, TRUE)
+  passed.check.binz.ratio.x <- ifelse(
+    (sdar.hist.x[["counts"]][z.delta.delta.x + 1]) / samples > 0.25, FALSE, TRUE)
+  passed.check.bin0.ratio.x <- ifelse(
+    (sdar.hist.x[["counts"]][1]) / samples > 0.25, FALSE, TRUE)
 
   # Analyze y-resolution
   max.delta.delta.y <- normalized.resolution$delta.delta.y %>% max()
   n_bins.delta.delta.y <- ceiling(max.delta.delta.y / delta.optimal)
   bin.breaks.y <- seq(-.5, n_bins.delta.delta.y + 1, 1)
 
-  sdar.hist.y <- graphics::hist(normalized.resolution$delta.delta.y / delta.optimal,
+  sdar.hist.y <- graphics::hist(
+    normalized.resolution$delta.delta.y / delta.optimal,
     breaks = bin.breaks.y, plot = showPlots,
     main = "Histogram for assessment of y-Resolution",
     xlab = "\u2206\u2206yi (binned by \u03B4)", warn.unused = FALSE
@@ -143,8 +160,10 @@ check_data_quality.resolution <- function(data.normalized,
     which.max()
   relativeResolution.y <- z.delta.delta.y / 3
   passed.check.resolution.y <- ifelse(relativeResolution.y <= 1, TRUE, FALSE)
-  passed.check.binz.ratio.y <- ifelse((sdar.hist.y[["counts"]][z.delta.delta.y + 1]) / samples > 0.25, FALSE, TRUE)
-  passed.check.bin0.ratio.y <- ifelse((sdar.hist.y[["counts"]][1]) / samples > 0.25, FALSE, TRUE)
+  passed.check.binz.ratio.y <- ifelse(
+    (sdar.hist.y[["counts"]][z.delta.delta.y + 1]) / samples > 0.25, FALSE, TRUE)
+  passed.check.bin0.ratio.y <- ifelse(
+    (sdar.hist.y[["counts"]][1]) / samples > 0.25, FALSE, TRUE)
 
   # secondary checks. for resolution if first have failed
   if (!passed.check.resolution.x) {
@@ -165,14 +184,14 @@ check_data_quality.resolution <- function(data.normalized,
   if (warn) {
     if (!passed.check.resolution.x) {
       warning(paste0(
-        "relative digital resolution of x-values might be insufficient (",
+        "Relative digital resolution of x-values might be insufficient (",
         round(relativeResolution.x * 100, 1), " %)\n"
       ), call. = FALSE)
     }
 
     if (!passed.check.resolution.y) {
       warning(paste0(
-        "relative digital resolution of y-values might be insufficient (",
+        "Relative digital resolution of y-values might be insufficient (",
         round(relativeResolution.y * 100, 1), " %)\n"
       ), call. = FALSE)
     }
@@ -276,14 +295,17 @@ check_data_quality <- function(data.normalized,
 
 
 
-# simplified version of check_data_quality, will return only the (boolean) result of the checks
+# simplified version of check_data_quality, will return only the (boolean)
+# result of the checks
 check_data_quality.lazy <- function(data.normalized) {
   # satisfy pipe addiction...
   `%>%` <- magrittr::`%>%`
 
   # get and check both data quality metrics
-  digitalResolution <- check_data_quality.resolution(data.normalized, warn = FALSE)
-  Noise <- check_data_quality.noise(data.normalized, warn = FALSE)
+  digitalResolution <- check_data_quality.resolution(data.normalized,
+                                                     warn = FALSE)
+  Noise <- check_data_quality.noise(data.normalized,
+                                    warn = FALSE)
 
   list(
     "passed.check" = digitalResolution$passed.check && Noise$passed.check,
@@ -321,7 +343,8 @@ check_fit_quality <- function(data.normalized,
       fit[["otr.idx.start"]],
       fit[["otr.idx.end"]]
     )) %>%
-    dplyr::mutate("y.residual" = .data[["y.normalized"]] - (m * .data[["x.normalized"]] + b))
+    dplyr::mutate("y.residual" = .data[["y.normalized"]] -
+                    (m * .data[["x.normalized"]] + b))
 
   # find range of data in normalized x and y
   x.min <- data.filtered$x.normalized %>% min()
@@ -376,29 +399,41 @@ check_fit_quality <- function(data.normalized,
   if (verbose) {
     message("  Fit Quality Metric: Curvature")
     message("    1st Quartile")
-    message(paste0("      Number of Points:         ", number_of_points.first_quartile))
-    message(paste0("      Residual Slope:           ", residual_slope.first_quartile))
-    message(paste0("      Allowable Residual Slope: ", allowable_residual_slope))
-    message(paste0("      Relative Residual Slope:  ", relative_residual_slope.first_quartile))
+    message(paste0("      Number of Points:         ",
+                   number_of_points.first_quartile))
+    message(paste0("      Residual Slope:           ",
+                   residual_slope.first_quartile))
+    message(paste0("      Allowable Residual Slope: ",
+                   allowable_residual_slope))
+    message(paste0("      Relative Residual Slope:  ",
+                   relative_residual_slope.first_quartile))
     message("    4th Quartile")
-    message(paste0("      Number of Points:         ", number_of_points.fourth_quartile))
-    message(paste0("      Residual Slope:           ", residual_slope.fourth_quartile))
-    message(paste0("      Allowable Residual Slope: ", allowable_residual_slope))
-    message(paste0("      Relative Residual Slope:  ", relative_residual_slope.fourth_quartile, "\n"))
+    message(paste0("      Number of Points:         ",
+                   number_of_points.fourth_quartile))
+    message(paste0("      Residual Slope:           ",
+                   residual_slope.fourth_quartile))
+    message(paste0("      Allowable Residual Slope: ",
+                   allowable_residual_slope))
+    message(paste0("      Relative Residual Slope:  ",
+                   relative_residual_slope.fourth_quartile, "\n"))
 
     message("  Second Fit Quality Metric")
-    message(paste0("      normalized y-range:       ", y.min, " - ", y.max))
-    message(paste0("      relative fit range:       ", relative_fit_range, "\n"))
+    message(paste0("      normalized y-range:       ",
+                   y.min, " - ", y.max))
+    message(paste0("      relative fit range:       ",
+                   relative_fit_range, "\n"))
   }
 
   # give warning when quality metric checks have failed
   if (warn) {
     if (!(check.passed.first_quartile && check.passed.fourth_quartile)) {
-      warning("First Fit Quality Metric checks failed: Excessive curvature found in the vicinity of the fitted range!\n", call. = FALSE)
+      warning("Excessive curvature found in the vicinity of the fitted range!\n",
+              call. = FALSE)
     }
 
     if (!check.passed.relative_fit_range) {
-      warning("Second Fit Quality Metric check failed: unacceptably small linear region!\n", call. = FALSE)
+      warning("Unacceptably small linear region!\n",
+              call. = FALSE)
     }
   }
 
@@ -427,11 +462,13 @@ check_fit_quality <- function(data.normalized,
           xlab = plot.xlab,
           ylab = plot.ylab,
           xlim = c(x.min - 0.05 * x.range, x.max + 0.05 * x.range),
-          ylim = c(y.residual.min - 0.05 * y.residual.range, y.residual.max + 0.1 * y.residual.range)
+          ylim = c(y.residual.min - 0.05 * y.residual.range,
+                   y.residual.max + 0.1 * y.residual.range)
         )
 
         # add vertical lines, arrows, and text for the 1st and 4th quartiles
-        graphics::abline(v = c(x.end.first_quartile, x.start.fourth_quartile), lty = c("dotdash", "dotdash"))
+        graphics::abline(v = c(x.end.first_quartile, x.start.fourth_quartile),
+                         lty = c("dotdash", "dotdash"))
         graphics::arrows(
           x0 = x.end.first_quartile,
           y0 = y.residual.max + 0.05 * y.residual.range,
@@ -439,7 +476,9 @@ check_fit_quality <- function(data.normalized,
           y1 = y.residual.max + 0.05 * y.residual.range,
           length = 0.1
         )
-        graphics::text(x.min + 0.125 * x.range, y.residual.max + 0.1 * y.residual.range, "1st Quartile")
+        graphics::text(x.min + 0.125 * x.range,
+                       y.residual.max + 0.1 * y.residual.range,
+                       "1st Quartile")
         graphics::arrows(
           x0 = x.start.fourth_quartile,
           y0 = y.residual.max + 0.05 * y.residual.range,
@@ -447,11 +486,15 @@ check_fit_quality <- function(data.normalized,
           y1 = y.residual.max + 0.05 * y.residual.range,
           length = 0.1
         )
-        graphics::text(x.max - 0.125 * x.range, y.residual.max + 0.1 * y.residual.range, "4th Quartile")
+        graphics::text(x.max - 0.125 * x.range,
+                       y.residual.max + 0.1 * y.residual.range,
+                       "4th Quartile")
       },
       plot.data = data.frame(
-        "x.normalized" = data.filtered$x.normalized %>% unlist(TRUE, FALSE),
-        "y.residual" = data.filtered$y.residual %>% unlist(TRUE, FALSE)
+        "x.normalized" = data.filtered$x.normalized %>%
+          unlist(TRUE, FALSE),
+        "y.residual" = data.filtered$y.residual %>%
+          unlist(TRUE, FALSE)
       ),
       plot.x = "x.normalized",
       plot.y = "y.residual",
@@ -510,7 +553,9 @@ check_fit_quality <- function(data.normalized,
 #'
 #' @noRd
 check_fit_quality.lazy <- function(data.normalized, fit) {
-  fit_quality_metrics <- check_fit_quality(data.normalized, fit, FALSE, FALSE, FALSE, FALSE)
+  fit_quality_metrics <- check_fit_quality(data.normalized,
+                                           fit,
+                                           FALSE, FALSE, FALSE, FALSE)
 
   list(
     "passed.check" = fit_quality_metrics$passed.check,

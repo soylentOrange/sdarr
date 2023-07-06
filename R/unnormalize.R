@@ -78,7 +78,9 @@ unnormalize_results <- function(normalized_data,
   # give a warning when quality checks have failed
   if (warn) {
     if (!all.checks.passed) {
-      warning("Some quality checks failed: result might be inaccurate or completely wrong!\n")
+      warning(
+        "Quality checks failed: result might be inaccurate!\n",
+        call. = FALSE)
     }
   }
 

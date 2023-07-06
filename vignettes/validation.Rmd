@@ -1,8 +1,8 @@
 ---
-title: "Validation against Reference Data Set E3076-DS1(2018)"
+title: "Validation against Reference Data Set"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Validation against Reference Data Set E3076-DS1(2018)}
+  %\VignetteIndexEntry{Validation against Reference Data Set}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -127,7 +127,7 @@ E3076_DS1_2018 %>%
         y = "force (in kN)"
       )
   } %>%
-  ggplotly(dynamicTicks = TRUE) %>%
+  ggplotly(dynamicTicks = TRUE, originalData = FALSE) %>%
   config(displaylogo = FALSE, showSendToCloud = FALSE)
 ```
 
@@ -173,7 +173,7 @@ sdarr.results$plots$final.fit %>%
         y = plot.ylab
       )
   } %>%
-  ggplotly(dynamicTicks = TRUE) %>%
+  ggplotly(dynamicTicks = TRUE, originalData = FALSE) %>%
   config(displaylogo = FALSE, showSendToCloud = FALSE)
 ```
 
@@ -223,7 +223,7 @@ sdarr.lazy.results$plots$final.fit %>%
         y = plot.ylab
       )
   } %>%
-  ggplotly(dynamicTicks = TRUE) %>%
+  ggplotly(dynamicTicks = TRUE, originalData = FALSE) %>%
   config(displaylogo = FALSE, showSendToCloud = FALSE)
 ```
 
@@ -352,7 +352,7 @@ Comparing the regression curves of `sdarr.lazy()` and `sdarr()` over the mechani
       y = plot.ylab
     )
 } %>%
-  ggplotly(dynamicTicks = TRUE) %>%
+  ggplotly(dynamicTicks = TRUE, originalData = FALSE) %>%
   config(displaylogo = FALSE, showSendToCloud = FALSE)
 ```
 

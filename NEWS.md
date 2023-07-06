@@ -2,8 +2,9 @@
 
 * Fixed typos.
 * Use tidyverse_style
-* Reduced use of globals to minimum (?)
+* Reduced use of global variables to minimum (?)
 * Modified (lengthy) example of sdarr() with "donttest". 
+* Added (web-only) article for de-noising feature. 
 
 # sdarr 0.4.4
 

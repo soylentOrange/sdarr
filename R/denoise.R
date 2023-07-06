@@ -6,12 +6,12 @@
 #'   component.
 #'
 #' @noRd
-denoise_vector <- function(data, verbose = FALSE) {
+denoise_vector <- function(data, vmd.alpha = 1500, verbose = FALSE) {
   default_vmd_params <- list(
-    alpha = 2000, # moderate bandwidth constraint
-    tau = 0, # noise-tolerance (no strict fidelity enforcement)
+    alpha = vmd.alpha,
+    tau = 0,   # noise-tolerance (no strict fidelity enforcement)
     DC = TRUE, # a DC part imposed
-    init = 1, # initialize omegas uniformly
+    init = 0,  # all omegas start at 0 # initialize omegas uniformly
     tol = 1e-6
   )
 
@@ -25,6 +25,7 @@ denoise_vector <- function(data, verbose = FALSE) {
   )
 
   # de-noise with the optimum number of modes
+  optimum_k <- max(2, optimum_k)
   data.vmd <- VMDecomp::vmd(data,
     alpha = default_vmd_params$alpha,
     tau = default_vmd_params$tau,

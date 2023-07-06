@@ -175,8 +175,8 @@ sdarr_execute <- function(prepared_data, otr.info,
 #' @param data Data record to analyze. Labels of the data columns will be used
 #'   as units.
 #'
-#' @param x,y Use <[`tidy-selections`][dplyr::dplyr_tidy_select]> to specify x
-#'   and y within the data record.
+#' @param x,y <[`tidy-select`][dplyr::dplyr_tidy_select]> Columns with x and y
+#'   within data.
 #'
 #' @param verbose,showPlots Give informational messages and plots during
 #'   computation. Defaults to `"report"` to only show a report and a plot of the

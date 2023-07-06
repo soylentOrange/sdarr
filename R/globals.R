@@ -1,9 +1,9 @@
 utils::globalVariables(c(
-  # pseudo-globals for piping and tidyverse
+  # pseudo-global variables for piping and tidyverse
   ".",
   ".data",
 
-  # pseudo-globals for crated functions
+  # pseudo-global variables for crated functions
   "ddx.scaled",
   "ddy.scaled",
   "plot.data",

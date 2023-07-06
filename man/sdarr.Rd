@@ -10,8 +10,8 @@ sdarr(data, x, y, verbose = "report", showPlots = "report", savePlots = FALSE)
 \item{data}{Data record to analyze. Labels of the data columns will be used
 as units.}
 
-\item{x, y}{Use <\code{\link[dplyr:dplyr_tidy_select]{tidy-selections}}> to specify x
-and y within the data record.}
+\item{x, y}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Columns with x and y
+within data.}
 
 \item{verbose, showPlots}{Give informational messages and plots during
 computation. Defaults to \code{"report"} to only show a report and a plot of the

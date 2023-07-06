@@ -153,10 +153,6 @@ find_linear_regressions <- function(data.normalized, verbose = FALSE) {
     ))
   }
 
-  if (results$offset_raise_required %>% unlist(TRUE, FALSE)) {
-    warning("Upper index of the optimum region is the last point in the truncated test record: The offset point needs to be raised!\n", call. = FALSE)
-  }
-
   # return results
   return(results)
 }

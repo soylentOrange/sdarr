@@ -1,0 +1,262 @@
+---
+title: "Excessive noise in test data"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  out.width = "100%"
+)
+```
+
+```{r setup, message=FALSE, warning=FALSE, include = FALSE}
+# attach required packages
+library(sdarr)
+library(magrittr)
+library(stats)
+library(ggplot2)
+library(plotly)
+
+# setup multisession calculations with a maximum of 8 cores
+# (or however many cores are available...)
+future::plan(future::multisession,
+  workers = min(c(parallelly::availableCores(), 8))
+)
+
+# set a random seed
+set.seed(50041180)
+```
+
+As one of the first steps in the SDAR-algorithm, the test data is checked for digital resolution and excessive noise (see: [NIST Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050) or [ASTM E3076-18](https://doi.org/10.1520/E3076-18)). As stated in [NIST Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050) *...our analyses show that the use of SDAR is not advisable in case of noisy unloading/reloading cycles and/or in the presence of significant hysteresis, since the most linear portion identified by the algorithm may not necessarily represent the true elastic behavior of the specimen...*.  
+
+`sdarr.lazy()` thus includes a de-noising feature using Variational Mode Decomposition to be more robust against noise in the test data.  
+
+### Preparation of synthetic noisy test data
+
+`synthesize_test_data()` is used to prepare a noisy and noise-free test record resembling tensile mechanical testing of aluminium (Al 6060 T66, values from the [MMPDS Handbook](https://ntrl.ntis.gov/NTRL/dashboard/searchResults/titleDetail/PB2003106632.xhtml), with a toe region added).
+
+```{r prepare low_data_quality}
+# Synthesize a noisy test record resembling Al 6060 T66
+# (Values from MMPDS Handbook, with a toe region added)
+slope.reference <- 68000
+offset.reference <- 10
+Al_6060_T66.noisy <- synthesize_test_data(
+  slope = slope.reference, yield.y = 160,
+  ultimate.y = 215, ultimate.x = 0.091,
+  offset = offset.reference, 
+  enob.x = 14, enob.x_FS = 14, 
+  enob.y = 12, enob.y_FS = 12, enob.y_noise = 6,
+  toe.initial.y = 10, toe.max.y = 20,
+  toe.initial.slope = 13600
+)
+
+# Synthesize a noise-free test record resembling Al 6060 T66
+# (Values from MMPDS Handbook, with a toe region added)
+Al_6060_T66.clean <- synthesize_test_data(
+  slope = slope.reference, yield.y = 160,
+  ultimate.y = 215, ultimate.x = 0.091,
+  offset = offset.reference, 
+  enob.x = 14, enob.x_FS = 14, 
+  enob.y = 12, enob.y_FS = 12, enob.y_noise = 0,
+  toe.initial.y = 10, toe.max.y = 20,
+  toe.initial.slope = 13600
+)
+```
+
+Gaussian noise is added to the synthetic test data when setting `enob.y_noise` or `enob.x_noise` to a numeric value `> 0`. Here, the level of noise of the stress-values is set to an effective number of 6 bits. Thus the assumed standard deviation of the Gaussian noise is `r paste0(round(215*2^-12*(2^6 - 1),2), " MPa")`, as calculated by: ultimate.y * 2^-enob.x_FS * (2^enob.x_noise - 1)). The standard deviation of the noise calculated from the synthesized data is `r paste0(round(sd(Al_6060_T66.clean$stress - Al_6060_T66.noisy$stress), 2), " MPa")` and might be a little different from the assumed value as the noise is created randomly from a standard distribution. 
+
+
+```{r synthetic data - plot, fig.height=4, fig.width=6}
+
+# plot noisy vs. clean test data
+{
+  ggplot(data = Al_6060_T66.noisy, aes(x = strain, y = stress, 
+                                     color = "(noisy) data")) +
+    geom_line() +
+    geom_line(data = Al_6060_T66.clean, 
+              aes(color = "(noise-free) data")) +
+    theme_bw() +
+    labs(
+      title = "Synthetic Data (noisy and clean)",
+      x = "strain",
+      y = "stress (in MPa)"
+    )
+} %>%
+  ggplotly(dynamicTicks = TRUE, originalData = FALSE) %>%
+  config(displaylogo = FALSE, showSendToCloud = FALSE)
+```
+
+
+## Analysis of noisy data with sdarr  
+
+When failing to pass the tests for data quality, `sdarr()` will continue the evaluation of the data record but will issue a warning message as the results of fitting the linear regressions might be flawed by insufficient data quality. 
+
+```{r low_data_quality with sdarr}
+# analyze synthetic data with sdarr() 
+noisy_result <- Al_6060_T66.noisy %>%
+  sdarr(strain, stress, showPlots = "n", savePlots = T)
+```
+
+### Analysis results of (noisy) data with sdarr  
+
+Next to the warnings raised by `sdarr()`, in the reporting message you can see a deviation of the slope and offset from the parameters used to create the synthetic data. The slope is off by `r round(abs(slope.reference - as.numeric(noisy_result$sdar$finalSlope)), 0)` MPa (or `r round(abs(slope.reference - as.numeric(noisy_result$sdar$finalSlope))/slope.reference*100, 1)` %) and the intercept by `r round(abs(offset.reference - as.numeric(noisy_result$sdar$trueIntercept)), 2)` MPa (or `r round(abs(offset.reference - as.numeric(noisy_result$sdar$trueIntercept))/offset.reference*100, 1)` %).  
+
+```{r low_data_quality with sdarr - plot, fig.height=4, fig.width=6}
+
+# plot fit against noisy and clean test data
+{
+  # tap the environment of the crated plot-functions
+  plot.env <- rlang::fn_env(noisy_result$plots$final.fit)
+
+  # get data and labels
+  plot.data <- plot.env$plot.data 
+  plot.main <- plot.env$plot.main
+  plot.xlab <- plot.env$plot.xlab
+  plot.ylab <- plot.env$plot.ylab
+  plot.y.data.max <- plot.data$y.data %>% max()
+  plot.y.lowerBound <- plot.env$y.lowerBound
+  plot.y.upperBound <- plot.env$y.upperBound
+
+  # get fit ranges
+  x.lowerBound <- noisy_result$sdar$x.lowerBound
+  x.upperBound <- noisy_result$sdar$x.upperBound
+  plot.y.data.max <- plot.data$y.data %>% max(na.rm = TRUE)
+  plot.y.data.min <- plot.data$y.data %>% min(na.rm = TRUE)
+  plot.x.data.max <- plot.data$x.data %>% max(na.rm = TRUE)
+  plot.x.data.min <- plot.data$x.data %>% min(na.rm = TRUE)
+
+  # plot the data, noise-free data, final fit and fit-range
+  ggplot(
+    data = plot.data %>% dplyr::bind_cols(
+      data.frame(x.data.clean = Al_6060_T66.clean$strain %>% as.numeric(),
+                 y.data.clean = Al_6060_T66.clean$stress %>% as.numeric()) %>%
+        dplyr::filter(dplyr::between(x.data.clean,
+                                     plot.x.data.min,
+                                     plot.x.data.max))
+      ),
+    aes(x = x.data, y = y.data, color = "(noisy) data")
+  ) +
+    geom_line() +
+    geom_line(aes(x = x.data.clean, y = y.data.clean, 
+                  color = "(noise-free) data")) +
+    geom_line(
+      data = plot.data %>%
+        dplyr::filter(y.fit <= plot.y.data.max),
+      aes(x = x.data, y = y.fit, color = "fit (sdarr)")
+    ) +
+    geom_hline(aes(color = "fit range", 
+                   yintercept = plot.y.lowerBound),
+               linetype = "dashed",
+               show.legend = TRUE) +
+    geom_hline(aes(color = "fit range", 
+                   yintercept = plot.y.upperBound),
+               linetype = "dashed",
+               show.legend = TRUE) +
+    theme_bw() +
+    labs(
+      title = "Final fit of (noisy) data",
+      x = plot.xlab,
+      y = plot.ylab
+    )
+} %>%
+  ggplotly(dynamicTicks = TRUE, originalData = FALSE) %>%
+  config(displaylogo = FALSE, showSendToCloud = FALSE)
+```
+
+## De-noising in sdarr.lazy
+
+A second modification to the original SDAR-algorithm is de-noising of the test record within `sdarr.lazy()` in case data quality checks have failed.  
+The quasi-static component of the noisy test record is identified by Variational Mode Decomposition (see: [Dragomiretskiy & Zosso (2014)](https://doi.org/10.1109/TSP.2013.2288675)) using the [VMDecomp-package](https://CRAN.R-project.org/package=VMDecomp). Finding the range for final fitting with the random sub-sampling approach is conducted on the de-noised data. The final fit will be calculated on the original (noisy) data. Still, warning messages will be given and careful inspection of the results is advisable.    
+
+```{r low_data_quality with sdarr.lazy, fig.height=4, fig.width=6}
+
+# analyze noisy synthetic data using sdarr.lazy()
+noisy_result.lazy <- Al_6060_T66.noisy %>%
+  sdarr.lazy(strain, stress, showPlots = "n", savePlots = T,
+             enforce_subsampling = TRUE, cutoff_probability = 0.9)
+```
+
+### Analysis results of (noisy) data with sdarr.lazy  
+
+Next to the warnings raised from `sdarr.lazy()`, in the reporting message you can see a (a little less) deviation of the slope and offset from the parameters used to create the synthetic data. The slope is off by `r round(abs(slope.reference - as.numeric(noisy_result.lazy$sdar$finalSlope)), 0)` MPa (or `r round(abs(slope.reference - as.numeric(noisy_result.lazy$sdar$finalSlope))/slope.reference*100, 1)` %) and the intercept by `r round(abs(offset.reference - as.numeric(noisy_result.lazy$sdar$trueIntercept)), 2)` MPa (or `r round(abs(offset.reference - as.numeric(noisy_result.lazy$sdar$trueIntercept))/offset.reference*100, 1)` %).  
+
+
+```{r low_data_quality with sdarr.lazy - plot, fig.height=4, fig.width=6}
+
+# plot fit against noisy, de-noised and clean test data
+{
+  # tap the environment of the crated plot-functions
+  plot.fit.env <- rlang::fn_env(noisy_result.lazy$plots$final.fit)
+  plot.otr.denoised.env <- rlang::fn_env(noisy_result.lazy$plots$otr.denoised)
+
+  # get data and fit ranges
+  plot.fit.data <- plot.fit.env$plot.data 
+  plot.fit.y.data.max <- plot.fit.data$y.data %>% max()
+  plot.fit.y.lowerBound <- plot.fit.env$y.lowerBound
+  plot.fit.y.upperBound <- plot.fit.env$y.upperBound
+  plot.fit.y.data.max <- plot.fit.data$y.data %>% max(na.rm = TRUE)
+  plot.fit.y.data.min <- plot.fit.data$y.data %>% min(na.rm = TRUE)
+  plot.fit.x.data.max <- plot.fit.data$x.data %>% max(na.rm = TRUE)
+  plot.fit.x.data.min <- plot.fit.data$x.data %>% min(na.rm = TRUE)
+  plot.otr.denoised.data <- plot.otr.denoised.env$plot.data
+
+  # plot the data, noise-free data, final fit and fit-range
+  ggplot(
+    data = plot.data %>% dplyr::bind_cols(
+      data.frame(x.data.clean = Al_6060_T66.clean$strain %>% as.numeric(),
+                 y.data.clean = Al_6060_T66.clean$stress %>% as.numeric()) %>%
+        dplyr::filter(dplyr::between(x.data.clean,
+                                     plot.fit.x.data.min,
+                                     plot.fit.x.data.max))
+      ),
+    aes(x = x.data, y = y.data, color = "(noisy) data")
+  ) +
+    geom_line() +
+    geom_line(data = plot.otr.denoised.data %>%
+                dplyr::filter(dplyr::between(x.data.denoised,
+                                             plot.fit.x.data.min,
+                                             plot.fit.x.data.max)),
+              aes(x = x.data.denoised, y = y.data.denoised, 
+                  color = "(de-noised ) data")) +
+    geom_line(aes(x = x.data.clean, y = y.data.clean, 
+                  color = "(noise-free) data")) +
+    geom_line(
+      data = plot.fit.data %>%
+        dplyr::filter(y.fit <= plot.fit.y.data.max),
+      aes(x = x.data, y = y.fit, color = "fit (sdarr)")
+    ) +
+    geom_hline(aes(color = "fit range", 
+                   yintercept = plot.fit.y.lowerBound),
+               linetype = "dashed",
+               show.legend = TRUE) +
+    geom_hline(aes(color = "fit range", 
+                   yintercept = plot.fit.y.upperBound),
+               linetype = "dashed",
+               show.legend = TRUE) +
+    theme_bw() +
+    labs(
+      title = "Final fit of (noisy) data",
+      x = plot.xlab,
+      y = plot.ylab
+    )
+} %>%
+  ggplotly(dynamicTicks = TRUE, originalData = FALSE) %>%
+  config(displaylogo = FALSE, showSendToCloud = FALSE)
+```
+
+## Summary
+
+The de-noising feature in `sdarr.lazy()` can improve the outcome of the analysis quite a bit. In the example provided, the deviation of the final slope is reduced from `r round(abs(slope.reference - as.numeric(noisy_result$sdar$finalSlope))/slope.reference*100, 1)` % using `sdarr()` to `r round(abs(slope.reference - as.numeric(noisy_result.lazy$sdar$finalSlope))/slope.reference*100, 1)` % when using `sdarr.lazy()`. Still, when noise levels are considered "excessive" by the standard, you might want to re-consider your testing approach...
+  
+## Final Remark 
+
+Even though the functions within this package have been tested, see the remark in the LICENSE...
+  
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
