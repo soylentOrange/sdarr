@@ -20,7 +20,7 @@ estimate for the fit-range within the data."><!-- mathjax --><script src="https:
     
     <a class="navbar-brand me-2" href="../index.html">sdarr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.5</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,7 +34,8 @@ estimate for the fit-range within the data."><!-- mathjax --><script src="https:
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/validation.html">Validation against Reference Data Set E3076-DS1(2018)</a>
+    <a class="dropdown-item" href="../articles/excessive_noise_levels.html">Excessive noise in test data</a>
+    <a class="dropdown-item" href="../articles/validation.html">Validation against Reference Data Set</a>
   </div>
 </li>
 <li class="nav-item">
@@ -57,7 +58,7 @@ estimate for the fit-range within the data."><!-- mathjax --><script src="https:
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Random sub-sampling variant of the SDAR-algorithm</h1>
-      <small class="dont-index">Source: <a href="https://github.com/soylentOrange/sdarr/blob/HEAD/R/sdarrLazy.R" class="external-link"><code>R/sdarrLazy.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/soylentOrange/sdarr/blob/HEAD/R/sdarr_lazy.R" class="external-link"><code>R/sdarr_lazy.R</code></a></small>
       <div class="d-none name"><code>sdarr.lazy.Rd</code></div>
     </div>
 
@@ -81,6 +82,8 @@ estimate for the fit-range within the data.</p>
 <span>  cutoff_probability <span class="op">=</span> <span class="fl">0.975</span>,</span>
 <span>  quality_penalty <span class="op">=</span> <span class="fl">0.1</span>,</span>
 <span>  enforce_subsampling <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  enforce_denoising <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  vmd.alpha <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="st">"report"</span>,</span>
 <span>  showPlots <span class="op">=</span> <span class="st">"report"</span>,</span>
 <span>  savePlots <span class="op">=</span> <span class="cn">FALSE</span></span>
@@ -95,8 +98,8 @@ as units.</p></dd>
 
 
 <dt>x, y</dt>
-<dd><p>Use &lt;<code><a href="https://dplyr.tidyverse.org/reference/dplyr_tidy_select.html" class="external-link">tidy-selections</a></code>&gt; to specify x
-and y within the data record.</p></dd>
+<dd><p>&lt;<code><a href="https://dplyr.tidyverse.org/reference/dplyr_tidy_select.html" class="external-link">tidy-select</a></code>&gt; Columns with x and y
+within data.</p></dd>
 
 
 <dt>fit.rep</dt>
@@ -124,6 +127,17 @@ fit-quality metrics.</p></dd>
 when it is computationally more expensive than the standard SDAR-algorithm.</p></dd>
 
 
+<dt>enforce_denoising</dt>
+<dd><p>Set to <code>TRUE</code>, to enforce de-noising of the test
+record for finding the final fitting range.</p></dd>
+
+
+<dt>vmd.alpha</dt>
+<dd><p>A numeric value specifying the balancing parameter of the
+data-fidelity constraint in <a href="https://rdrr.io/pkg/VMDecomp/man/vmd.html" class="external-link">VMDecomp::vmd</a> for de-noising when original
+data is failing the data quality checks.</p></dd>
+
+
 <dt>verbose, showPlots</dt>
 <dd><p>Give informational messages and plots during
 computation. Defaults to <code>"report"</code> to only show a report and a plot of the
@@ -140,17 +154,16 @@ later use.</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>A list containing a data-frame with the results of the final fit, a
-list with the quality- and fit-metrics, and a list containing the
-&lt;<code><a href="https://rdrr.io/pkg/carrier/man/crate.html" class="external-link">crated</a></code>&gt; plot-functions (if <code>savePlots = TRUE</code>).</p>
+<p>A list containing a data-frame with the results of the final fit,
+lists with the quality- and fit-metrics, and a list containing the crated
+plot-functions (if <code>savePlots = TRUE</code>).</p>
     </div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
-    <p>The function can use parallel processing via the
-<code><a href="https://furrr.futureverse.org/reference/furrr-package.html" class="external-link">furrr-package</a></code>. To use this feature, set up a plan
-other than the default sequential strategy beforehand. As random values are
-drawn, set a random seed (see: <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code>) beforehand to get reproducible
-results.</p>
+    <p>The function can use parallel processing via the furrr-package. To use
+this feature, set up a plan other than the default sequential strategy
+beforehand. As random values are drawn, set a random seed beforehand to get
+reproducible results.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -176,24 +189,29 @@ Evaluation - J TEST EVAL, 39. https://doi.org/10.1520/JTE103038</p>
 <span class="r-in"><span><span class="co"># (Values according to Metallic Material Properties</span></span></span>
 <span class="r-in"><span><span class="co"># Development and Standardization (MMPDS) Handbook).</span></span></span>
 <span class="r-in"><span><span class="co"># Explicitly set names to "strain" and "stress".</span></span></span>
-<span class="r-in"><span><span class="va">Al_6060_T66</span> <span class="op">&lt;-</span> <span class="fu"><a href="synthesize_test_data.html">synthesize_test_data</a></span><span class="op">(</span>slope <span class="op">=</span> <span class="fl">68000</span>,</span></span>
-<span class="r-in"><span>                                    yield.y <span class="op">=</span> <span class="fl">160</span>,</span></span>
-<span class="r-in"><span>                                    ultimate.y <span class="op">=</span> <span class="fl">215</span>,</span></span>
-<span class="r-in"><span>                                    ultimate.x <span class="op">=</span> <span class="fl">0.091</span>,</span></span>
-<span class="r-in"><span>                                    x.name <span class="op">=</span> <span class="st">"strain"</span>,</span></span>
-<span class="r-in"><span>                                    y.name <span class="op">=</span> <span class="st">"stress"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">Al_6060_T66</span> <span class="op">&lt;-</span> <span class="fu"><a href="synthesize_test_data.html">synthesize_test_data</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  slope <span class="op">=</span> <span class="fl">68000</span>,</span></span>
+<span class="r-in"><span>  yield.y <span class="op">=</span> <span class="fl">160</span>,</span></span>
+<span class="r-in"><span>  ultimate.y <span class="op">=</span> <span class="fl">215</span>,</span></span>
+<span class="r-in"><span>  ultimate.x <span class="op">=</span> <span class="fl">0.091</span>,</span></span>
+<span class="r-in"><span>  x.name <span class="op">=</span> <span class="st">"strain"</span>,</span></span>
+<span class="r-in"><span>  y.name <span class="op">=</span> <span class="st">"stress"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># use sdarr.lazy() to analyze the synthetic test record</span></span></span>
 <span class="r-in"><span><span class="co"># (using relaxed settings for the noise-free synthetic data)</span></span></span>
 <span class="r-in"><span><span class="co"># will print a report and give a plot of the final fit</span></span></span>
 <span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu">sdarr.lazy</span><span class="op">(</span><span class="va">Al_6060_T66</span>, <span class="va">strain</span>, <span class="va">stress</span>,</span></span>
-<span class="r-in"><span>                     cutoff_probability <span class="op">=</span> <span class="fl">0.8</span>,</span></span>
-<span class="r-in"><span>                     fit.rep <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  cutoff_probability <span class="op">=</span> <span class="fl">0.8</span>,</span></span>
+<span class="r-in"><span>  fit.rep <span class="op">=</span> <span class="fl">2</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Determination of Slope in the Linear Region of a Test Record:</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Random sub-sampling modification of the SDAR-algorithm</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   Random sub-sampling information:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       229 points of 337 points in the normalized range were used.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       216 points of 337 points in the normalized range were used.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>       0 % of sub-sampled normalized ranges passed the data quality checks.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>       100 % of linear regressions passed the fit quality checks.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>       0 % of linear regressions passed all quality checks.</span>
@@ -218,20 +236,20 @@ Evaluation - J TEST EVAL, 39. https://doi.org/10.1520/JTE103038</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>       --&gt; pass</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   Fit Quality Metric: Curvature</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>     1st Quartile</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       Relative Residual Slope: 0.000179775304545843</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       Number of Points:        50</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       Relative Residual Slope: 0.000918627599492298</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       Number of Points:        49</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>       --&gt; pass</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>     4th Quartile</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       Relative Residual Slope: -0.00605997860775069</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       Number of Points:        50</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       Relative Residual Slope: -0.00482474888578022</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       Number of Points:        49</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>       --&gt; pass</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   Fit Quality Metric: Fit Range</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       relative fit range:      0.661797553625244</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       relative fit range:      0.668672756582483</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>       --&gt; pass</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   Un-normalized fit</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       Final Slope:             68001.1406632664 MPa</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       True Intercept:          0.00100121873037546 MPa</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       y-Range:                 0.38055419921875 MPa - 74.4049072265625 MPa</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       Final Slope:             68001.5357120182 MPa</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       True Intercept:          0.000848743193187772 MPa</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       y-Range:                 0 MPa - 73.2632446289062 MPa</span>
 <span class="r-plt img"><img src="sdarr.lazy-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>

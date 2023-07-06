@@ -5,28 +5,28 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="description" content="Slope Determination by Analysis of Residuals (SDAR) for automated 
-    and objective linear-fitting of mechanical test-data 
-    (see: standard ASTM E3076-18 ≤doi:10.1520/E3076-18&gt; or a detailed 
-    description in E. Lucon (2019) &lt;doi:10.6028/NIST.TN.2050&gt;). As the 
-    SDAR-algorithm heavily uses linear regressions, a faster version is 
-    additionally available to find the optimum region for the (one) final 
-    linear regression by random sub-sampling within the normalized range of the 
-    test-data.">
+<meta name="description" content="Slope Determination by Analysis of Residuals (SDAR) for
+    automated and objective linear-fitting of mechanical test-data (see:
+    standard ASTM E3076-18 &lt;doi:10.1520/E3076-18&gt; or a detailed
+    description in E. Lucon (2019) &lt;doi:10.6028/NIST.TN.2050&gt;). As the
+    SDAR-algorithm heavily uses linear regressions, a faster version is
+    additionally available to find the optimum region for the (one) final
+    linear regression by random sub-sampling within the normalized range
+    of the test-data.">
 <title>Slope Determination by Analysis of Residuals • sdarr</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Slope Determination by Analysis of Residuals">
-<meta property="og:description" content="Slope Determination by Analysis of Residuals (SDAR) for automated 
-    and objective linear-fitting of mechanical test-data 
-    (see: standard ASTM E3076-18 ≤doi:10.1520/E3076-18&gt; or a detailed 
-    description in E. Lucon (2019) &lt;doi:10.6028/NIST.TN.2050&gt;). As the 
-    SDAR-algorithm heavily uses linear regressions, a faster version is 
-    additionally available to find the optimum region for the (one) final 
-    linear regression by random sub-sampling within the normalized range of the 
-    test-data.">
+<meta property="og:description" content="Slope Determination by Analysis of Residuals (SDAR) for
+    automated and objective linear-fitting of mechanical test-data (see:
+    standard ASTM E3076-18 &lt;doi:10.1520/E3076-18&gt; or a detailed
+    description in E. Lucon (2019) &lt;doi:10.6028/NIST.TN.2050&gt;). As the
+    SDAR-algorithm heavily uses linear regressions, a faster version is
+    additionally available to find the optimum region for the (one) final
+    linear regression by random sub-sampling within the normalized range
+    of the test-data.">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
@@ -40,7 +40,7 @@
     
     <a class="navbar-brand me-2" href="index.html">sdarr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.5</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -55,7 +55,8 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="articles/validation.html">Validation against Reference Data Set E3076-DS1(2018)</a>
+    <a class="dropdown-item" href="articles/excessive_noise_levels.html">Excessive noise in test data</a>
+    <a class="dropdown-item" href="articles/validation.html">Validation against Reference Data Set</a>
   </div>
 </li>
 <li class="nav-item">
@@ -107,22 +108,27 @@ It allows for automated and objective linear-fitting of mechanical test-data. Se
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://soylentorange.github.io/sdarr/">sdarr</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># setup multisession calculations with a maximum of 8 cores </span></span>
+<span><span class="co"># setup multisession calculations with a maximum of 8 cores</span></span>
 <span><span class="co"># (or however many cores are available...)</span></span>
-<span><span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="fu">future</span><span class="fu">::</span><span class="va"><a href="https://future.futureverse.org/reference/multisession.html" class="external-link">multisession</a></span>, </span>
-<span>             workers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu">parallelly</span><span class="fu">::</span><span class="fu"><a href="https://parallelly.futureverse.org/reference/availableCores.html" class="external-link">availableCores</a></span><span class="op">(</span><span class="op">)</span>, <span class="fl">8</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="fu">future</span><span class="fu">::</span><span class="va"><a href="https://future.futureverse.org/reference/multisession.html" class="external-link">multisession</a></span>,</span>
+<span>  workers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu">parallelly</span><span class="fu">::</span><span class="fu"><a href="https://parallelly.futureverse.org/reference/availableCores.html" class="external-link">availableCores</a></span><span class="op">(</span><span class="op">)</span>, <span class="fl">8</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Synthesize a test record resembling Al 6060 T66</span></span>
 <span><span class="co"># (Values from MMPDS Handbook, with a toe region added)</span></span>
-<span><span class="va">Al_6060_T66</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/synthesize_test_data.html">synthesize_test_data</a></span><span class="op">(</span>slope <span class="op">=</span> <span class="fl">68000</span>, yield.y <span class="op">=</span> <span class="fl">160</span>, </span>
-<span>                                    ultimate.y <span class="op">=</span> <span class="fl">215</span>, ultimate.x <span class="op">=</span> <span class="fl">0.091</span>,</span>
-<span>                                    offset <span class="op">=</span> <span class="fl">10</span>,</span>
-<span>                                    toe.initial.y <span class="op">=</span> <span class="fl">3</span>, toe.max.y <span class="op">=</span> <span class="fl">15</span>,</span>
-<span>                                    toe.initial.slope <span class="op">=</span> <span class="fl">34000</span><span class="op">)</span></span>
+<span><span class="va">Al_6060_T66</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/synthesize_test_data.html">synthesize_test_data</a></span><span class="op">(</span></span>
+<span>  slope <span class="op">=</span> <span class="fl">68000</span>, yield.y <span class="op">=</span> <span class="fl">160</span>,</span>
+<span>  ultimate.y <span class="op">=</span> <span class="fl">215</span>, ultimate.x <span class="op">=</span> <span class="fl">0.091</span>,</span>
+<span>  offset <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  toe.initial.y <span class="op">=</span> <span class="fl">3</span>, toe.max.y <span class="op">=</span> <span class="fl">15</span>,</span>
+<span>  toe.initial.slope <span class="op">=</span> <span class="fl">13600</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Analyze the test record</span></span>
-<span><span class="va">Al_6060_T66.result</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sdarr.html">sdarr</a></span><span class="op">(</span><span class="va">Al_6060_T66</span>, x <span class="op">=</span> <span class="va">strain</span>, y <span class="op">=</span> <span class="va">stress</span>,</span>
-<span>                            verbose <span class="op">=</span> <span class="st">"r"</span>, showPlots <span class="op">=</span> <span class="st">"r"</span><span class="op">)</span></span>
+<span><span class="va">Al_6060_T66.result</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sdarr.html">sdarr</a></span><span class="op">(</span><span class="va">Al_6060_T66</span>,</span>
+<span>  x <span class="op">=</span> <span class="va">strain</span>, y <span class="op">=</span> <span class="va">stress</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="st">"r"</span>, showPlots <span class="op">=</span> <span class="st">"r"</span>, savePlots <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span>
 <span><span class="co">#&gt; Determination of Slope in the Linear Region of a Test Record:</span></span>
 <span><span class="co">#&gt; SDAR-algorithm</span></span>
 <span><span class="co">#&gt;   Data Quality Metric: Digital Resolution</span></span>
@@ -141,7 +147,7 @@ It allows for automated and objective linear-fitting of mechanical test-data. Se
 <span><span class="co">#&gt;       Relative x-Noise:        1.12835262887974e-14</span></span>
 <span><span class="co">#&gt;       --&gt; pass</span></span>
 <span><span class="co">#&gt;     y</span></span>
-<span><span class="co">#&gt;       Relative y-Noise:        0.0590566035999252</span></span>
+<span><span class="co">#&gt;       Relative y-Noise:        0.0628385403382046</span></span>
 <span><span class="co">#&gt;       --&gt; pass</span></span>
 <span><span class="co">#&gt;   Fit Quality Metric: Curvature</span></span>
 <span><span class="co">#&gt;     1st Quartile</span></span>
@@ -164,34 +170,21 @@ It allows for automated and objective linear-fitting of mechanical test-data. Se
 <div class="section level3">
 <h3 id="random-sub-sampling-modification-of-the-sdar-algorithm">Random sub-sampling modification of the SDAR-algorithm<a class="anchor" aria-label="anchor" href="#random-sub-sampling-modification-of-the-sdar-algorithm"></a>
 </h3>
-<p>A basic example of <code><a href="reference/sdarr.lazy.html">sdarr.lazy()</a></code>, a lazy variant of the sdarr-function on a synthetic data set, which is based on the properties of aluminium (Al 6060 T66) as given in the <a href="https://ntrl.ntis.gov/NTRL/dashboard/searchResults/titleDetail/PB2003106632.xhtml" class="external-link">Metallic Material Properties Development and Standardization (MMPDS) Handbook</a>. A toe-region and a non-zero intercept are added to make the test data less boring.</p>
+<p>A basic example of <code><a href="reference/sdarr.lazy.html">sdarr.lazy()</a></code>, a lazy variant of the sdarr-function on a synthetic data set, which is based on the properties of aluminium (Al 6060 T66) as given in the <a href="https://ntrl.ntis.gov/NTRL/dashboard/searchResults/titleDetail/PB2003106632.xhtml" class="external-link">Metallic Material Properties Development and Standardization (MMPDS) Handbook</a>. A toe-region and a non-zero intercept are added to make the test data less boring (see above).</p>
 <p><code><a href="reference/sdarr.lazy.html">sdarr.lazy()</a></code> analyzes the data for the optimum size of the fitting region via random sub-sampling. It will give a small report as a message after finding the optimum fit. It should confirm the Young’s-modulus of 68 GPa and an intercept of 10 MPa. As the data set is rather short, enforce random sub-sampling by setting <code>enforce_subsampling = TRUE</code>.</p>
-<p>To make use of multi-core processing, configure <a href="https://furrr.futureverse.org/" class="external-link">furrr</a> to use a multisession strategy.</p>
+<p>To make use of multi-core processing, configure <a href="https://furrr.futureverse.org/" class="external-link">furrr</a> to use a multisession strategy (see above).</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://soylentorange.github.io/sdarr/">sdarr</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># setup multisession calculations with a maximum of 8 cores </span></span>
-<span><span class="co"># (or however many cores are available...)</span></span>
-<span><span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="fu">future</span><span class="fu">::</span><span class="va"><a href="https://future.futureverse.org/reference/multisession.html" class="external-link">multisession</a></span>, </span>
-<span>             workers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu">parallelly</span><span class="fu">::</span><span class="fu"><a href="https://parallelly.futureverse.org/reference/availableCores.html" class="external-link">availableCores</a></span><span class="op">(</span><span class="op">)</span>, <span class="fl">8</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Synthesize a test record resembling Al 6060 T66</span></span>
-<span><span class="co"># (Values from MMPDS Handbook, with a toe region added)</span></span>
-<span><span class="va">Al_6060_T66</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/synthesize_test_data.html">synthesize_test_data</a></span><span class="op">(</span>slope <span class="op">=</span> <span class="fl">68000</span>, yield.y <span class="op">=</span> <span class="fl">160</span>, </span>
-<span>                                    ultimate.y <span class="op">=</span> <span class="fl">215</span>, ultimate.x <span class="op">=</span> <span class="fl">0.091</span>,</span>
-<span>                                    offset <span class="op">=</span> <span class="fl">10</span>,</span>
-<span>                                    toe.initial.y <span class="op">=</span> <span class="fl">3</span>, toe.max.y <span class="op">=</span> <span class="fl">15</span>,</span>
-<span>                                    toe.initial.slope <span class="op">=</span> <span class="fl">34000</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># set a random seed</span></span>
+<code class="sourceCode R"><span><span class="co"># set a random seed</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">50041180</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Analyze the test record </span></span>
+<span><span class="co"># Analyze the test record</span></span>
 <span><span class="co"># (using a relaxed cutoff_probability for the noise-free synthetic data)</span></span>
-<span><span class="va">Al_6060_T66.result.lazy</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sdarr.lazy.html">sdarr.lazy</a></span><span class="op">(</span><span class="va">Al_6060_T66</span>, x <span class="op">=</span> <span class="va">strain</span>, y <span class="op">=</span> <span class="va">stress</span>,</span>
-<span>                                      cutoff_probability <span class="op">=</span> <span class="fl">0.8</span>,</span>
-<span>                                      enforce_subsampling <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                                      verbose <span class="op">=</span> <span class="st">"r"</span>, showPlots <span class="op">=</span> <span class="st">"r"</span><span class="op">)</span></span>
+<span><span class="va">Al_6060_T66.result.lazy</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sdarr.lazy.html">sdarr.lazy</a></span><span class="op">(</span><span class="va">Al_6060_T66</span>,</span>
+<span>  x <span class="op">=</span> <span class="va">strain</span>, y <span class="op">=</span> <span class="va">stress</span>,</span>
+<span>  cutoff_probability <span class="op">=</span> <span class="fl">0.8</span>,</span>
+<span>  enforce_subsampling <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="st">"r"</span>, showPlots <span class="op">=</span> <span class="st">"n"</span></span>
+<span><span class="op">)</span></span>
 <span><span class="co">#&gt; Determination of Slope in the Linear Region of a Test Record:</span></span>
 <span><span class="co">#&gt;   lazy algorithm requires more fits than standard SDAR-algorithm:  </span></span>
 <span><span class="co">#&gt;     99500 vs. 36856 fits.</span></span>
@@ -219,7 +212,7 @@ It allows for automated and objective linear-fitting of mechanical test-data. Se
 <span><span class="co">#&gt;       Relative x-Noise:        1.12835262887974e-14</span></span>
 <span><span class="co">#&gt;       --&gt; pass</span></span>
 <span><span class="co">#&gt;     y</span></span>
-<span><span class="co">#&gt;       Relative y-Noise:        0.0590566035999252</span></span>
+<span><span class="co">#&gt;       Relative y-Noise:        0.0628385403382046</span></span>
 <span><span class="co">#&gt;       --&gt; pass</span></span>
 <span><span class="co">#&gt;   Fit Quality Metric: Curvature</span></span>
 <span><span class="co">#&gt;     1st Quartile</span></span>
@@ -237,7 +230,6 @@ It allows for automated and objective linear-fitting of mechanical test-data. Se
 <span><span class="co">#&gt;       Final Slope:             67999.060977753 MPa</span></span>
 <span><span class="co">#&gt;       True Intercept:          10.0024898483829 MPa</span></span>
 <span><span class="co">#&gt;       y-Range:                 25.484619140625 MPa - 84.7723388671875 MPa</span></span></code></pre></div>
-<p><img src="reference/figures/README-example-sdar.lazy-1.png" width="100%"></p>
 </div>
 <div class="section level3">
 <h3 id="plot-functions">plot functions<a class="anchor" aria-label="anchor" href="#plot-functions"></a>
@@ -245,58 +237,60 @@ It allows for automated and objective linear-fitting of mechanical test-data. Se
 <p><code><a href="reference/sdarr.html">sdarr()</a></code> and <code><a href="reference/sdarr.lazy.html">sdarr.lazy()</a></code> will create diagnostic plots throughout calculations, which will only be shown when requested (i.e. set <code>showPlots = "all</code>). To have a plot drawn later, you can call the provided plot-functions from the results, when you set <code>savePlots = TRUE</code>.</p>
 <p>The plot-functions are <a href="https://github.com/r-lib/carrier" class="external-link">crated</a>, so you can easily tap their environment to convert it into e.g. a <a href="https://ggplot2.tidyverse.org/" class="external-link">ggplot2-graphic</a>.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://soylentorange.github.io/sdarr/">sdarr</a></span><span class="op">)</span></span>
-<span><span class="co"># satisfy pipe addiction...</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://magrittr.tidyverse.org" class="external-link">magrittr</a></span><span class="op">)</span></span>
-<span><span class="co"># make nice and shiny graphics withh ggplot2...</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># setup multisession calculations with a maximum of 8 cores </span></span>
-<span><span class="co"># (or however many cores are available...)</span></span>
-<span><span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="fu">future</span><span class="fu">::</span><span class="va"><a href="https://future.futureverse.org/reference/multisession.html" class="external-link">multisession</a></span>, </span>
-<span>             workers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu">parallelly</span><span class="fu">::</span><span class="fu"><a href="https://parallelly.futureverse.org/reference/availableCores.html" class="external-link">availableCores</a></span><span class="op">(</span><span class="op">)</span>, <span class="fl">8</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Synthesize a test record resembling Al 6060 T66</span></span>
-<span><span class="co"># (Values from MMPDS Handbook, with a toe region added)</span></span>
-<span><span class="va">Al_6060_T66</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/synthesize_test_data.html">synthesize_test_data</a></span><span class="op">(</span>slope <span class="op">=</span> <span class="fl">68000</span>, yield.y <span class="op">=</span> <span class="fl">160</span>, </span>
-<span>                                    ultimate.y <span class="op">=</span> <span class="fl">215</span>, ultimate.x <span class="op">=</span> <span class="fl">0.091</span>,</span>
-<span>                                    offset <span class="op">=</span> <span class="fl">10</span>,</span>
-<span>                                    toe.initial.y <span class="op">=</span> <span class="fl">3</span>, toe.max.y <span class="op">=</span> <span class="fl">15</span>,</span>
-<span>                                    toe.initial.slope <span class="op">=</span> <span class="fl">34000</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Analyze the test record using the standard algorithm</span></span>
-<span><span class="va">Al_6060_T66.result</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sdarr.html">sdarr</a></span><span class="op">(</span><span class="va">Al_6060_T66</span>, x <span class="op">=</span> <span class="va">strain</span>, y <span class="op">=</span> <span class="va">stress</span>,</span>
-<span>                            verbose <span class="op">=</span> <span class="st">"n"</span>, showPlots <span class="op">=</span> <span class="st">"n"</span>, savePlots <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># show plot of final fit using the plot function from the result</span></span>
+<code class="sourceCode R"><span></span>
+<span><span class="co"># show plot of final fit using the plot function from the result (see above)</span></span>
 <span><span class="va">Al_6060_T66.result</span><span class="op">$</span><span class="va">plots</span><span class="op">$</span><span class="fu">final.fit</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-example-plot-fun-1.png" width="100%"></p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="co"># plot the final fit using ggplot2 </span></span>
-<span><span class="op">{</span></span>
-<span>  <span class="co"># tap the environment of the crated plot-function</span></span>
-<span>  <span class="va">plot.env</span> <span class="op">&lt;-</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/fn_env.html" class="external-link">fn_env</a></span><span class="op">(</span><span class="va">Al_6060_T66.result</span><span class="op">$</span><span class="va">plots</span><span class="op">$</span><span class="va">final.fit</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># satisfy pipe addiction...</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://magrittr.tidyverse.org" class="external-link">magrittr</a></span><span class="op">)</span></span>
+<span><span class="co"># make nice and shiny graphics withh ggplot2...</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span> </span>
+<span></span>
+<span><span class="co"># plot the final fit using ggplot2</span></span>
+<span><span class="va">Al_6060_T66.result</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> <span class="op">{</span></span>
 <span>  </span>
+<span>  <span class="co"># tap the environment of the crated plot-function</span></span>
+<span>  <span class="va">plot.env</span> <span class="op">&lt;-</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/fn_env.html" class="external-link">fn_env</a></span><span class="op">(</span><span class="va">.</span><span class="op">$</span><span class="va">plots</span><span class="op">$</span><span class="va">final.fit</span><span class="op">)</span></span>
+<span></span>
 <span>  <span class="co"># get data and labels</span></span>
 <span>  <span class="va">plot.data</span> <span class="op">&lt;-</span> <span class="va">plot.env</span><span class="op">$</span><span class="va">plot.data</span></span>
 <span>  <span class="va">plot.main</span> <span class="op">&lt;-</span> <span class="va">plot.env</span><span class="op">$</span><span class="va">plot.main</span></span>
 <span>  <span class="va">plot.xlab</span> <span class="op">&lt;-</span> <span class="va">plot.env</span><span class="op">$</span><span class="va">plot.xlab</span></span>
 <span>  <span class="va">plot.ylab</span> <span class="op">&lt;-</span> <span class="va">plot.env</span><span class="op">$</span><span class="va">plot.ylab</span></span>
-<span>  <span class="va">y.data.max</span> <span class="op">&lt;-</span> <span class="va">plot.data</span><span class="op">$</span><span class="va">y.data</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="op">)</span></span>
-<span>  </span>
+<span>  <span class="va">plot.y.data.max</span> <span class="op">&lt;-</span> <span class="va">plot.data</span><span class="op">$</span><span class="va">y.data</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="va">plot.y.lowerBound</span> <span class="op">&lt;-</span> <span class="va">plot.env</span><span class="op">$</span><span class="va">y.lowerBound</span></span>
+<span>  <span class="va">plot.y.upperBound</span> <span class="op">&lt;-</span> <span class="va">plot.env</span><span class="op">$</span><span class="va">y.upperBound</span></span>
+<span></span>
 <span>  <span class="co"># create the ggplot2</span></span>
 <span>  <span class="va">plot.data</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x.data</span>, y <span class="op">=</span> <span class="va">y.data</span>, color <span class="op">=</span> <span class="st">"Al_6060_T66"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">plot.data</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
-<span>                <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">y.fit</span> <span class="op">&lt;=</span> <span class="va">y.data.max</span><span class="op">)</span>,</span>
-<span>              <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x.data</span>, y <span class="op">=</span> <span class="va">y.fit</span>, color <span class="op">=</span> <span class="st">"fit (sdarr)"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span></span>
+<span>      data <span class="op">=</span> <span class="va">plot.data</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span></span>
+<span>        <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">y.fit</span> <span class="op">&lt;=</span> <span class="va">plot.y.data.max</span><span class="op">)</span>,</span>
+<span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x.data</span>, y <span class="op">=</span> <span class="va">y.fit</span>, color <span class="op">=</span> <span class="st">"fit (sdarr)"</span><span class="op">)</span></span>
+<span>    <span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_hline</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"fit range"</span>, </span>
+<span>                   yintercept <span class="op">=</span> <span class="va">plot.y.lowerBound</span><span class="op">)</span>,</span>
+<span>               linetype <span class="op">=</span> <span class="st">"dashed"</span>,</span>
+<span>               show.legend <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_hline</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"fit range"</span>, </span>
+<span>                   yintercept <span class="op">=</span> <span class="va">plot.y.upperBound</span><span class="op">)</span>,</span>
+<span>               linetype <span class="op">=</span> <span class="st">"dashed"</span>,</span>
+<span>               show.legend <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="va">plot.main</span>,</span>
-<span>       x <span class="op">=</span> <span class="va">plot.xlab</span>,</span>
-<span>       y <span class="op">=</span> <span class="va">plot.ylab</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>      title <span class="op">=</span> <span class="va">plot.main</span>,</span>
+<span>      x <span class="op">=</span> <span class="va">plot.xlab</span>,</span>
+<span>      y <span class="op">=</span> <span class="va">plot.ylab</span>,</span>
+<span>      caption <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Result of the SDAR-algorithm:\n\nFinal Slope: "</span>,</span>
+<span>                       <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">.</span><span class="op">$</span><span class="va">sdar</span><span class="op">$</span><span class="va">finalSlope</span><span class="op">/</span><span class="fl">1000</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">" GPa\nTrue Offset: "</span>,</span>
+<span>                       <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">.</span><span class="op">$</span><span class="va">sdar</span><span class="op">$</span><span class="va">trueIntercept</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">" MPa\n\nFit Range: "</span>,</span>
+<span>                       <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">plot.y.lowerBound</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">" MPa - "</span>,</span>
+<span>                       <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">plot.y.upperBound</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">" MPa"</span><span class="op">)</span></span>
+<span>    <span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
-<p><img src="reference/figures/README-example-plot-fun-2.png" width="100%"></p>
+<p><img src="reference/figures/README-example-plot-fun-gg-1.png" width="100%"></p>
 </div>
 </div>
 <div class="section level2">
