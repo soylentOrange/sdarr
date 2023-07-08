@@ -120,8 +120,8 @@ It allows for automated and objective linear-fitting of mechanical test-data. Se
 <span>  slope <span class="op">=</span> <span class="fl">68000</span>, yield.y <span class="op">=</span> <span class="fl">160</span>,</span>
 <span>  ultimate.y <span class="op">=</span> <span class="fl">215</span>, ultimate.x <span class="op">=</span> <span class="fl">0.091</span>,</span>
 <span>  offset <span class="op">=</span> <span class="fl">10</span>,</span>
-<span>  toe.initial.y <span class="op">=</span> <span class="fl">3</span>, toe.max.y <span class="op">=</span> <span class="fl">15</span>,</span>
-<span>  toe.initial.slope <span class="op">=</span> <span class="fl">13600</span></span>
+<span>  toe.start.y <span class="op">=</span> <span class="fl">3</span>, toe.end.y <span class="op">=</span> <span class="fl">15</span>,</span>
+<span>  toe.start.slope <span class="op">=</span> <span class="fl">13600</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Analyze the test record</span></span>
@@ -139,32 +139,32 @@ It allows for automated and objective linear-fitting of mechanical test-data. Se
 <span><span class="co">#&gt;       --&gt; pass</span></span>
 <span><span class="co">#&gt;     y</span></span>
 <span><span class="co">#&gt;       Relative y-Resolution:   0.333333333333333</span></span>
-<span><span class="co">#&gt;       % at this resolution:    1.19402985074627</span></span>
-<span><span class="co">#&gt;       % in zeroth bin:         98.8059701492537</span></span>
+<span><span class="co">#&gt;       % at this resolution:    1.49253731343284</span></span>
+<span><span class="co">#&gt;       % in zeroth bin:         98.5074626865672</span></span>
 <span><span class="co">#&gt;       --&gt; pass</span></span>
 <span><span class="co">#&gt;   Data Quality Metric: Noise</span></span>
 <span><span class="co">#&gt;     x</span></span>
 <span><span class="co">#&gt;       Relative x-Noise:        1.12835262887974e-14</span></span>
 <span><span class="co">#&gt;       --&gt; pass</span></span>
 <span><span class="co">#&gt;     y</span></span>
-<span><span class="co">#&gt;       Relative y-Noise:        0.0628385403382046</span></span>
+<span><span class="co">#&gt;       Relative y-Noise:        0.0630192818713285</span></span>
 <span><span class="co">#&gt;       --&gt; pass</span></span>
 <span><span class="co">#&gt;   Fit Quality Metric: Curvature</span></span>
 <span><span class="co">#&gt;     1st Quartile</span></span>
-<span><span class="co">#&gt;       Relative Residual Slope: 0.00112596960003188</span></span>
+<span><span class="co">#&gt;       Relative Residual Slope: -0.000639630646573031</span></span>
 <span><span class="co">#&gt;       Number of Points:        40</span></span>
 <span><span class="co">#&gt;       --&gt; pass</span></span>
 <span><span class="co">#&gt;     4th Quartile</span></span>
-<span><span class="co">#&gt;       Relative Residual Slope: -0.00682689398113825</span></span>
+<span><span class="co">#&gt;       Relative Residual Slope: -0.000639630646584453</span></span>
 <span><span class="co">#&gt;       Number of Points:        40</span></span>
 <span><span class="co">#&gt;       --&gt; pass</span></span>
 <span><span class="co">#&gt;   Fit Quality Metric: Fit Range</span></span>
-<span><span class="co">#&gt;       relative fit range:      0.800879700901693</span></span>
+<span><span class="co">#&gt;       relative fit range:      0.795882891125343</span></span>
 <span><span class="co">#&gt;       --&gt; pass</span></span>
 <span><span class="co">#&gt;   Un-normalized fit</span></span>
-<span><span class="co">#&gt;       Final Slope:             67999.5684247684 MPa</span></span>
-<span><span class="co">#&gt;       True Intercept:          10.0022190872361 MPa</span></span>
-<span><span class="co">#&gt;       y-Range:                 24.7366333007812 MPa - 84.4049072265625 MPa</span></span></code></pre></div>
+<span><span class="co">#&gt;       Final Slope:             67994.3606141895 MPa</span></span>
+<span><span class="co">#&gt;       True Intercept:          10.0010871775444 MPa</span></span>
+<span><span class="co">#&gt;       y-Range:                 24.7329711914062 MPa - 84.7732543945312 MPa</span></span></code></pre></div>
 <p><img src="reference/figures/README-example-sdar-1.png" width="100%"></p>
 </div>
 <div class="section level3">
@@ -188,14 +188,14 @@ It allows for automated and objective linear-fitting of mechanical test-data. Se
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Determination of Slope in the Linear Region of a Test Record:</span></span>
 <span><span class="co">#&gt;   lazy algorithm requires more fits than standard SDAR-algorithm:  </span></span>
-<span><span class="co">#&gt;     99500 vs. 36856 fits.</span></span>
+<span><span class="co">#&gt;     97515 vs. 36856 fits.</span></span>
 <span><span class="co">#&gt;   Anyways, random sub-sampling will be used...</span></span>
 <span><span class="co">#&gt; Random sub-sampling modification of the SDAR-algorithm</span></span>
 <span><span class="co">#&gt;   Random sub-sampling information:</span></span>
-<span><span class="co">#&gt;       247 points of 337 points in the normalized range were used.</span></span>
-<span><span class="co">#&gt;       20 % of sub-sampled normalized ranges passed the data quality checks.</span></span>
+<span><span class="co">#&gt;       245 points of 337 points in the normalized range were used.</span></span>
+<span><span class="co">#&gt;       0 % of sub-sampled normalized ranges passed the data quality checks.</span></span>
 <span><span class="co">#&gt;       100 % of linear regressions passed the fit quality checks.</span></span>
-<span><span class="co">#&gt;       20 % of linear regressions passed all quality checks.</span></span>
+<span><span class="co">#&gt;       0 % of linear regressions passed all quality checks.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   Data Quality Metric: Digital Resolution</span></span>
 <span><span class="co">#&gt;     x</span></span>
@@ -205,32 +205,32 @@ It allows for automated and objective linear-fitting of mechanical test-data. Se
 <span><span class="co">#&gt;       --&gt; pass</span></span>
 <span><span class="co">#&gt;     y</span></span>
 <span><span class="co">#&gt;       Relative y-Resolution:   0.333333333333333</span></span>
-<span><span class="co">#&gt;       % at this resolution:    1.19402985074627</span></span>
-<span><span class="co">#&gt;       % in zeroth bin:         98.8059701492537</span></span>
+<span><span class="co">#&gt;       % at this resolution:    1.49253731343284</span></span>
+<span><span class="co">#&gt;       % in zeroth bin:         98.5074626865672</span></span>
 <span><span class="co">#&gt;       --&gt; pass</span></span>
 <span><span class="co">#&gt;   Data Quality Metric: Noise</span></span>
 <span><span class="co">#&gt;     x</span></span>
 <span><span class="co">#&gt;       Relative x-Noise:        1.12835262887974e-14</span></span>
 <span><span class="co">#&gt;       --&gt; pass</span></span>
 <span><span class="co">#&gt;     y</span></span>
-<span><span class="co">#&gt;       Relative y-Noise:        0.0628385403382046</span></span>
+<span><span class="co">#&gt;       Relative y-Noise:        0.0630192818713285</span></span>
 <span><span class="co">#&gt;       --&gt; pass</span></span>
 <span><span class="co">#&gt;   Fit Quality Metric: Curvature</span></span>
 <span><span class="co">#&gt;     1st Quartile</span></span>
-<span><span class="co">#&gt;       Relative Residual Slope: 0.00277455072182705</span></span>
-<span><span class="co">#&gt;       Number of Points:        40</span></span>
+<span><span class="co">#&gt;       Relative Residual Slope: 0.000165214573477868</span></span>
+<span><span class="co">#&gt;       Number of Points:        41</span></span>
 <span><span class="co">#&gt;       --&gt; pass</span></span>
 <span><span class="co">#&gt;     4th Quartile</span></span>
-<span><span class="co">#&gt;       Relative Residual Slope: -0.00745994845842898</span></span>
-<span><span class="co">#&gt;       Number of Points:        40</span></span>
+<span><span class="co">#&gt;       Relative Residual Slope: -0.00224215406178426</span></span>
+<span><span class="co">#&gt;       Number of Points:        41</span></span>
 <span><span class="co">#&gt;       --&gt; pass</span></span>
 <span><span class="co">#&gt;   Fit Quality Metric: Fit Range</span></span>
-<span><span class="co">#&gt;       relative fit range:      0.806020362992475</span></span>
+<span><span class="co">#&gt;       relative fit range:      0.790818181818182</span></span>
 <span><span class="co">#&gt;       --&gt; pass</span></span>
 <span><span class="co">#&gt;   Un-normalized fit</span></span>
-<span><span class="co">#&gt;       Final Slope:             67999.060977753 MPa</span></span>
-<span><span class="co">#&gt;       True Intercept:          10.0024898483829 MPa</span></span>
-<span><span class="co">#&gt;       y-Range:                 25.484619140625 MPa - 84.7723388671875 MPa</span></span></code></pre></div>
+<span><span class="co">#&gt;       Final Slope:             67993.9438149842 MPa</span></span>
+<span><span class="co">#&gt;       True Intercept:          10.0012595609108 MPa</span></span>
+<span><span class="co">#&gt;       y-Range:                 25.103759765625 MPa - 85.528564453125 MPa</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="plot-functions">Plot Functions<a class="anchor" aria-label="anchor" href="#plot-functions"></a>
