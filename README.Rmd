@@ -60,8 +60,8 @@ Al_6060_T66 <- synthesize_test_data(
   slope = 68000, yield.y = 160,
   ultimate.y = 215, ultimate.x = 0.091,
   offset = 10,
-  toe.initial.y = 3, toe.max.y = 15,
-  toe.initial.slope = 13600
+  toe.start.y = 3, toe.end.y = 15,
+  toe.start.slope = 13600
 )
 
 # Analyze the test record

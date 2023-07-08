@@ -62,8 +62,8 @@ Al_6060_T66 <- synthesize_test_data(
   slope = 68000, yield.y = 160,
   ultimate.y = 215, ultimate.x = 0.091,
   offset = 10,
-  toe.initial.y = 3, toe.max.y = 15,
-  toe.initial.slope = 13600
+  toe.start.y = 3, toe.end.y = 15,
+  toe.start.slope = 13600
 )
 
 # Analyze the test record
@@ -81,32 +81,32 @@ Al_6060_T66.result <- sdar(Al_6060_T66,
 #>       --> pass
 #>     y
 #>       Relative y-Resolution:   0.333333333333333
-#>       % at this resolution:    1.19402985074627
-#>       % in zeroth bin:         98.8059701492537
+#>       % at this resolution:    1.49253731343284
+#>       % in zeroth bin:         98.5074626865672
 #>       --> pass
 #>   Data Quality Metric: Noise
 #>     x
 #>       Relative x-Noise:        1.12835262887974e-14
 #>       --> pass
 #>     y
-#>       Relative y-Noise:        0.0628385403382046
+#>       Relative y-Noise:        0.0630192818713285
 #>       --> pass
 #>   Fit Quality Metric: Curvature
 #>     1st Quartile
-#>       Relative Residual Slope: 0.00112596960003188
+#>       Relative Residual Slope: -0.000639630646573031
 #>       Number of Points:        40
 #>       --> pass
 #>     4th Quartile
-#>       Relative Residual Slope: -0.00682689398113825
+#>       Relative Residual Slope: -0.000639630646584453
 #>       Number of Points:        40
 #>       --> pass
 #>   Fit Quality Metric: Fit Range
-#>       relative fit range:      0.800879700901693
+#>       relative fit range:      0.795882891125343
 #>       --> pass
 #>   Un-normalized fit
-#>       Final Slope:             67999.5684247684 MPa
-#>       True Intercept:          10.0022190872361 MPa
-#>       y-Range:                 24.7366333007812 MPa - 84.4049072265625 MPa
+#>       Final Slope:             67994.3606141895 MPa
+#>       True Intercept:          10.0010871775444 MPa
+#>       y-Range:                 24.7329711914062 MPa - 84.7732543945312 MPa
 ```
 
 <img src="man/figures/README-example-sdar-1.png" width="100%" />
@@ -146,14 +146,14 @@ Al_6060_T66.result.lazy <- sdar.lazy(Al_6060_T66,
 )
 #> Determination of Slope in the Linear Region of a Test Record:
 #>   lazy algorithm requires more fits than standard SDAR-algorithm:  
-#>     99500 vs. 36856 fits.
+#>     97515 vs. 36856 fits.
 #>   Anyways, random sub-sampling will be used...
 #> Random sub-sampling modification of the SDAR-algorithm
 #>   Random sub-sampling information:
-#>       247 points of 337 points in the normalized range were used.
-#>       20 % of sub-sampled normalized ranges passed the data quality checks.
+#>       245 points of 337 points in the normalized range were used.
+#>       0 % of sub-sampled normalized ranges passed the data quality checks.
 #>       100 % of linear regressions passed the fit quality checks.
-#>       20 % of linear regressions passed all quality checks.
+#>       0 % of linear regressions passed all quality checks.
 #> 
 #>   Data Quality Metric: Digital Resolution
 #>     x
@@ -163,32 +163,32 @@ Al_6060_T66.result.lazy <- sdar.lazy(Al_6060_T66,
 #>       --> pass
 #>     y
 #>       Relative y-Resolution:   0.333333333333333
-#>       % at this resolution:    1.19402985074627
-#>       % in zeroth bin:         98.8059701492537
+#>       % at this resolution:    1.49253731343284
+#>       % in zeroth bin:         98.5074626865672
 #>       --> pass
 #>   Data Quality Metric: Noise
 #>     x
 #>       Relative x-Noise:        1.12835262887974e-14
 #>       --> pass
 #>     y
-#>       Relative y-Noise:        0.0628385403382046
+#>       Relative y-Noise:        0.0630192818713285
 #>       --> pass
 #>   Fit Quality Metric: Curvature
 #>     1st Quartile
-#>       Relative Residual Slope: 0.00277455072182705
-#>       Number of Points:        40
+#>       Relative Residual Slope: 0.000165214573477868
+#>       Number of Points:        41
 #>       --> pass
 #>     4th Quartile
-#>       Relative Residual Slope: -0.00745994845842898
-#>       Number of Points:        40
+#>       Relative Residual Slope: -0.00224215406178426
+#>       Number of Points:        41
 #>       --> pass
 #>   Fit Quality Metric: Fit Range
-#>       relative fit range:      0.806020362992475
+#>       relative fit range:      0.790818181818182
 #>       --> pass
 #>   Un-normalized fit
-#>       Final Slope:             67999.060977753 MPa
-#>       True Intercept:          10.0024898483829 MPa
-#>       y-Range:                 25.484619140625 MPa - 84.7723388671875 MPa
+#>       Final Slope:             67993.9438149842 MPa
+#>       True Intercept:          10.0012595609108 MPa
+#>       y-Range:                 25.103759765625 MPa - 85.528564453125 MPa
 ```
 
 ### Plot Functions

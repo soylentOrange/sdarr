@@ -11,9 +11,9 @@ synthesize_test_data(
   ultimate.y,
   ultimate.x,
   offset = 0,
-  toe.initial.y = 0,
-  toe.initial.slope = slope,
-  toe.max.y = 0,
+  toe.start.y = 0,
+  toe.start.slope = slope,
+  toe.end.y = 0,
   enob.x = 14,
   enob.y = 14,
   enob.x_FS = 16,
@@ -39,12 +39,12 @@ synthesize_test_data(
 
 \item{offset}{Value of y-offset.}
 
-\item{toe.initial.y}{Intersection of toe-region with y-axis (before adding an
+\item{toe.start.y}{Intersection of toe-region with y-axis (before adding an
 offset).}
 
-\item{toe.initial.slope}{Initial slope of toe region.}
+\item{toe.start.slope}{Initial slope of toe region.}
 
-\item{toe.max.y}{End of toe region.}
+\item{toe.end.y}{End of toe region.}
 
 \item{enob.x}{Effective number of bits for the synthetic data x-range. Will
 determine the number of points in the returned data (i.e. 2^enob.x). Also
@@ -93,8 +93,8 @@ reproducible results.
 }
 \examples{
 # Synthesize a test record resembling Al 6060 T66
-# (Values according to Metallic Material Properties Development and
-# Standardization (MMPDS) Handbook)
+# (Values according to Metallic Material Properties
+# Development and Standardization (MMPDS) Handbook)
 Al_6060_T66 <- synthesize_test_data(
   slope = 68000,
   yield.y = 160,
@@ -111,7 +111,7 @@ plot(
 }
 \references{
 Hill, H. N. (1944). Determination of stress-strain relations
-from" offset" yield strength values. Aluminum Co of America Pittsburgh Pa.
+from "offset" yield strength values. Aluminum Co of America Pittsburgh Pa.
 
 Ramberg, W., & Osgood, W. R. (1943). Description of Stress-Strain
 Curves by Three Parameters; National Advisory Committee for Aeronautics

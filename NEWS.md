@@ -1,7 +1,8 @@
-# develpment version
+# development version
 
-* change of interface
-* added down-sampling variant
+* Change of function-interfaces for simplicity-
+* Added down-sampling variant of the SDAR-algorithm.
+* Improvement of algorithm for synthesizing test data.
 
 # sdarr 0.4.5
 

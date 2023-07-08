@@ -47,8 +47,8 @@ Al_6060_T66.noisy <- synthesize_test_data(
   offset = offset.reference, 
   enob.x = 14, enob.x_FS = 14, 
   enob.y = 12, enob.y_FS = 12, enob.y_noise = 6,
-  toe.initial.y = 10, toe.max.y = 20,
-  toe.initial.slope = 13600
+  toe.start.y = 10, toe.end.y = 20,
+  toe.start.slope = 13600
 )
 
 # Synthesize a noise-free test record resembling Al 6060 T66
@@ -59,8 +59,8 @@ Al_6060_T66.clean <- synthesize_test_data(
   offset = offset.reference, 
   enob.x = 14, enob.x_FS = 14, 
   enob.y = 12, enob.y_FS = 12, enob.y_noise = 0,
-  toe.initial.y = 10, toe.max.y = 20,
-  toe.initial.slope = 13600
+  toe.start.y = 10, toe.end.y = 20,
+  toe.start.slope = 13600
 )
 ```
 
@@ -218,7 +218,7 @@ Next to the warnings raised from `sdar.lazy()`, in the reporting message you can
                                              plot.fit.x.data.min,
                                              plot.fit.x.data.max)),
               aes(x = x.data.denoised, y = y.data.denoised, 
-                  color = "(de-noised ) data")) +
+                  color = "(de-noised) data")) +
     geom_line(aes(x = x.data.clean, y = y.data.clean, 
                   color = "(noise-free) data")) +
     geom_line(

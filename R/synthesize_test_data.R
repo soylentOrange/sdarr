@@ -12,7 +12,7 @@
 #'   reproducible results.
 #'
 #' @references Hill, H. N. (1944). Determination of stress-strain relations
-#'   from" offset" yield strength values. Aluminum Co of America Pittsburgh Pa.
+#'   from "offset" yield strength values. Aluminum Co of America Pittsburgh Pa.
 #'
 #' @references Ramberg, W., & Osgood, W. R. (1943). Description of Stress-Strain
 #'   Curves by Three Parameters; National Advisory Committee for Aeronautics
@@ -34,12 +34,12 @@
 #'
 #' @param offset Value of y-offset.
 #'
-#' @param toe.initial.y Intersection of toe-region with y-axis (before adding an
+#' @param toe.start.y Intersection of toe-region with y-axis (before adding an
 #'   offset).
 #'
-#' @param toe.initial.slope Initial slope of toe region.
+#' @param toe.start.slope Initial slope of toe region.
 #'
-#' @param toe.max.y End of toe region.
+#' @param toe.end.y End of toe region.
 #'
 #' @param enob.x Effective number of bits for the synthetic data x-range. Will
 #'   determine the number of points in the returned data (i.e. 2^enob.x). Also
@@ -73,8 +73,8 @@
 #'
 #' @examples
 #' # Synthesize a test record resembling Al 6060 T66
-#' # (Values according to Metallic Material Properties Development and
-#' # Standardization (MMPDS) Handbook)
+#' # (Values according to Metallic Material Properties
+#' # Development and Standardization (MMPDS) Handbook)
 #' Al_6060_T66 <- synthesize_test_data(
 #'   slope = 68000,
 #'   yield.y = 160,
@@ -91,7 +91,7 @@
 #' @export
 synthesize_test_data <- function(slope, yield.y, yield.xp = 0.002,
                                  ultimate.y, ultimate.x, offset = 0,
-                                 toe.initial.y = 0, toe.initial.slope = slope, toe.max.y = 0,
+                                 toe.start.y = 0, toe.start.slope = slope, toe.end.y = 0,
                                  enob.x = 14, enob.y = 14, enob.x_FS = 16, enob.y_FS = 16,
                                  enob.x_noise = 0, enob.y_noise = 0,
                                  x.name = "strain", y.name = "stress",
@@ -102,7 +102,7 @@ synthesize_test_data <- function(slope, yield.y, yield.xp = 0.002,
   n <- log(ef / yield.xp) / log(ultimate.y / yield.y)
 
   # get a splinefun to predict stress/force from sequence of strain/displacement values
-  synthetic_data.splinefun <- data.frame("y" = seq(0, ultimate.y, length.out = 1000)) %>%
+  synthetic_data.sfun <- data.frame("y" = seq(0, ultimate.y, length.out = 2^enob.x)) %>%
     dplyr::mutate("x" = .data$y / slope + yield.xp * (.data$y / yield.y)^n) %>%
     {
       stats::splinefun(.$x, .$y,
@@ -111,14 +111,15 @@ synthesize_test_data <- function(slope, yield.y, yield.xp = 0.002,
       )
     }
 
-  # synthetize data starting with a regular sequence of strain/displacement values
-  data.frame("x" = seq(from = 0, to = ultimate.x, length.out = 2^enob.x)) %>%
-    dplyr::mutate("y" = synthetic_data.splinefun(.data$x)) %>%
+  # get a splinefun for creating synthetic data with added toe region
+  # (strain/displacement...) with added toe region
+  synthetic_data.toed.sfun <- data.frame("x" = seq(from = 0, to = ultimate.x, length.out = 2^enob.x)) %>%
+    dplyr::mutate("y" = synthetic_data.sfun(.data$x)) %>%
     {
       # add a toe region (if possible)
       synthetic_data <- .
-      synthetic_data.toe <- synthetic_data %>% dplyr::filter(.data$y <= toe.max.y)
-      synthetic_data.post_toe <- synthetic_data %>% dplyr::filter(.data$y > toe.max.y)
+      synthetic_data.toe <- synthetic_data %>% dplyr::filter(.data$y <= toe.end.y)
+      synthetic_data.post_toe <- synthetic_data %>% dplyr::filter(.data$y > toe.end.y)
 
       # does it make any sense to add a toe region to the synthetic data?
       if (nrow(synthetic_data.toe) > 2) {
@@ -133,7 +134,7 @@ synthesize_test_data <- function(slope, yield.y, yield.xp = 0.002,
           "y" = c(
             seq(-23 * synthetic_data.toe[2, "x"], 0,
               length.out = 24
-            ) * toe.initial.slope + toe.initial.y,
+            ) * toe.start.slope + toe.start.y,
             utils::tail(synthetic_data.toe, 1)$y,
             utils::head(synthetic_data.post_toe, 23)$y
           )
@@ -149,58 +150,88 @@ synthesize_test_data <- function(slope, yield.y, yield.xp = 0.002,
           dplyr::mutate("y" = toe.sfun(.data$x)) %>%
           dplyr::bind_rows(synthetic_data.post_toe)
       } else {
-        if (toe.max.y > 0) {
+        if (toe.end.y > 0) {
           warning("Toe-region is not feasible. (Too little data...)")
         }
         synthetic_data
       }
-    } %>%
-    {
-      # add noise to data
+    } %>% {
+      stats::splinefun(.$x, .$y,
+                       method = "monoH.FC",
+                       ties = list("ordered", mean))
+    }
+
+  # synthesize data starting with a regular sequence of x-values
+  # (strain/displacement...) with added toe region
+  # start with the sequence of x-values
+  data.frame("x" = seq(from = 0, to = ultimate.x, length.out = 2^enob.x)) %>% {
+    # add noise to x-data
+    synthetic_data <- .
+    synthetic_data.nrow <- nrow(synthetic_data)
+    # maximum value "recorded" x-data
+    x.max <- max(synthetic_data$x)
+    # hypothetical x-value at FS
+    x.max.FS <- x.max * 2^(enob.x_FS - enob.x)
+    # x-value worth at 1 bit of FS
+    x.resolution <- x.max.FS * 2^-enob.x_FS
+    # sd of noise
+    x.noise.sd <- (2^enob.x_noise - 1) * x.resolution
+
+    # add noise from a normal distribution
+    synthetic_data %>%
+      dplyr::mutate("x" = .data$x + stats::rnorm(synthetic_data.nrow, sd = x.noise.sd))
+  } %>% {
+    # add quantization noise
+    synthetic_data <- .
+
+    # maximum value "recorded" x-data
+    x.max <- max(synthetic_data$x)
+    # hypothetical x-value at FS
+    x.max.FS <- x.max * 2^(enob.x_FS - enob.x)
+    # x-value worth at 1 bit of FS
+    x.resolution <- x.max.FS * 2^-enob.x_FS
+
+    synthetic_data %>%
+      dplyr::mutate("x" = round(.data$x / x.resolution, 0) * x.resolution)
+  } %>%
+    # order the x-data (in case adding noise mixed something up)
+    dplyr::arrange(.data$x) %>%
+    # use the splinefun with the toe region to synthesize y-data
+    dplyr::mutate("y" = synthetic_data.toed.sfun(.data$x)) %>% {
+      # add noise to y-data
       synthetic_data <- .
       synthetic_data.nrow <- nrow(synthetic_data)
-      # maximum value "recorded" x-data
-      x.max <- max(synthetic_data$x)
-      # hypothetical x-value at FS
-      x.max.FS <- x.max * 2^(enob.x_FS - enob.x)
-      # x-value worth at 1 bit of FS
-      x.resolution <- x.max.FS * 2^-enob.x_FS
-      # sd of noise
-      x.noise.sd <- (2^enob.x_noise - 1) * x.resolution
-
-      # same for y
+      # maximum value "recorded" y-data
       y.max <- max(synthetic_data$y)
+      # hypothetical y-value at FS
       y.max.FS <- y.max * 2^(enob.y_FS - enob.y)
+      # y-value worth at 1 bit of FS
       y.resolution <- y.max.FS * 2^-enob.y_FS
+      # sd of noise
       y.noise.sd <- (2^enob.y_noise - 1) * y.resolution
 
+      # add noise from a normal distribution
       synthetic_data %>%
-        dplyr::mutate("x" = .data$x + stats::rnorm(synthetic_data.nrow, sd = x.noise.sd)) %>%
         dplyr::mutate("y" = .data$y + stats::rnorm(synthetic_data.nrow, sd = y.noise.sd))
     } %>%
-    {
+    # add offset to y-data
+    dplyr::mutate("y" = .data$y + offset) %>% {
       # add quantization noise
       synthetic_data <- .
 
-      # maximum value "recorded" x-data
-      x.max <- max(synthetic_data$x)
-      # hypothetical x-value at FS
-      x.max.FS <- x.max * 2^(enob.x_FS - enob.x)
-      # x-value worth at 1 bit of FS
-      x.resolution <- x.max.FS * 2^-enob.x_FS
-
-      # same for y
+      # maximum value "recorded" y-data
       y.max <- max(synthetic_data$y)
+      # hypothetical y-value at FS
       y.max.FS <- y.max * 2^(enob.y_FS - enob.y)
+      # y-value worth at 1 bit of FS
       y.resolution <- y.max.FS * 2^-enob.y_FS
 
       synthetic_data %>%
-        dplyr::mutate("x" = round(.data$x / x.resolution, 0) * x.resolution) %>%
         dplyr::mutate("y" = round(.data$y / y.resolution, 0) * y.resolution)
     } %>%
-    dplyr::mutate("y" = .data$y + offset) %>%
-    dplyr::arrange(.data$x) %>%
+    # set labels
     labelled::set_variable_labels(.labels = list(x = x.unit, y = y.unit)) %>%
+    #set names
     magrittr::set_names(c(x.name, y.name)) %>%
     return()
 }
