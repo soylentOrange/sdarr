@@ -1,4 +1,3 @@
-#' @aliases sdarr-package
 #' @keywords internal
 "_PACKAGE"
 

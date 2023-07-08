@@ -1,11 +1,12 @@
 #' Run the SDAR algorithm on prepared data
 #' @noRd
-sdarr_execute <- function(prepared_data, otr.info,
-                          verbose.all = FALSE,
-                          verbose.report = TRUE,
-                          showPlots.all = FALSE,
-                          showPlots.report = TRUE,
-                          savePlots = FALSE) {
+sdar_execute <- function(prepared_data, otr.info,
+                         verbose.all = FALSE,
+                         verbose.report = TRUE,
+                         showPlots.all = FALSE,
+                         showPlots.report = TRUE,
+                         savePlots = FALSE) {
+
   # maybe the offset for step 1 needs to be raised later
   raise_offset_times <- 0
   optimum_fit_is_found <- FALSE
@@ -103,7 +104,7 @@ sdarr_execute <- function(prepared_data, otr.info,
     "passed.check.fit" = "(fit quality checks)"
   )
 
-  sdarr.results <- data.frame(
+  sdar.results <- data.frame(
     "finalSlope" = assembled_results$Slope_Determination_Results$finalSlope,
     "finalSlope.conf.low" = final.fit.confint["x.data", 1],
     "finalSlope.conf.high" = final.fit.confint["x.data", 2],
@@ -124,7 +125,7 @@ sdarr_execute <- function(prepared_data, otr.info,
 
   # return full results
   results <- list(
-    "sdar" = sdarr.results,
+    "sdar" = sdar.results,
     "Data_Quality_Metrics" = assembled_results$Data_Quality_Metrics,
     "Fit_Quality_Metrics" = assembled_results$Fit_Quality_Metrics
   )
@@ -189,7 +190,7 @@ sdarr_execute <- function(prepared_data, otr.info,
 #' @param savePlots Set to `TRUE` to get plot-functions with the result for
 #'   later use.
 #'
-#' @seealso [sdarr.lazy()] for the random sub-sampling modification of the
+#' @seealso [sdar.lazy()] for the random sub-sampling modification of the
 #'   SDAR-algorithm.
 #'
 #' @examples
@@ -211,23 +212,22 @@ sdarr_execute <- function(prepared_data, otr.info,
 #' )
 #'
 #'
-#' # use sdarr() to analyze the synthetic test record
+#' # use sdar() to analyze the synthetic test record
 #' # will print a report and give a plot of the final fit
 #' \donttest{
-#' result <- sdarr(Al_6060_T66, strain, stress)
+#' result <- sdar(Al_6060_T66, strain, stress)
 #' }
 #'
-#' @returns A list containing a data-frame with the results of the final fit,
+#' @returns A list containing a data.frame with the results of the final fit,
 #'   lists with the quality- and fit-metrics, and a list containing the crated
 #'   plot-functions (if `savePlots = TRUE`).
 #'
 #' @export
-sdarr <- function(data,
-                  x,
-                  y,
-                  verbose = "report",
-                  showPlots = "report",
-                  savePlots = FALSE) {
+sdar <- function(data, x, y,
+                 verbose = "report",
+                 showPlots = "report",
+                 savePlots = FALSE) {
+
   # to be furrr-safe, enquote the tidy arguments here
   x <- rlang::enquo(x)
   y <- rlang::enquo(y)
@@ -296,7 +296,7 @@ sdarr <- function(data,
   }
 
   # execute the SDAR-algorithm
-  sdarr_execute(
+  sdar_execute(
     prepared_data,
     otr.info,
     verbose.all,

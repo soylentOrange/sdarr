@@ -16,9 +16,9 @@ test-data. See a detailed description of the algorithm in the [NIST
 Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050)
 or in [Graham & Adler (2011)](https://doi.org/10.1520/JTE103038).
 
-As the SDAR-algorithm, implemented in `sdarr()`, heavily uses linear
-regressions, a faster version `sdarr.lazy()` was implemented, which
-finds the optimum region for the (one) final linear regression by random
+As the SDAR-algorithm, implemented in `sdar()`, heavily uses linear
+regressions, a faster version `sdar.lazy()` was implemented, which finds
+the optimum region for the (one) final linear regression by random
 sub-sampling within the normalized range of the test-data.
 
 ## Installation
@@ -35,16 +35,16 @@ devtools::install_github("soylentOrange/sdarr")
 
 ### Standard SDAR-algorithm
 
-A basic example of using `sdarr()` on a synthetic data set, which is
+A basic example of using `sdar()` on a synthetic data set, which is
 based on the properties of aluminium (Al 6060 T66) as given in the
 [Metallic Material Properties Development and Standardization (MMPDS)
 Handbook](https://ntrl.ntis.gov/NTRL/dashboard/searchResults/titleDetail/PB2003106632.xhtml).
 A toe-region and a non-zero intercept are added to make the test data
 less boring.
 
-`sdarr()` analyzes the data and will give a small report as a message.
-It should confirm the Young’s-modulus of 68 GPa and an intercept of 10
-MPa. To make use of multi-core processing, configure
+`sdar()` analyzes the data and will give a small report as a message. It
+should confirm the Young’s-modulus of 68 GPa and an intercept of 10 MPa.
+To make use of multi-core processing, configure
 [furrr](https://furrr.futureverse.org/) to use a multisession strategy.
 
 ``` r
@@ -67,7 +67,7 @@ Al_6060_T66 <- synthesize_test_data(
 )
 
 # Analyze the test record
-Al_6060_T66.result <- sdarr(Al_6060_T66,
+Al_6060_T66.result <- sdar(Al_6060_T66,
   x = strain, y = stress,
   verbose = "r", showPlots = "r", savePlots = TRUE
 )
@@ -113,15 +113,15 @@ Al_6060_T66.result <- sdarr(Al_6060_T66,
 
 ### Random sub-sampling modification of the SDAR-algorithm
 
-A basic example of `sdarr.lazy()`, a lazy variant of the sdarr-function
-on a synthetic data set, which is based on the properties of aluminium
-(Al 6060 T66) as given in the [Metallic Material Properties Development
-and Standardization (MMPDS)
+A basic example of `sdar.lazy()`, a random sub-sampling modification of
+the SDAR-algorithm on a synthetic data set, which is based on the
+properties of aluminium (Al 6060 T66) as given in the [Metallic Material
+Properties Development and Standardization (MMPDS)
 Handbook](https://ntrl.ntis.gov/NTRL/dashboard/searchResults/titleDetail/PB2003106632.xhtml).
 A toe-region and a non-zero intercept are added to make the test data
 less boring (see above).
 
-`sdarr.lazy()` analyzes the data for the optimum size of the fitting
+`sdar.lazy()` analyzes the data for the optimum size of the fitting
 region via random sub-sampling. It will give a small report as a message
 after finding the optimum fit. It should confirm the Young’s-modulus of
 68 GPa and an intercept of 10 MPa. As the data set is rather short,
@@ -137,11 +137,12 @@ set.seed(50041180)
 
 # Analyze the test record
 # (using a relaxed cutoff_probability for the noise-free synthetic data)
-Al_6060_T66.result.lazy <- sdarr.lazy(Al_6060_T66,
+Al_6060_T66.result.lazy <- sdar.lazy(Al_6060_T66,
   x = strain, y = stress,
+  verbose = "r", showPlots = "n",
+  savePlots = TRUE,
   cutoff_probability = 0.8,
-  enforce_subsampling = TRUE,
-  verbose = "r", showPlots = "n"
+  enforce_subsampling = TRUE
 )
 #> Determination of Slope in the Linear Region of a Test Record:
 #>   lazy algorithm requires more fits than standard SDAR-algorithm:  
@@ -192,7 +193,7 @@ Al_6060_T66.result.lazy <- sdarr.lazy(Al_6060_T66,
 
 ### Plot Functions
 
-`sdarr()` and `sdarr.lazy()` will create diagnostic plots throughout
+`sdar()` and `sdar.lazy()` will create diagnostic plots throughout
 calculations, which will only be shown when requested (i.e. set
 `showPlots = "all`). To have a plot drawn later, you can call the
 provided plot-functions from the results, when you set
@@ -205,7 +206,7 @@ you can easily tap their environment to convert it into e.g. a
 ``` r
 
 # show plot of final fit using the plot function from the result (see above)
-Al_6060_T66.result$plots$final.fit()
+Al_6060_T66.result.lazy$plots$final.fit()
 ```
 
 <img src="man/figures/README-example-plot-fun-1.png" width="100%" />
@@ -237,7 +238,7 @@ Al_6060_T66.result %>% {
     geom_line(
       data = plot.data %>%
         dplyr::filter(y.fit <= plot.y.data.max),
-      aes(x = x.data, y = y.fit, color = "fit (sdarr)")
+      aes(x = x.data, y = y.fit, color = "fit (sdar)")
     ) +
     geom_hline(aes(color = "fit range", 
                    yintercept = plot.y.lowerBound),

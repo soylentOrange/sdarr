@@ -1,25 +1,23 @@
-#' Run the SDAR algorithm with random sub-sampling
+#' Run the SDAR algorithm with down-sampling
 #' @noRd
-sdar_execute.lazy <- function(prepared_data,
-                              otr.info,
-                              normalized_data.hint = NULL,
-                              denoise.x = FALSE,
-                              denoise.y = FALSE,
-                              vmd.alpha = 1000,
-                              fit.rep,
-                              fit.candidates,
-                              optimum.range.size,
-                              cutoff_probability,
-                              quality_penalty,
-                              verbose.all = FALSE,
-                              verbose.report = TRUE,
-                              showPlots.all = FALSE,
-                              showPlots.report = TRUE,
-                              savePlots = FALSE) {
-
+sdar_execute.downsample <- function(prepared_data,
+                                    otr.info,
+                                    normalized_data.hint = NULL,
+                                    denoise.x = FALSE,
+                                    denoise.y = FALSE,
+                                    vmd.alpha = 1000,
+                                    fit.candidates,
+                                    optimum.range.size,
+                                    cutoff_probability,
+                                    quality_penalty = 0.1,
+                                    verbose.all = FALSE,
+                                    verbose.report = TRUE,
+                                    showPlots.all = FALSE,
+                                    showPlots.report = TRUE,
+                                    savePlots = FALSE) {
   # Give a (long) welcome message
   if (verbose.report) {
-    message("Random sub-sampling modification of the SDAR-algorithm\n")
+    message("Down-sampling modification of the SDAR-algorithm\n")
   }
 
   # maybe the offset for step 1 needs to be raised later
@@ -52,7 +50,7 @@ sdar_execute.lazy <- function(prepared_data,
     # find optimum fits and determine summary of data & fit quality metrics
     optimum_fits <- find_linear_regressions.subsampled(
       normalized_data$data.normalized,
-      fit.rep,
+      1,
       fit.candidates,
       optimum.range.size
     ) %>%
@@ -314,7 +312,7 @@ sdar_execute.lazy <- function(prepared_data,
     "x.lowerBound.conf.high" = assembled_results$Slope_Determination_Results$x.unit,
     "x.upperBound.conf.high" = assembled_results$Slope_Determination_Results$x.unit,
     "Num.Obs.fit" = "(points in final fit)",
-    "Num.Obs.subsampled" = "(points in sub-sampled data range)",
+    "Num.Obs.downsampled" = "(points in down-sampled data range)",
     "Num.Obs.normalized" = "(points in normalized data range)",
     "passed.check" = "(all checks)",
     "passed.check.data" = "(data quality checks)",
@@ -341,12 +339,12 @@ sdar_execute.lazy <- function(prepared_data,
     "x.upperBound.conf.low" = weighed.results[[1, "x.upperBound.conf.low"]],
     "x.upperBound.conf.high" = weighed.results[[1, "x.upperBound.conf.high"]],
     "Num.Obs.fit" = nrow(prepared_data[optimum_fit$otr.idx.start:optimum_fit$otr.idx.end, ]),
-    "Num.Obs.subsampled" = optimum.range.size,
+    "Num.Obs.downsampled" = optimum.range.size,
     "Num.Obs.normalized" = assembled_results$Data_Quality_Metrics$Num.Obs.normalized,
     "passed.check" = assembled_results$Slope_Determination_Results$passed.check,
     "passed.check.data" = assembled_results$Data_Quality_Metrics$passed.check,
     "passed.check.fit" = assembled_results$Fit_Quality_Metrics$passed.check,
-    "method" = "SDAR with random sub-sampling"
+    "method" = "SDAR with down-sampling"
   ) %>%
     labelled::set_variable_labels(.labels = results.labels)
 
@@ -384,11 +382,11 @@ sdar_execute.lazy <- function(prepared_data,
 }
 
 
-#' @title Random sub-sampling variant of the SDAR-algorithm
+#' @title Down-sampling variant of the SDAR-algorithm
 #'
-#' @description Run a random sub-sampling modification of the SDAR algorithm as
+#' @description Run a down-sampling modification of the SDAR algorithm as
 #'   originally standardized in ASTM E3076-18. As the original version uses
-#'   numerous linear regressions (`.lm.fit()` from the stats-package), it can be
+#'   numerous linear regressions (`.lm.fit()` from the stats-package), which can be
 #'   painfully slow for test data with high resolution. The lazy variant of the
 #'   algorithm will use several random sub-samples of the data to find the best
 #'   estimate for the fit-range within the data. Additionally, the test data
@@ -422,23 +420,16 @@ sdar_execute.lazy <- function(prepared_data,
 #'   Decomposition. IEEE Transactions on Signal Processing, 62(3), 531–544.
 #'   https://doi.org/10.1109/TSP.2013.2288675
 #'
-#'
 #' @inheritParams sdar
 #'
-#' @param fit.rep Repetitions of random sub-sampling and fitting.
-#'
 #' @param fit.candidates Give a number for selecting optimum fit candidates
-#'   (ordered decreasingly by normalized residuals) for each of the repetitions
-#'   of random sub-sampling.
+#'   (ordered decreasingly by normalized residuals).
 #'
 #' @param cutoff_probability Cut-off probability for estimating optimum size of
-#'   sub-sampled data range via logistic regression.
+#'   down-sampled data range via logistic regression.
 #'
 #' @param quality_penalty Factor to down-weight fits with inferior data- and
 #'   fit-quality metrics.
-#'
-#' @param enforce_subsampling Set to `TRUE`, to use sub-sampling method even
-#'   when it is computationally more expensive than the standard SDAR-algorithm.
 #'
 #' @param enforce_denoising Set to `TRUE`, to enforce de-noising of the test
 #'   record for finding the final fitting range.
@@ -469,28 +460,25 @@ sdar_execute.lazy <- function(prepared_data,
 #' )
 #'
 #'
-#' # use sdar.lazy() to analyze the synthetic test record
+#' # use sdar.downsample() to analyze the synthetic test record
 #' # (using relaxed settings for the noise-free synthetic data)
 #' # will print a report and give a plot of the final fit
 #' \donttest{
-#' result <- sdar.lazy(Al_6060_T66, strain, stress,
-#'   cutoff_probability = 0.8,
-#'   fit.rep = 2
+#' result <- sdar.downsample(Al_6060_T66, strain, stress,
+#'   cutoff_probability = 0.8
 #' )
 #' }
 #'
 #' @export
-sdar.lazy <- function(data, x, y,
-                      verbose = "report",
-                      showPlots = "report",
-                      savePlots = FALSE,
-                      fit.rep = 5,
-                      fit.candidates = 20,
-                      cutoff_probability = 0.975,
-                      quality_penalty = 0.1,
-                      enforce_subsampling = FALSE,
-                      enforce_denoising = FALSE,
-                      vmd.alpha = 1000) {
+sdar.downsample <- function(data, x, y,
+                            fit.candidates = 20,
+                            cutoff_probability = 0.975,
+                            quality_penalty = 0.1,
+                            enforce_denoising = FALSE,
+                            vmd.alpha = 1000,
+                            verbose = "report",
+                            showPlots = "report",
+                            savePlots = FALSE) {
 
   # to be furrr-safe, enquote the tidy arguments here
   x <- rlang::enquo(x)
@@ -644,8 +632,10 @@ sdar.lazy <- function(data, x, y,
     }
   }
 
+  return (normalized_data)
+
   # find optimum range for sub-sampling
-  optimum_size <- optimum_size_for_subsampling(normalized_data$data.normalized,
+  optimum_size <- optimum_size_for_downsampling(normalized_data$data.normalized,
     cutoff_probability = cutoff_probability,
     showPlots = showPlots.all,
     verbose = verbose.all,
@@ -675,48 +665,32 @@ sdar.lazy <- function(data, x, y,
     }
   }
 
-  # check for viability of sub-sampling-approach
-  viability <- subsampling_viability(
-    nrow(normalized_data$data.normalized),
-    optimum_size$optimum.range.size,
-    fit.rep
-  )
+  # check for viability of down-sampling-approach
+  viability <- optimum_size$optimum.range.size < nrow(normalized_data$data.normalized)
 
   # check, whether sub-sampling would save time and execute standard or lazy variant
-  if (viability$viable == FALSE) {
+  if (viability == FALSE) {
     if (verbose.report) {
-      message(paste0(
-        "  lazy algorithm requires more fits than standard SDAR-algorithm:  \n    ",
-        viability$Nfits.subsampling, " vs. ", viability$Nfits.plain, " fits."
-      ))
-      if (enforce_subsampling == FALSE) {
-        message("  Standard SDAR-algorithm will be used...\n")
-      } else {
-        message("  Anyways, random sub-sampling will be used...\n")
-      }
+      message("  Standard SDAR-algorithm will be used...\n")
     }
 
-    # use standard SDAR-algorithm or force sub-sampling method
-    if (enforce_subsampling == FALSE) {
-      # execute the standard SDAR-algorithm
-      result <- sdar_execute(
-        prepared_data, otr.info, verbose.all, verbose.report,
-        showPlots.all, showPlots.report, savePlots
-      )
-      result$sdar <- result$sdar %>% dplyr::mutate("method" = "SDAR")
-      return(result)
-    }
+    # execute the standard SDAR-algorithm
+    result <- sdar_execute(
+      prepared_data, otr.info, verbose.all, verbose.report,
+      showPlots.all, showPlots.report, savePlots
+    )
+    result$sdar <- result$sdar %>% dplyr::mutate("method" = "SDAR")
+    return(result)
   }
 
-  # execute the sub-sampling - SDAR-algorithm
-  results <- sdar_execute.lazy(
+  # execute the down-sampling - SDAR-algorithm
+  results <- sdar_execute.downsample(
     prepared_data = prepared_data,
     otr.info = otr.info,
     normalized_data.hint = normalized_data,
     denoise.x = denoise.x,
     denoise.y = denoise.y,
     vmd.alpha = vmd.alpha,
-    fit.rep = fit.rep,
     fit.candidates = fit.candidates,
     optimum.range.size = optimum_size$optimum.range.size,
     cutoff_probability = cutoff_probability,
@@ -730,7 +704,7 @@ sdar.lazy <- function(data, x, y,
 
   # add a de-noising remark
   if (denoise.x || denoise.y || enforce_denoising) {
-    results$sdar$method <- "SDAR with random sub-sampling on de-noised data"
+    results$sdar$method <- "SDAR with down-sampling on de-noised data"
   }
 
   # append/sort plots to the results

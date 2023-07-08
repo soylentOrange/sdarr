@@ -1,3 +1,8 @@
+# develpment version
+
+* change of interface
+* added down-sampling variant
+
 # sdarr 0.4.5
 
 * Fixed typos.

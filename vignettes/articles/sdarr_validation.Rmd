@@ -125,18 +125,18 @@ E3076_DS1_2018 %>%
   config(displaylogo = FALSE, showSendToCloud = FALSE)
 ```
 
-# Validation of the standard SDAR-algorithm (sdarr)
+# Validation of the standard SDAR-algorithm (sdar)
 
-```{r sdarr_check, fig.height=4, fig.width=6}
+```{r sdar_check, fig.height=4, fig.width=6}
 # Run the algorithm
-sdarr.results <- E3076_DS1_2018 %>%
-  sdarr(extensometer, force,
-    showPlots = "n",
-    savePlots = TRUE
+sdar.results <- E3076_DS1_2018 %>%
+  sdar(extensometer, force,
+       showPlots = "n",
+       savePlots = TRUE
   )
 
 # show the plot of the final fit
-sdarr.results$plots$final.fit %>%
+sdar.results$plots$final.fit %>%
   {
     # tap the environment of the crated plot-function
     plot.env <- rlang::fn_env(.)
@@ -158,7 +158,7 @@ sdarr.results$plots$final.fit %>%
       geom_line(
         data = plot.data %>%
           dplyr::filter(y.fit <= y.data.max),
-        aes(x = x.data, y = y.fit, color = "fit (sdarr)")
+        aes(x = x.data, y = y.fit, color = "fit (sdar)")
       ) +
       theme_bw() +
       labs(
@@ -171,23 +171,23 @@ sdarr.results$plots$final.fit %>%
   config(displaylogo = FALSE, showSendToCloud = FALSE)
 ```
 
-## Validation Result of the standard SDAR-algorithm (sdarr)
+## Validation Result of the standard SDAR-algorithm (sdar)
 
-The results of the analysis using `sdarr()` are practically identical to the results given in [ASTM E3076-18](https://doi.org/10.1520/E3076-18) and perfectly match the results from [NIST Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050) (except for omitting any rounding). As stated in [NIST Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050) *...The few small discrepancies are most likely attributable to rounding errors...*.
+The results of the analysis using `sdar()` are practically identical to the results given in [ASTM E3076-18](https://doi.org/10.1520/E3076-18) and perfectly match the results from [NIST Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050) (except for omitting any rounding). As stated in [NIST Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050) *...The few small discrepancies are most likely attributable to rounding errors...*.
 
-# Validation of the Random Sub-sampling Modification of the SDAR-algorithm (sdarr.lazy)
+# Validation of the Random Sub-sampling Modification of the SDAR-algorithm (sdar.lazy)
 
-```{r sdarr.lazy_check, fig.height=4, fig.width=6}
+```{r sdar.lazy_check, fig.height=4, fig.width=6}
 # Run the algorithm (after setting a random seed)
 set.seed(50041180)
-sdarr.lazy.results <- E3076_DS1_2018 %>%
-  sdarr.lazy(extensometer, force,
-    enforce_subsampling = TRUE,
-    showPlots = "n", savePlots = TRUE
+sdar.lazy.results <- E3076_DS1_2018 %>%
+  sdar.lazy(extensometer, force,
+            enforce_subsampling = TRUE,
+            showPlots = "n", savePlots = TRUE
   )
 
 # show the plot of the final fit
-sdarr.lazy.results$plots$final.fit %>%
+sdar.lazy.results$plots$final.fit %>%
   {
     # tap the environment of the crated plot-function
     plot.env <- rlang::fn_env(.)
@@ -208,7 +208,7 @@ sdarr.lazy.results$plots$final.fit %>%
           dplyr::filter(y.fit <= y.data.max),
         aes(
           x = x.data, y = y.fit,
-          color = "fit (sdarr.lazy)"
+          color = "fit (sdar.lazy)"
         )
       ) +
       theme_bw() +
@@ -222,18 +222,18 @@ sdarr.lazy.results$plots$final.fit %>%
   config(displaylogo = FALSE, showSendToCloud = FALSE)
 ```
 
-## Validation Result of the Random Sub-sampling Modification of the SDAR-algorithm (sdarr.lazy)
+## Validation Result of the Random Sub-sampling Modification of the SDAR-algorithm (sdar.lazy)
 
-At first glimpse, the results of the analysis using the random sub-sampling variant of the SDAR-algorithm `sdarr.lazy()` are not identical to the results given in [ASTM E3076-18](https://doi.org/10.1520/E3076-18) or the results from [NIST Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050) (except for omitting any rounding).  
-However, when considering the 95% confidence intervals (additionally given with the result from `sdarr()` and `sdarr.lazy()`) obtained from the final fitting in the standard SDAR-algorithm, the results of the lazy variant are well within the 95%-CI of the standard variant. There is only a minor difference in the y-range of the final fits resulting in slightly different final results.  
-Comparing the regression curves of `sdarr.lazy()` and `sdarr()` over the mechanical data, you see that there is practically no difference (zoom in ...a lot... to see a difference).
+At first glimpse, the results of the analysis using the random sub-sampling variant of the SDAR-algorithm `sdar.lazy()` are not identical to the results given in [ASTM E3076-18](https://doi.org/10.1520/E3076-18) or the results from [NIST Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050) (except for omitting any rounding).  
+However, when considering the 95% confidence intervals (additionally given with the result from `sdar()` and `sdar.lazy()`) obtained from the final fitting in the standard SDAR-algorithm, the results of the lazy variant are well within the 95%-CI of the standard variant. There is only a minor difference in the y-range of the final fits resulting in slightly different final results.  
+Comparing the regression curves of `sdar.lazy()` and `sdar()` over the mechanical data, you see that there is practically no difference (zoom in ...a lot... to see a difference).
 
-```{r sdarr.lazy_comparison, fig.height=4, fig.width=6}
+```{r sdar.lazy_comparison, fig.height=4, fig.width=6}
 # plot fit (with 95% CI) and lazy fit against original test record
 {
   # tap the environment of the crated plot-functions
-  plot.env <- rlang::fn_env(sdarr.results$plots$final.fit)
-  plot.env.lazy <- rlang::fn_env(sdarr.lazy.results$plots$final.fit)
+  plot.env <- rlang::fn_env(sdar.results$plots$final.fit)
+  plot.env.lazy <- rlang::fn_env(sdar.lazy.results$plots$final.fit)
 
   # get data and labels
   plot.data <- plot.env$plot.data %>%
@@ -243,10 +243,10 @@ Comparing the regression curves of `sdarr.lazy()` and `sdarr()` over the mechani
   plot.ylab <- plot.env$plot.ylab
 
   # get fit ranges
-  x.lowerBound <- sdarr.results$sdar$x.lowerBound
-  x.upperBound <- sdarr.results$sdar$x.upperBound
-  x.lowerBound.lazy <- sdarr.lazy.results$sdar$x.lowerBound
-  x.upperBound.lazy <- sdarr.lazy.results$sdar$x.upperBound
+  x.lowerBound <- sdar.results$sdar$x.lowerBound
+  x.upperBound <- sdar.results$sdar$x.upperBound
+  x.lowerBound.lazy <- sdar.lazy.results$sdar$x.lowerBound
+  x.upperBound.lazy <- sdar.lazy.results$sdar$x.upperBound
 
   # re-fit for plotting
   y.data.prediction <- plot.data %>%
@@ -305,7 +305,7 @@ Comparing the regression curves of `sdarr.lazy()` and `sdarr()` over the mechani
         )),
       aes(
         x = x.data, y = y.data,
-        color = "fit-range (sdarr)"
+        color = "fit-range (sdar)"
       ),
       linewidth = 1.5, alpha = 0.5
     ) +
@@ -318,28 +318,28 @@ Comparing the regression curves of `sdarr.lazy()` and `sdarr()` over the mechani
         )),
       aes(
         x = x.data, y = y.data,
-        color = "fit-range (sdarr.lazy)"
+        color = "fit-range (sdar.lazy)"
       ),
       linewidth = 1.5, alpha = 0.5
     ) +
     geom_line(
       data = plot.data %>%
         dplyr::filter(fit <= y.data.max),
-      aes(x = x.data, y = fit, color = "fit (sdarr)")
+      aes(x = x.data, y = fit, color = "fit (sdar)")
     ) +
     geom_ribbon(
       data = plot.data %>%
         dplyr::filter(fit <= y.data.max),
       aes(
         x = x.data, y = NULL, ymin = lwr, ymax = upr,
-        color = "fit (sdarr)"
+        color = "fit (sdar)"
       ),
       linewidth = 0, alpha = 0.25
     ) +
     geom_line(
       data = plot.data %>%
         dplyr::filter(fit.lazy <= y.data.max),
-      aes(x = x.data, y = fit.lazy, color = "fit (sdarr.lazy)")
+      aes(x = x.data, y = fit.lazy, color = "fit (sdar.lazy)")
     ) +
     theme_bw() +
     labs(
@@ -354,7 +354,7 @@ Comparing the regression curves of `sdarr.lazy()` and `sdarr()` over the mechani
 
 # Conclusions
 
-Even though this is more a benchmarking than a *real* validation, the results of `sdarr()` are practically identical to the results listed in [ASTM E3076-18](https://doi.org/10.1520/E3076-18) and in [NIST Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050). Considering the 95% confidence intervals of the fitting results, same seems true for the random sub-sampling modification used in `sdarr.lazy()`.
+Even though this is more a benchmarking than a *real* validation, the results of `sdar()` are practically identical to the results listed in [ASTM E3076-18](https://doi.org/10.1520/E3076-18) and in [NIST Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050). Considering the 95% confidence intervals of the fitting results, same seems true for the random sub-sampling modification used in `sdar.lazy()`.
 
 ## Final Remark
   
