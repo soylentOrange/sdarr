@@ -34,13 +34,16 @@
     <loc>https://soylentorange.github.io/sdarr/reference/pipe.html</loc>
   </url>
   <url>
+    <loc>https://soylentorange.github.io/sdarr/reference/sdar.downsample.html</loc>
+  </url>
+  <url>
+    <loc>https://soylentorange.github.io/sdarr/reference/sdar.html</loc>
+  </url>
+  <url>
+    <loc>https://soylentorange.github.io/sdarr/reference/sdar.lazy.html</loc>
+  </url>
+  <url>
     <loc>https://soylentorange.github.io/sdarr/reference/sdarr-package.html</loc>
-  </url>
-  <url>
-    <loc>https://soylentorange.github.io/sdarr/reference/sdarr.html</loc>
-  </url>
-  <url>
-    <loc>https://soylentorange.github.io/sdarr/reference/sdarr.lazy.html</loc>
   </url>
   <url>
     <loc>https://soylentorange.github.io/sdarr/reference/synthesize_test_data.html</loc>

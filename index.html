@@ -88,7 +88,7 @@
 </h1></div>
 <p>The sdarr-package provides a R implementation of the algorithm for Slope Determination by Analysis of Residuals (SDAR) as standardized in <a href="https://doi.org/10.1520/E3076-18" class="external-link">ASTM E3076-18</a>.<br>
 It allows for automated and objective linear-fitting of mechanical test-data. See a detailed description of the algorithm in the <a href="https://doi.org/10.6028/NIST.TN.2050" class="external-link">NIST Technical Note 2050 by E. Lucon</a> or in <a href="https://doi.org/10.1520/JTE103038" class="external-link">Graham &amp; Adler (2011)</a>.</p>
-<p>As the SDAR-algorithm, implemented in <code><a href="reference/sdarr.html">sdarr()</a></code>, heavily uses linear regressions, a faster version <code><a href="reference/sdarr.lazy.html">sdarr.lazy()</a></code> was implemented, which finds the optimum region for the (one) final linear regression by random sub-sampling within the normalized range of the test-data.</p>
+<p>As the SDAR-algorithm, implemented in <code><a href="reference/sdar.html">sdar()</a></code>, heavily uses linear regressions, a faster version <code><a href="reference/sdar.lazy.html">sdar.lazy()</a></code> was implemented, which finds the optimum region for the (one) final linear regression by random sub-sampling within the normalized range of the test-data.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -103,8 +103,8 @@ It allows for automated and objective linear-fitting of mechanical test-data. Se
 <div class="section level3">
 <h3 id="standard-sdar-algorithm">Standard SDAR-algorithm<a class="anchor" aria-label="anchor" href="#standard-sdar-algorithm"></a>
 </h3>
-<p>A basic example of using <code><a href="reference/sdarr.html">sdarr()</a></code> on a synthetic data set, which is based on the properties of aluminium (Al 6060 T66) as given in the <a href="https://ntrl.ntis.gov/NTRL/dashboard/searchResults/titleDetail/PB2003106632.xhtml" class="external-link">Metallic Material Properties Development and Standardization (MMPDS) Handbook</a>. A toe-region and a non-zero intercept are added to make the test data less boring.</p>
-<p><code><a href="reference/sdarr.html">sdarr()</a></code> analyzes the data and will give a small report as a message. It should confirm the Young’s-modulus of 68 GPa and an intercept of 10 MPa. To make use of multi-core processing, configure <a href="https://furrr.futureverse.org/" class="external-link">furrr</a> to use a multisession strategy.</p>
+<p>A basic example of using <code><a href="reference/sdar.html">sdar()</a></code> on a synthetic data set, which is based on the properties of aluminium (Al 6060 T66) as given in the <a href="https://ntrl.ntis.gov/NTRL/dashboard/searchResults/titleDetail/PB2003106632.xhtml" class="external-link">Metallic Material Properties Development and Standardization (MMPDS) Handbook</a>. A toe-region and a non-zero intercept are added to make the test data less boring.</p>
+<p><code><a href="reference/sdar.html">sdar()</a></code> analyzes the data and will give a small report as a message. It should confirm the Young’s-modulus of 68 GPa and an intercept of 10 MPa. To make use of multi-core processing, configure <a href="https://furrr.futureverse.org/" class="external-link">furrr</a> to use a multisession strategy.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://soylentorange.github.io/sdarr/">sdarr</a></span><span class="op">)</span></span>
 <span></span>
@@ -125,7 +125,7 @@ It allows for automated and objective linear-fitting of mechanical test-data. Se
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Analyze the test record</span></span>
-<span><span class="va">Al_6060_T66.result</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sdarr.html">sdarr</a></span><span class="op">(</span><span class="va">Al_6060_T66</span>,</span>
+<span><span class="va">Al_6060_T66.result</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sdar.html">sdar</a></span><span class="op">(</span><span class="va">Al_6060_T66</span>,</span>
 <span>  x <span class="op">=</span> <span class="va">strain</span>, y <span class="op">=</span> <span class="va">stress</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="st">"r"</span>, showPlots <span class="op">=</span> <span class="st">"r"</span>, savePlots <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
@@ -170,8 +170,8 @@ It allows for automated and objective linear-fitting of mechanical test-data. Se
 <div class="section level3">
 <h3 id="random-sub-sampling-modification-of-the-sdar-algorithm">Random sub-sampling modification of the SDAR-algorithm<a class="anchor" aria-label="anchor" href="#random-sub-sampling-modification-of-the-sdar-algorithm"></a>
 </h3>
-<p>A basic example of <code><a href="reference/sdarr.lazy.html">sdarr.lazy()</a></code>, a lazy variant of the sdarr-function on a synthetic data set, which is based on the properties of aluminium (Al 6060 T66) as given in the <a href="https://ntrl.ntis.gov/NTRL/dashboard/searchResults/titleDetail/PB2003106632.xhtml" class="external-link">Metallic Material Properties Development and Standardization (MMPDS) Handbook</a>. A toe-region and a non-zero intercept are added to make the test data less boring (see above).</p>
-<p><code><a href="reference/sdarr.lazy.html">sdarr.lazy()</a></code> analyzes the data for the optimum size of the fitting region via random sub-sampling. It will give a small report as a message after finding the optimum fit. It should confirm the Young’s-modulus of 68 GPa and an intercept of 10 MPa. As the data set is rather short, enforce random sub-sampling by setting <code>enforce_subsampling = TRUE</code>.</p>
+<p>A basic example of <code><a href="reference/sdar.lazy.html">sdar.lazy()</a></code>, a random sub-sampling modification of the SDAR-algorithm on a synthetic data set, which is based on the properties of aluminium (Al 6060 T66) as given in the <a href="https://ntrl.ntis.gov/NTRL/dashboard/searchResults/titleDetail/PB2003106632.xhtml" class="external-link">Metallic Material Properties Development and Standardization (MMPDS) Handbook</a>. A toe-region and a non-zero intercept are added to make the test data less boring (see above).</p>
+<p><code><a href="reference/sdar.lazy.html">sdar.lazy()</a></code> analyzes the data for the optimum size of the fitting region via random sub-sampling. It will give a small report as a message after finding the optimum fit. It should confirm the Young’s-modulus of 68 GPa and an intercept of 10 MPa. As the data set is rather short, enforce random sub-sampling by setting <code>enforce_subsampling = TRUE</code>.</p>
 <p>To make use of multi-core processing, configure <a href="https://furrr.futureverse.org/" class="external-link">furrr</a> to use a multisession strategy (see above).</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># set a random seed</span></span>
@@ -179,11 +179,12 @@ It allows for automated and objective linear-fitting of mechanical test-data. Se
 <span></span>
 <span><span class="co"># Analyze the test record</span></span>
 <span><span class="co"># (using a relaxed cutoff_probability for the noise-free synthetic data)</span></span>
-<span><span class="va">Al_6060_T66.result.lazy</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sdarr.lazy.html">sdarr.lazy</a></span><span class="op">(</span><span class="va">Al_6060_T66</span>,</span>
+<span><span class="va">Al_6060_T66.result.lazy</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sdar.lazy.html">sdar.lazy</a></span><span class="op">(</span><span class="va">Al_6060_T66</span>,</span>
 <span>  x <span class="op">=</span> <span class="va">strain</span>, y <span class="op">=</span> <span class="va">stress</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="st">"r"</span>, showPlots <span class="op">=</span> <span class="st">"n"</span>,</span>
+<span>  savePlots <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  cutoff_probability <span class="op">=</span> <span class="fl">0.8</span>,</span>
-<span>  enforce_subsampling <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  verbose <span class="op">=</span> <span class="st">"r"</span>, showPlots <span class="op">=</span> <span class="st">"n"</span></span>
+<span>  enforce_subsampling <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Determination of Slope in the Linear Region of a Test Record:</span></span>
 <span><span class="co">#&gt;   lazy algorithm requires more fits than standard SDAR-algorithm:  </span></span>
@@ -234,12 +235,12 @@ It allows for automated and objective linear-fitting of mechanical test-data. Se
 <div class="section level3">
 <h3 id="plot-functions">Plot Functions<a class="anchor" aria-label="anchor" href="#plot-functions"></a>
 </h3>
-<p><code><a href="reference/sdarr.html">sdarr()</a></code> and <code><a href="reference/sdarr.lazy.html">sdarr.lazy()</a></code> will create diagnostic plots throughout calculations, which will only be shown when requested (i.e. set <code>showPlots = "all</code>). To have a plot drawn later, you can call the provided plot-functions from the results, when you set <code>savePlots = TRUE</code>.</p>
+<p><code><a href="reference/sdar.html">sdar()</a></code> and <code><a href="reference/sdar.lazy.html">sdar.lazy()</a></code> will create diagnostic plots throughout calculations, which will only be shown when requested (i.e. set <code>showPlots = "all</code>). To have a plot drawn later, you can call the provided plot-functions from the results, when you set <code>savePlots = TRUE</code>.</p>
 <p>The plot-functions are <a href="https://github.com/r-lib/carrier" class="external-link">crated</a>, so you can easily tap their environment to convert it into e.g. a <a href="https://ggplot2.tidyverse.org/" class="external-link">ggplot2-graphic</a>.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># show plot of final fit using the plot function from the result (see above)</span></span>
-<span><span class="va">Al_6060_T66.result</span><span class="op">$</span><span class="va">plots</span><span class="op">$</span><span class="fu">final.fit</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">Al_6060_T66.result.lazy</span><span class="op">$</span><span class="va">plots</span><span class="op">$</span><span class="fu">final.fit</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-example-plot-fun-1.png" width="100%"></p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># satisfy pipe addiction...</span></span>
@@ -268,7 +269,7 @@ It allows for automated and objective linear-fitting of mechanical test-data. Se
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span></span>
 <span>      data <span class="op">=</span> <span class="va">plot.data</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span></span>
 <span>        <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">y.fit</span> <span class="op">&lt;=</span> <span class="va">plot.y.data.max</span><span class="op">)</span>,</span>
-<span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x.data</span>, y <span class="op">=</span> <span class="va">y.fit</span>, color <span class="op">=</span> <span class="st">"fit (sdarr)"</span><span class="op">)</span></span>
+<span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x.data</span>, y <span class="op">=</span> <span class="va">y.fit</span>, color <span class="op">=</span> <span class="st">"fit (sdar)"</span><span class="op">)</span></span>
 <span>    <span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_hline</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"fit range"</span>, </span>
 <span>                   yintercept <span class="op">=</span> <span class="va">plot.y.lowerBound</span><span class="op">)</span>,</span>
