@@ -68,8 +68,7 @@ Al_6060_T66 <- synthesize_test_data(
 
 # Analyze the test record
 Al_6060_T66.result <- sdar(Al_6060_T66,
-  x = strain, y = stress,
-  verbose = "r", showPlots = "r", savePlots = TRUE
+  x = strain, y = stress, plotFun = TRUE
 )
 #> Determination of Slope in the Linear Region of a Test Record:
 #> SDAR-algorithm
@@ -124,8 +123,9 @@ less boring (see above).
 `sdar.lazy()` analyzes the data for the optimum size of the fitting
 region via random sub-sampling. It will give a small report as a message
 after finding the optimum fit. It should confirm the Young’s-modulus of
-68 GPa and an intercept of 10 MPa. As the data set is rather short,
-enforce random sub-sampling by setting `enforce_subsampling = TRUE`.
+68 GPa and an intercept of 10 MPa. As the synthetic data set is
+noise-free (except for quantization-noise), only one random sub-sampling
+run will do.
 
 To make use of multi-core processing, configure
 [furrr](https://furrr.futureverse.org/) to use a multisession strategy
@@ -136,21 +136,15 @@ To make use of multi-core processing, configure
 set.seed(50041180)
 
 # Analyze the test record
-# (using a relaxed cutoff_probability for the noise-free synthetic data)
+# (with enforced random sub-sampling)
 Al_6060_T66.result.lazy <- sdar.lazy(Al_6060_T66,
-  x = strain, y = stress,
-  verbose = "r", showPlots = "n",
-  savePlots = TRUE,
-  cutoff_probability = 0.8,
-  enforce_subsampling = TRUE
+  x = strain, y = stress, plot = FALSE,
+  plotFun = TRUE, n.fit = 1
 )
 #> Determination of Slope in the Linear Region of a Test Record:
-#>   lazy algorithm requires more fits than standard SDAR-algorithm:  
-#>     97515 vs. 36856 fits.
-#>   Anyways, random sub-sampling will be used...
 #> Random sub-sampling modification of the SDAR-algorithm
 #>   Random sub-sampling information:
-#>       245 points of 337 points in the normalized range were used.
+#>       251 points of 337 points in the normalized range were used.
 #>       0 % of sub-sampled normalized ranges passed the data quality checks.
 #>       100 % of linear regressions passed the fit quality checks.
 #>       0 % of linear regressions passed all quality checks.
@@ -175,29 +169,31 @@ Al_6060_T66.result.lazy <- sdar.lazy(Al_6060_T66,
 #>       --> pass
 #>   Fit Quality Metric: Curvature
 #>     1st Quartile
-#>       Relative Residual Slope: 0.000165214573477868
-#>       Number of Points:        41
+#>       Relative Residual Slope: 0.000682244584706368
+#>       Number of Points:        40
 #>       --> pass
 #>     4th Quartile
-#>       Relative Residual Slope: -0.00224215406178426
-#>       Number of Points:        41
+#>       Relative Residual Slope: -0.000682244584669766
+#>       Number of Points:        40
 #>       --> pass
 #>   Fit Quality Metric: Fit Range
-#>       relative fit range:      0.790818181818182
+#>       relative fit range:      0.811095571095571
 #>       --> pass
 #>   Un-normalized fit
-#>       Final Slope:             67993.9438149842 MPa
-#>       True Intercept:          10.0012595609108 MPa
-#>       y-Range:                 25.103759765625 MPa - 85.528564453125 MPa
+#>       Final Slope:             67994.5054945054 MPa
+#>       True Intercept:          10.0009699535978 MPa
+#>       y-Range:                 25.8590698242188 MPa - 84.7732543945312 MPa
 ```
 
 ### Plot Functions
 
 `sdar()` and `sdar.lazy()` will create diagnostic plots throughout
 calculations, which will only be shown when requested (i.e. set
-`showPlots = "all`). To have a plot drawn later, you can call the
-provided plot-functions from the results, when you set
-`savePlots = TRUE`.
+`plotFun = TRUE` for obtaining a
+[crated](https://github.com/r-lib/carrier) plot-function of the final
+fit, or `plotFun.all = TRUE` for all additional diagnostic plots). To
+have a plot drawn later, you can call the provided plot-function from
+the results, when you set `plotFun = TRUE` (or `plotFun.all = TRUE`).
 
 The plot-functions are [crated](https://github.com/r-lib/carrier), so
 you can easily tap their environment to convert it into e.g. a
@@ -218,7 +214,7 @@ library(magrittr)
 library(ggplot2) 
 
 # plot the final fit using ggplot2
-Al_6060_T66.result %>% {
+Al_6060_T66.result.lazy %>% {
   
   # tap the environment of the crated plot-function
   plot.env <- rlang::fn_env(.$plots$final.fit)
@@ -233,12 +229,12 @@ Al_6060_T66.result %>% {
   plot.y.upperBound <- plot.env$y.upperBound
 
   # create the ggplot2
-  plot.data %>% ggplot(aes(x = x.data, y = y.data, color = "Al_6060_T66")) +
+  plot.data %>% ggplot(aes(x = x.data, y = y.data, color = "Test data\n(Al 6060 T66)")) +
     geom_line() +
     geom_line(
       data = plot.data %>%
         dplyr::filter(y.fit <= plot.y.data.max),
-      aes(x = x.data, y = y.fit, color = "fit (sdar)")
+      aes(x = x.data, y = y.fit, color = "fit (sdar.lazy)")
     ) +
     geom_hline(aes(color = "fit range", 
                    yintercept = plot.y.lowerBound),
@@ -253,7 +249,7 @@ Al_6060_T66.result %>% {
       title = plot.main,
       x = plot.xlab,
       y = plot.ylab,
-      caption = paste0("Result of the SDAR-algorithm:\n\nFinal Slope: ",
+      caption = paste0("Result of the random sub-sampling SDAR-algorithm:\n\nFinal Slope: ",
                        round(.$sdar$finalSlope/1000, 1), " GPa\nTrue Offset: ",
                        round(.$sdar$trueIntercept, 1), " MPa\n\nFit Range: ",
                        round(plot.y.lowerBound, 1), " MPa - ",

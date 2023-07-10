@@ -1,11 +1,8 @@
-# development version
-
-* Change of function-interfaces for simplicity-
-* Added down-sampling variant of the SDAR-algorithm.
-* Improvement of algorithm for synthesizing test data.
-
 # sdarr 0.4.5
 
+* Change of function-interfaces for simplicity.
+* Added down-sampling variant of the SDAR-algorithm (under development).
+* Improvement of algorithm for synthesizing test data.
 * Fixed typos.
 * Use tidyverse_style
 * Reduced use of global variables to minimum (?)

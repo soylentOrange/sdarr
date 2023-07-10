@@ -8,16 +8,12 @@ sdar.lazy(
   data,
   x,
   y,
-  verbose = "report",
-  showPlots = "report",
-  savePlots = FALSE,
-  fit.rep = 5,
-  fit.candidates = 20,
-  cutoff_probability = 0.975,
-  quality_penalty = 0.1,
-  enforce_subsampling = FALSE,
-  enforce_denoising = FALSE,
-  vmd.alpha = 1000
+  verbose = TRUE,
+  plot = TRUE,
+  plotFun = FALSE,
+  n.fit = 5,
+  cutoff_probability = 0.9,
+  ...
 )
 }
 \arguments{
@@ -27,40 +23,23 @@ as units.}
 \item{x, y}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Columns with x and y
 within data.}
 
-\item{verbose, showPlots}{Give informational messages and plots during
-computation. Defaults to \code{"report"} to only show a report and a plot of the
-final fit. Set to \code{"all"} to also give messages from the individual steps.
-Set to \code{"none"} to be quiet. Can be abbreviated.}
+\item{verbose, plot}{Give a summarizing report / show a plot of the final fit.}
 
-\item{savePlots}{Set to \code{TRUE} to get plot-functions with the result for
-later use.}
+\item{plotFun}{Set to \code{TRUE} to get a plot-function for the final fit with
+the results for later use.}
 
-\item{fit.rep}{Repetitions of random sub-sampling and fitting.}
-
-\item{fit.candidates}{Give a number for selecting optimum fit candidates
-(ordered decreasingly by normalized residuals) for each of the repetitions
-of random sub-sampling.}
+\item{n.fit}{Repetitions of random sub-sampling and fitting.}
 
 \item{cutoff_probability}{Cut-off probability for estimating optimum size of
 sub-sampled data range via logistic regression.}
 
-\item{quality_penalty}{Factor to down-weight fits with inferior data- and
-fit-quality metrics.}
-
-\item{enforce_subsampling}{Set to \code{TRUE}, to use sub-sampling method even
-when it is computationally more expensive than the standard SDAR-algorithm.}
-
-\item{enforce_denoising}{Set to \code{TRUE}, to enforce de-noising of the test
-record for finding the final fitting range.}
-
-\item{vmd.alpha}{A numeric value specifying the balancing parameter of the
-data-fidelity constraint in \link[VMDecomp:vmd]{VMDecomp::vmd} for de-noising when original
-data is failing the data quality checks.}
+\item{...}{<\code{\link[rlang:dyn-dots]{dynamic-dots}}> What these dots do (lazy).}
 }
 \value{
 A list containing a data.frame with the results of the final fit,
 lists with the quality- and fit-metrics, and a list containing the crated
-plot-functions (if \code{savePlots = TRUE}).
+plot-function(s) (if \code{plotFun = TRUE} or, for all diagnostic plots
+\code{plotFun.all = TRUE}).
 }
 \description{
 Run a random sub-sampling modification of the SDAR algorithm as
@@ -76,9 +55,10 @@ on the \href{https://soylentorange.github.io/sdarr/}{package-website} for
 further information.
 }
 \note{
-The function can use parallel processing via the furrr-package. To use
-this feature, set up a plan other than the default sequential strategy
-beforehand. As random values are drawn, set a random seed beforehand to get
+The function can use parallel processing via the
+\href{https://furrr.futureverse.org/}{furrr-package}. To use this feature, set
+up a plan other than the default sequential strategy beforehand. Also, as
+random values are drawn, set a \code{\link[base:Random]{random seed}} beforehand to get
 reproducible results.
 }
 \examples{
@@ -98,12 +78,11 @@ Al_6060_T66 <- synthesize_test_data(
 
 
 # use sdar.lazy() to analyze the synthetic test record
-# (using relaxed settings for the noise-free synthetic data)
+# (relaxed setting of 2 random sub-samples for the noise-free data)
 # will print a report and give a plot of the final fit
 \donttest{
 result <- sdar.lazy(Al_6060_T66, strain, stress,
-  cutoff_probability = 0.8,
-  fit.rep = 2
+  n.fit = 2
 )
 }
 

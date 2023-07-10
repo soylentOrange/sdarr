@@ -94,14 +94,16 @@ normalize_data.execute <- function(data, otr.info = NULL,
 
 #' 1st step of SDAR-algorithm: offset, truncation, and normalization
 #' @noRd
-normalize_data <- function(data, otr.info = NULL,
+normalize_data <- function(data,
+                           otr.info = NULL,
                            raise_offset_times = 0,
                            denoise.x = FALSE,
                            denoise.y = FALSE,
-                           vmd.alpha = 1500,
+                           vmd.alpha = 2000,
+                           min_K = 2,
                            verbose = FALSE,
-                           showPlots = FALSE,
-                           savePlots = FALSE) {
+                           plot = FALSE,
+                           plotFun = FALSE) {
 
   # just normalize and return normalized data (with info and (possibly) plots)
   if (denoise.x == FALSE && denoise.y == FALSE) {
@@ -124,21 +126,26 @@ normalize_data <- function(data, otr.info = NULL,
     data_denoised <- data %>%
       dplyr::filter(.data$otr.idx <= normalized_data$tangency.point$otr.idx.tangent * 1.1)
 
+
+    # de-noise x-data
     if (denoise.x == TRUE) {
       data_denoised$x.data <- denoise_vector(
         data_denoised$x.data %>%
           as.numeric(),
         vmd.alpha = vmd.alpha,
-        verbose = FALSE
+        min_K = min_K,
+        verbose = verbose
       )
     }
 
+    # de-noise y-data
     if (denoise.y == TRUE) {
       data_denoised$y.data <- denoise_vector(
         data_denoised$y.data %>%
           as.numeric(),
         vmd.alpha = vmd.alpha,
-        verbose = FALSE
+        min_K = min_K,
+        verbose = verbose
       )
     }
 
@@ -180,7 +187,7 @@ normalize_data <- function(data, otr.info = NULL,
   }
 
   # Let's get plotty...
-  if (showPlots || savePlots) {
+  if (plot || plotFun) {
     if (!is.null(otr.info)) {
       # paste names and unit for plotting
       x.lab <- otr.info$x$name
@@ -224,7 +231,7 @@ normalize_data <- function(data, otr.info = NULL,
     )
 
     # Plot Original Test Record
-    if (showPlots) {
+    if (plot) {
       plot.otr()
     }
 
@@ -255,7 +262,7 @@ normalize_data <- function(data, otr.info = NULL,
       )
 
       # Plot Original Test Record
-      if (showPlots) {
+      if (plot) {
         plot.otr.denoised()
       }
     }
@@ -286,7 +293,7 @@ normalize_data <- function(data, otr.info = NULL,
     )
 
     # Plot Shifted, Truncated and Normalized Test Record
-    if (showPlots) {
+    if (plot) {
       plot.normalized()
     }
   }
@@ -294,7 +301,7 @@ normalize_data <- function(data, otr.info = NULL,
   # assemble results
   results <- normalized_data
 
-  if (savePlots) {
+  if (plotFun) {
     results <- results %>% append(list(
       "plots" = list(
         "plot.otr" = plot.otr,

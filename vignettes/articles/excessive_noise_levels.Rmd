@@ -95,7 +95,7 @@ When failing to pass the tests for data quality, `sdar()` will continue the eval
 ```{r low_data_quality with sdar}
 # analyze synthetic data with sdar() 
 noisy_result <- Al_6060_T66.noisy %>%
-  sdar(strain, stress, showPlots = "n", savePlots = T)
+  sdar(strain, stress, plot = FALSE, plotFun = TRUE)
 ```
 
 ## Analysis Results of Noisy Data with sdar  
@@ -172,9 +172,19 @@ The quasi-static component of the noisy test record is identified by Variational
 ```{r low_data_quality with sdar.lazy, fig.height=4, fig.width=6}
 
 # analyze noisy synthetic data using sdar.lazy()
+clean_result <- Al_6060_T66.clean %>%
+  sdar(strain, stress, plot = TRUE, 
+            plotFun.all = TRUE)
+
+# analyze noisy synthetic data using sdar.lazy()
 noisy_result.lazy <- Al_6060_T66.noisy %>%
-  sdar.lazy(strain, stress, showPlots = "n", savePlots = T,
-             enforce_subsampling = TRUE, cutoff_probability = 0.9)
+  sdar.lazy(strain, stress, plot = FALSE, 
+            plotFun.all = TRUE,
+            enforce_subsampling = TRUE, 
+            #enforce_denoising = TRUE, 
+            vmd.alpha = 100, min_K = 9,
+            Nmin_factor = 0.2,
+            cutoff_probability = 0.9)
 ```
 
 ## Analysis Results of Noisy Data with sdar.lazy  

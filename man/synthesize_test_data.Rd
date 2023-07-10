@@ -88,8 +88,8 @@ n of the Ramberg-Osgood equation are calculated from the yield-strength
 (e.g. the point of ultimate stress) as proposed by Hill.
 }
 \note{
-As random values are drawn, set a random seed beforehand to get
-reproducible results.
+As random values are drawn, set a \code{\link[base:Random]{random seed}} beforehand
+to get reproducible results.
 }
 \examples{
 # Synthesize a test record resembling Al 6060 T66
@@ -110,8 +110,8 @@ plot(
 
 }
 \references{
-Hill, H. N. (1944). Determination of stress-strain relations
-from "offset" yield strength values. Aluminum Co of America Pittsburgh Pa.
+Hill, H. N. (1944). Determination of stress-strain relations from
+"offset" yield strength values. Aluminum Co of America Pittsburgh Pa.
 
 Ramberg, W., & Osgood, W. R. (1943). Description of Stress-Strain
 Curves by Three Parameters; National Advisory Committee for Aeronautics

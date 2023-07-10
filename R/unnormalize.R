@@ -14,6 +14,7 @@ unnormalize_results <- function(normalized_data,
                                 fitQualityMetrics,
                                 verbose = FALSE,
                                 warn = TRUE) {
+
   # shorthands for calculations
   y.tangent <- normalized_data[["tangency.point"]][["y.tangent"]]
   x.tangent <- normalized_data[["tangency.point"]][["x.tangent"]]
@@ -96,7 +97,7 @@ unnormalize_results <- function(normalized_data,
     "x.lowerBound" = x.lowerBound,
     "x.upperBound" = x.upperBound,
     "x.unit" = x.unit,
-    "passed.check" = all.checks.passed %>%
-      return()
-  )
+    "passed.check" = all.checks.passed
+  ) %>%
+    return()
 }

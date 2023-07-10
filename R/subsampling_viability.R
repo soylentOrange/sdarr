@@ -5,14 +5,18 @@
 #' approach.
 #'
 #' @noRd
-subsampling_viability <- function(rangeSize.original, rangeSize.optimum,
-                                  rep = 1, verbose = FALSE) {
+subsampling_viability <- function(rangeSize.original,
+                                  rangeSize.optimum,
+                                  n.fit,
+                                  verbose = FALSE,
+                                  Nmin_factor = 0.2) {
+
   Nmin.plain <- max(floor(rangeSize.original * 0.2), 10)
   Nfits.plain <- 0.5 * ((rangeSize.original - Nmin.plain + 1)^2 +
     (rangeSize.original - Nmin.plain + 1))
 
-  Nmin.optimum <- max(floor(rangeSize.optimum * 0.2), 10)
-  Nfits.subsampling <- rep * 0.5 * ((rangeSize.optimum - Nmin.optimum + 1)^2 +
+  Nmin.optimum <- max(floor(rangeSize.optimum * Nmin_factor), 10)
+  Nfits.subsampling <- n.fit * 0.5 * ((rangeSize.optimum - Nmin.optimum + 1)^2 +
     (rangeSize.optimum - Nmin.optimum + 1))
 
   list(
@@ -32,8 +36,9 @@ subsampling_viability <- function(rangeSize.original, rangeSize.optimum,
 optimum_size_for_subsampling <- function(data.normalized,
                                          cutoff_probability,
                                          verbose = FALSE,
-                                         showPlots = FALSE,
-                                         savePlots = FALSE) {
+                                         plot = FALSE,
+                                         plotFun = FALSE) {
+
   # find optimum fit-range for sub-sampling
   normalized.ranges <- seq.int(
     50,
@@ -122,14 +127,7 @@ optimum_size_for_subsampling <- function(data.normalized,
   # check if we can satisfy cutoff_probability,
   # possibly adjust it
   max.pm <- normalized.ranges.modelpredictions$pm %>% max(na.rm = TRUE)
-  cutoff_probability.matched <- TRUE
-  if (max.pm < cutoff_probability) {
-    warning("Failed to determine optimum size by given cutoff_probability.",
-      call. = FALSE
-    )
-    cutoff_probability <- max.pm
-    cutoff_probability.matched <- FALSE
-  }
+  cutoff_probability <- max.pm*cutoff_probability
 
   # find optimum range size by (possibly adjusted) cutoff_probability
   optimum.range.size <- normalized.ranges.modelpredictions %>%
@@ -142,12 +140,18 @@ optimum_size_for_subsampling <- function(data.normalized,
   # prepare results
   results <- list(
     "optimum.range.size" = optimum.range.size,
-    "cutoff_probability.matched" = cutoff_probability.matched,
-    "max.pm" = max.pm
+    "cutoff_probability.adjusted" = cutoff_probability
   )
 
+  # print message
+  if (verbose) {
+    message(paste0("  Optimum size for sub-sampling is ",
+                   optimum.range.size, " (from ",
+                   nrow(data.normalized), ") samples.\n"))
+  }
+
   # Let's get plotty...
-  if (showPlots || savePlots) {
+  if (plot || plotFun) {
     # create plot function
     plot.modelpredictions <- carrier::crate(
       function(value) {
@@ -207,7 +211,7 @@ optimum_size_for_subsampling <- function(data.normalized,
       plot.main = "Probability of passing Data Quality Check"
     )
 
-    if (savePlots) {
+    if (plotFun) {
       results <- results %>% append(list(
         "plots" = list(
           "plot.modelpredictions" = plot.modelpredictions
@@ -216,7 +220,7 @@ optimum_size_for_subsampling <- function(data.normalized,
     }
 
     # Plot Shifted, Truncated and Normalized Test Record
-    if (showPlots) {
+    if (plot) {
       plot.modelpredictions()
     }
   }

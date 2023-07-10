@@ -4,7 +4,7 @@
 \alias{sdar}
 \title{SDAR-algorithm}
 \usage{
-sdar(data, x, y, verbose = "report", showPlots = "report", savePlots = FALSE)
+sdar(data, x, y, verbose = TRUE, plot = TRUE, plotFun = FALSE, ...)
 }
 \arguments{
 \item{data}{Data record to analyze. Labels of the data columns will be used
@@ -13,30 +13,30 @@ as units.}
 \item{x, y}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Columns with x and y
 within data.}
 
-\item{verbose, showPlots}{Give informational messages and plots during
-computation. Defaults to \code{"report"} to only show a report and a plot of the
-final fit. Set to \code{"all"} to also give messages from the individual steps.
-Set to \code{"none"} to be quiet. Can be abbreviated.}
+\item{verbose, plot}{Give a summarizing report / show a plot of the final fit.}
 
-\item{savePlots}{Set to \code{TRUE} to get plot-functions with the result for
-later use.}
+\item{plotFun}{Set to \code{TRUE} to get a plot-function for the final fit with
+the results for later use.}
+
+\item{...}{<\code{\link[rlang:dyn-dots]{dynamic-dots}}> What these dots do (std).}
 }
 \value{
 A list containing a data.frame with the results of the final fit,
 lists with the quality- and fit-metrics, and a list containing the crated
-plot-functions (if \code{savePlots = TRUE}).
+plot-function(s) (if \code{plotFun = TRUE}).
 }
 \description{
 Run the SDAR algorithm as standardized in ASTM E3076-18. Will
 use numerous linear regressions (\code{.lm.fit()} from the stats-package) and
-can be painfully slow for test data with high resolution.
-See the article on \href{https://soylentorange.github.io/sdarr/articles/sdarr_validation.html}{validation}
-on the \href{https://soylentorange.github.io/sdarr/}{package-website} for further information.
+can be painfully slow for test data with high resolution. See the article
+on \href{https://soylentorange.github.io/sdarr/articles/sdarr_validation.html}{validation} on
+the \href{https://soylentorange.github.io/sdarr/}{package-website} for further
+information.
 }
 \note{
-The function can use parallel processing via the furrr-package. To use
-this feature, set up a plan other than the default sequential strategy
-beforehand.
+The function can use parallel processing via the
+\href{https://furrr.futureverse.org/}{furrr-package}. To use this feature, set
+up a plan other than the default sequential strategy beforehand.
 }
 \examples{
 # Synthesize a test record resembling Al 6060 T66

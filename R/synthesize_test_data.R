@@ -8,11 +8,11 @@
 #'   (typically at 0.2% offset) and a second point in the post-yield region
 #'   (e.g. the point of ultimate stress) as proposed by Hill.
 #'
-#' @note As random values are drawn, set a random seed beforehand to get
-#'   reproducible results.
+#' @note As random values are drawn, set a [`random seed`][base::RNG] beforehand
+#'   to get reproducible results.
 #'
-#' @references Hill, H. N. (1944). Determination of stress-strain relations
-#'   from "offset" yield strength values. Aluminum Co of America Pittsburgh Pa.
+#' @references Hill, H. N. (1944). Determination of stress-strain relations from
+#'   "offset" yield strength values. Aluminum Co of America Pittsburgh Pa.
 #'
 #' @references Ramberg, W., & Osgood, W. R. (1943). Description of Stress-Strain
 #'   Curves by Three Parameters; National Advisory Committee for Aeronautics

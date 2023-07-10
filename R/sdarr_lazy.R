@@ -5,20 +5,23 @@ sdar_execute.lazy <- function(prepared_data,
                               normalized_data.hint = NULL,
                               denoise.x = FALSE,
                               denoise.y = FALSE,
-                              vmd.alpha = 1000,
-                              fit.rep,
-                              fit.candidates,
+                              vmd.alpha = 2000,
+                              min_K = 2,
+                              n.fit,
+                              n.candidates,
                               optimum.range.size,
                               cutoff_probability,
                               quality_penalty,
                               verbose.all = FALSE,
-                              verbose.report = TRUE,
-                              showPlots.all = FALSE,
-                              showPlots.report = TRUE,
-                              savePlots = FALSE) {
+                              verbose = TRUE,
+                              plot.all = FALSE,
+                              plot = TRUE,
+                              plotFun.all = FALSE,
+                              plotFun = FALSE,
+                              Nmin_factor = 0.2) {
 
   # Give a (long) welcome message
-  if (verbose.report) {
+  if (verbose) {
     message("Random sub-sampling modification of the SDAR-algorithm\n")
   }
 
@@ -43,18 +46,20 @@ sdar_execute.lazy <- function(prepared_data,
         denoise.x = denoise.x,
         denoise.y = denoise.y,
         vmd.alpha = vmd.alpha,
+        min_K = min_K,
         verbose = verbose.all,
-        showPlots = showPlots.all,
-        savePlots = savePlots
+        plot = plot.all,
+        plotFun = plotFun.all
       )
     }
 
     # find optimum fits and determine summary of data & fit quality metrics
     optimum_fits <- find_linear_regressions.subsampled(
       normalized_data$data.normalized,
-      fit.rep,
-      fit.candidates,
-      optimum.range.size
+      n.fit,
+      n.candidates,
+      optimum.range.size,
+      Nmin_factor = Nmin_factor
     ) %>%
       # penalize by data quality metrics
       dplyr::mutate(data.quality.penalty = 1.0) %>%
@@ -114,7 +119,7 @@ sdar_execute.lazy <- function(prepared_data,
     dplyr::filter(.data$passed.check == TRUE)) / optimum_fits.nrow
 
   # give a message on success rate of data and fit quality checks
-  if (verbose.report) {
+  if (verbose) {
     if (denoise.x || denoise.y) {
       message("  Random sub-sampling information (after de-noising was applied):")
     } else {
@@ -160,7 +165,7 @@ sdar_execute.lazy <- function(prepared_data,
   # re-do normalization without de-noising
   plot.otr.denoised <- NULL
   if (denoise.x || denoise.y) {
-    if(savePlots) {
+    if(plotFun.all) {
       # save the plot of de-noised data
       plot.otr.denoised <- normalized_data$plots$plot.otr.denoised
     }
@@ -172,8 +177,8 @@ sdar_execute.lazy <- function(prepared_data,
       denoise.x = FALSE,
       denoise.y = FALSE,
       verbose = verbose.all,
-      showPlots = showPlots.all,
-      savePlots = savePlots
+      plot = plot.all,
+      plotFun = plotFun.all
     )
   }
 
@@ -240,12 +245,11 @@ sdar_execute.lazy <- function(prepared_data,
 
   # check data quality on the finally selected range
   data_quality_metrics <- check_data_quality(
-    normalized_data$data.normalized,
-    verbose.all,
-    showPlots.all,
-    savePlots
+    data.normalized = normalized_data$data.normalized,
+    verbose = verbose.all,
+    plot = plot.all,
+    plotFun = plotFun.all
   )
-
 
   # linear regression on (complete) normalized data
   optimum.otr.idx.start <- round(weighed.results[[1, "otr.idx.start"]], 0)
@@ -268,23 +272,24 @@ sdar_execute.lazy <- function(prepared_data,
 
   # check fit quality
   fit_quality_metrics <- check_fit_quality(
-    normalized_data$data.normalized,
-    optimum_fit,
-    verbose.all,
-    showPlots.all,
-    savePlots
+    data.normalized = normalized_data$data.normalized,
+    fit = optimum_fit,
+    verbose = verbose.all,
+    plot = plot.all,
+    plotFun = plotFun.all
   )
 
   # un-normalize data and summarize
   assembled_results <- assemble_report(
-    normalized_data,
-    otr.info,
-    data_quality_metrics,
-    optimum_fit,
-    fit_quality_metrics,
-    verbose.report,
-    showPlots.report,
-    savePlots
+    normalized_data = normalized_data,
+    otr.info = otr.info,
+    dataQualityMetrics = data_quality_metrics,
+    fit = optimum_fit,
+    fitQualityMetrics = fit_quality_metrics,
+    verbose = verbose,
+    plot = plot,
+    plotFun.all = plotFun.all,
+    plotFun = plotFun
   )
 
   # re-do the final fit to find confidence intervals for slope and intercepts
@@ -357,16 +362,22 @@ sdar_execute.lazy <- function(prepared_data,
     "Fit_Quality_Metrics" = assembled_results$Fit_Quality_Metrics
   )
 
-  # append/sort plots to the results
-  if (savePlots) {
+  # append plot
+  if (plotFun || plotFun.all) {
     results <- results %>% append(list("plots" = list(
-      "final.fit" = assembled_results$plots$plot.fit,
+      "final.fit" = assembled_results$plots$plot.fit
+    )))
+  }
+
+  # append more plots
+  if (plotFun.all) {
+    results$plots <- results$plots %>% append(list(
       "otr" = assembled_results$plots$plot.otr,
       "normalized" = assembled_results$plots$plot.normalized,
       "hist.x" = assembled_results$Data_Quality_Metrics$digitalResolution$plots$hist.x,
       "hist.y" = assembled_results$Data_Quality_Metrics$digitalResolution$plots$hist.y,
       "residuals" = assembled_results$Fit_Quality_Metrics$plots$plot.residuals
-    )))
+    ))
 
     # append plot of de-noised (partial) data, if available
     if(!is.null(plot.otr.denoised)) {
@@ -400,9 +411,10 @@ sdar_execute.lazy <- function(prepared_data,
 #'   on the [package-website](https://soylentorange.github.io/sdarr/) for
 #'   further information.
 #'
-#' @note The function can use parallel processing via the furrr-package. To use
-#'   this feature, set up a plan other than the default sequential strategy
-#'   beforehand. As random values are drawn, set a random seed beforehand to get
+#' @note The function can use parallel processing via the
+#'   [furrr-package](https://furrr.futureverse.org/). To use this feature, set
+#'   up a plan other than the default sequential strategy beforehand. Also, as
+#'   random values are drawn, set a [`random seed`][base::RNG] beforehand to get
 #'   reproducible results.
 #'
 #' @references Lucon, E. (2019). Use and validation of the slope determination
@@ -425,33 +437,19 @@ sdar_execute.lazy <- function(prepared_data,
 #'
 #' @inheritParams sdar
 #'
-#' @param fit.rep Repetitions of random sub-sampling and fitting.
-#'
-#' @param fit.candidates Give a number for selecting optimum fit candidates
-#'   (ordered decreasingly by normalized residuals) for each of the repetitions
-#'   of random sub-sampling.
+#' @param n.fit Repetitions of random sub-sampling and fitting.
 #'
 #' @param cutoff_probability Cut-off probability for estimating optimum size of
 #'   sub-sampled data range via logistic regression.
 #'
-#' @param quality_penalty Factor to down-weight fits with inferior data- and
-#'   fit-quality metrics.
-#'
-#' @param enforce_subsampling Set to `TRUE`, to use sub-sampling method even
-#'   when it is computationally more expensive than the standard SDAR-algorithm.
-#'
-#' @param enforce_denoising Set to `TRUE`, to enforce de-noising of the test
-#'   record for finding the final fitting range.
-#'
-#' @param vmd.alpha A numeric value specifying the balancing parameter of the
-#'   data-fidelity constraint in [VMDecomp::vmd] for de-noising when original
-#'   data is failing the data quality checks.
+#' @param ... <[`dynamic-dots`][rlang::dyn-dots]> What these dots do (lazy).
 #'
 #' @seealso [sdar()] for the standard SDAR-algorithm.
 #'
 #' @returns A list containing a data.frame with the results of the final fit,
 #'   lists with the quality- and fit-metrics, and a list containing the crated
-#'   plot-functions (if `savePlots = TRUE`).
+#'   plot-function(s) (if `plotFun = TRUE` or, for all diagnostic plots
+#'   `plotFun.all = TRUE`).
 #'
 #' @examples
 #' # Synthesize a test record resembling Al 6060 T66
@@ -470,41 +468,78 @@ sdar_execute.lazy <- function(prepared_data,
 #'
 #'
 #' # use sdar.lazy() to analyze the synthetic test record
-#' # (using relaxed settings for the noise-free synthetic data)
+#' # (relaxed setting of 2 random sub-samples for the noise-free data)
 #' # will print a report and give a plot of the final fit
 #' \donttest{
 #' result <- sdar.lazy(Al_6060_T66, strain, stress,
-#'   cutoff_probability = 0.8,
-#'   fit.rep = 2
+#'   n.fit = 2
 #' )
 #' }
 #'
 #' @export
 sdar.lazy <- function(data, x, y,
-                      verbose = "report",
-                      showPlots = "report",
-                      savePlots = FALSE,
-                      fit.rep = 5,
-                      fit.candidates = 20,
-                      cutoff_probability = 0.975,
-                      quality_penalty = 0.1,
-                      enforce_subsampling = FALSE,
-                      enforce_denoising = FALSE,
-                      vmd.alpha = 1000) {
+                      verbose = TRUE,
+                      plot = TRUE,
+                      plotFun = FALSE,
+                      n.fit = 5,
+                      cutoff_probability = 0.9,
+                      ...) {
 
   # to be furrr-safe, enquote the tidy arguments here
   x <- rlang::enquo(x)
   y <- rlang::enquo(y)
 
-  # determine verbosity level
-  verbose.all <- ifelse(verbose == "a" || verbose == "all", TRUE, FALSE)
-  verbose.report <- ifelse(verbose == "r" || verbose == "report", TRUE, FALSE)
-  verbose.report <- verbose.report || verbose.all
+  # @param n.candidates Give a number for selecting optimum fit candidates
+  #   (ordered decreasingly by normalized residuals) for each of the repetitions
+  #   of random sub-sampling.
 
-  # determine plot level
-  showPlots.all <- ifelse(showPlots == "a" || showPlots == "all", TRUE, FALSE)
-  showPlots.report <- ifelse(showPlots == "r" || showPlots == "report", TRUE, FALSE)
-  showPlots.report <- showPlots.report || showPlots.all
+  # @param quality_penalty Factor to down-weight fits with inferior data- and
+  #   fit-quality metrics.
+
+  # @param enforce_subsampling Set to `TRUE`, to use sub-sampling method even
+  #   when it is computationally more expensive than the standard SDAR-algorithm.
+
+  # @param enforce_denoising Set to `TRUE`, to enforce de-noising of the test
+  #   record for finding the final fitting range.
+
+  # @param vmd.alpha A numeric value specifying the balancing parameter of the
+  #   data-fidelity constraint in [VMDecomp::vmd] for de-noising when original
+  #   data is failing the data quality checks.
+
+  # @param min_K a numeric value specifying the minimum value of the K (modes)
+  #   parameter (from which decomposition starts)
+
+  # take care of dynamic dots
+  additional_parameters <- rlang::list2(...)
+  Nmin_factor <- try({additional_parameters$Nmin_factor}, silent = TRUE)
+  if(!is.numeric(Nmin_factor)) Nmin_factor <- 0.2
+  verbose.all <- try({additional_parameters$verbose.all}, silent = TRUE)
+  if(!is.logical(verbose.all)) verbose.all <- FALSE
+  plot.all <- try({additional_parameters$plot.all}, silent = TRUE)
+  if(!is.logical(plot.all)) plot.all <- FALSE
+  plotFun.all <- try({additional_parameters$plotFun.all}, silent = TRUE)
+  if(!is.logical(plotFun.all)) plotFun.all <- FALSE
+  n.candidates <- try({additional_parameters$n.candidates}, silent = TRUE)
+  if(!is.numeric(n.candidates)) n.candidates <- 20
+  enforce_subsampling <- try({additional_parameters$enforce_subsampling}, silent = TRUE)
+  if(!is.logical(enforce_subsampling)) enforce_subsampling <- FALSE
+  enforce_denoising <- try({additional_parameters$enforce_denoising}, silent = TRUE)
+  if(!is.logical(enforce_denoising)) enforce_denoising <- FALSE
+  quality_penalty <- try({additional_parameters$quality_penalty}, silent = TRUE)
+  if(!is.numeric(quality_penalty)) quality_penalty <- 0.1
+  vmd.alpha <- try({additional_parameters$vmd.alpha}, silent = TRUE)
+  if(!is.numeric(vmd.alpha)) vmd.alpha <- 1000
+  min_K <- try({additional_parameters$min_K}, silent = TRUE)
+  if(!is.numeric(min_K)) min_K <- 2
+
+  # save final fit plot, when plotFun.all is set
+  plotFun <- plotFun || plotFun.all
+
+  # give messages for report, when verbose.all is set
+  verbose <- verbose || verbose.all
+
+  # show final fit plot, when plot.all is set
+  plot <- plot || plot.all
 
   # get units for data
   x.label.unit <- data %>%
@@ -537,9 +572,9 @@ sdar.lazy <- function(data, x, y,
   # prepare data, add an index and remove NA from data
   prepared_data <- data.frame(
     x.data = data %>% dplyr::select(!!x) %>% unlist(TRUE, FALSE),
-    y.data = data %>% dplyr::select(!!y) %>% unlist(TRUE, FALSE),
-    otr.idx = seq.int(nrow(data))
+    y.data = data %>% dplyr::select(!!y) %>% unlist(TRUE, FALSE)
   ) %>%
+    dplyr::mutate("otr.idx" = as.numeric(rownames(.))) %>%
     tidyr::drop_na()
 
   # assemble information of the original test record
@@ -555,12 +590,12 @@ sdar.lazy <- function(data, x, y,
   )
 
   # Give a welcome message
-  if (verbose.report) {
+  if (verbose) {
     message("Determination of Slope in the Linear Region of a Test Record:")
   }
 
   if(enforce_denoising) {
-    if (verbose.report) {
+    if (verbose) {
       message("  Proceeding with de-noised data...\n")
       denoise.x <- TRUE
       denoise.y <- TRUE
@@ -573,9 +608,10 @@ sdar.lazy <- function(data, x, y,
         denoise.x = denoise.x,
         denoise.y = denoise.y,
         vmd.alpha = vmd.alpha,
+        min_K = min_K,
         verbose = FALSE,
-        showPlots = FALSE,
-        savePlots = TRUE
+        plot = FALSE,
+        plotFun = TRUE
       )
     }
   } else {
@@ -587,8 +623,8 @@ sdar.lazy <- function(data, x, y,
       denoise.x = FALSE,
       denoise.y = FALSE,
       verbose = verbose.all,
-      showPlots = showPlots.all,
-      savePlots = savePlots
+      plot = plot.all,
+      plotFun = plotFun.all
     )
 
     # get initial data quality metrics
@@ -609,9 +645,10 @@ sdar.lazy <- function(data, x, y,
         denoise.x = denoise.x,
         denoise.y = denoise.y,
         vmd.alpha = vmd.alpha,
+        min_K = min_K,
         verbose = FALSE,
-        showPlots = FALSE,
-        savePlots = TRUE
+        plot = FALSE,
+        plotFun = TRUE
       )
 
       # get data quality metrics of de-noised data
@@ -619,7 +656,7 @@ sdar.lazy <- function(data, x, y,
 
       # check results...
       if (data_quality_metrics$passed.check) {
-        if (verbose.report) {
+        if (verbose) {
           message("  Data quality checks of original test record failed!")
           message("  Proceeding with de-noised data...\n")
         }
@@ -629,15 +666,22 @@ sdar.lazy <- function(data, x, y,
     # Check data quality metrics and use standard-variant in case of failing to
     # pass check (again)
     if (!data_quality_metrics$passed.check) {
-      if (verbose.report) {
+      if (verbose) {
         message("  Data quality checks of de-noised test record failed!")
         message("  Examine plots of Standard SDAR-algorithm to determine how to proceed.\n")
       }
 
       # execute the standard SDAR-algorithm
       result <- sdar_execute(
-        prepared_data, otr.info, verbose.all, verbose.report,
-        showPlots.all, showPlots.report, savePlots
+        prepared_data = prepared_data,
+        otr.info = otr.info,
+        verbose.all = verbose.all,
+        verbose = verbose,
+        plot.all = plot.all,
+        plot = plot,
+        plotFun.all = plotFun.all,
+        plotFun = plotFun,
+        Nmin_factor = Nmin_factor
       )
       result$sdar <- result$sdar %>% dplyr::mutate("method" = "SDAR")
       return(result)
@@ -645,46 +689,49 @@ sdar.lazy <- function(data, x, y,
   }
 
   # find optimum range for sub-sampling
-  optimum_size <- optimum_size_for_subsampling(normalized_data$data.normalized,
+  optimum_size <- optimum_size_for_subsampling(
+    data.normalized = normalized_data$data.normalized,
     cutoff_probability = cutoff_probability,
-    showPlots = showPlots.all,
     verbose = verbose.all,
-    savePlots = savePlots
+    plot = plot.all,
+    plotFun = plotFun.all
   )
 
-  # check for possible errors in determination of optimum size
-  if (optimum_size$cutoff_probability.matched == FALSE) {
-    if (enforce_subsampling == TRUE) {
-      # Give an informational message and proceed using the found quasi-optimum
-      # size
-      if (verbose.report) {
-        message("  Failed to satisfy cutoff_probability. Lowering our expectations...\n")
-      }
-    } else {
-      if (verbose.report) {
-        message("  Failed to satisfy cutoff_probability. Standard SDAR-algorithm will be used...\n")
-      }
-
-      # execute the standard SDAR-algorithm
-      result <- sdar_execute(
-        prepared_data, otr.info, verbose.all, verbose.report,
-        showPlots.all, showPlots.report, savePlots
-      )
-      result$sdar <- result$sdar %>% dplyr::mutate("method" = "SDAR")
-      return(result)
-    }
-  }
+  # # check for possible errors in determination of optimum size
+  # if (optimum_size$cutoff_probability.matched == FALSE) {
+  #   if (enforce_subsampling == TRUE) {
+  #     # Give an informational message and proceed using the found quasi-optimum
+  #     # size
+  #     if (verbose) {
+  #       message("  Failed to satisfy cutoff_probability. Lowering our expectations...\n")
+  #     }
+  #   } else {
+  #     if (verbose) {
+  #       message("  Failed to satisfy cutoff_probability. Standard SDAR-algorithm will be used...\n")
+  #     }
+  #
+  #     # execute the standard SDAR-algorithm
+  #     result <- sdar_execute(
+  #       prepared_data, otr.info, verbose.all, verbose,
+  #       plot.all, showPlots.report, savePlots
+  #     )
+  #     result$sdar <- result$sdar %>% dplyr::mutate("method" = "SDAR")
+  #     return(result)
+  #   }
+  # }
 
   # check for viability of sub-sampling-approach
   viability <- subsampling_viability(
     nrow(normalized_data$data.normalized),
     optimum_size$optimum.range.size,
-    fit.rep
+    n.fit = n.fit,
+    verbose = FALSE,
+    Nmin_factor = Nmin_factor
   )
 
   # check, whether sub-sampling would save time and execute standard or lazy variant
   if (viability$viable == FALSE) {
-    if (verbose.report) {
+    if (verbose) {
       message(paste0(
         "  lazy algorithm requires more fits than standard SDAR-algorithm:  \n    ",
         viability$Nfits.subsampling, " vs. ", viability$Nfits.plain, " fits."
@@ -700,8 +747,15 @@ sdar.lazy <- function(data, x, y,
     if (enforce_subsampling == FALSE) {
       # execute the standard SDAR-algorithm
       result <- sdar_execute(
-        prepared_data, otr.info, verbose.all, verbose.report,
-        showPlots.all, showPlots.report, savePlots
+        prepared_data = prepared_data,
+        otr.info = otr.info,
+        verbose.all = verbose.all,
+        verbose = verbose,
+        plot.all = plot.all,
+        plot = plot,
+        plotFun.all = plotFun.all,
+        plotFun = plotFun,
+        Nmin_factor = Nmin_factor
       )
       result$sdar <- result$sdar %>% dplyr::mutate("method" = "SDAR")
       return(result)
@@ -716,16 +770,19 @@ sdar.lazy <- function(data, x, y,
     denoise.x = denoise.x,
     denoise.y = denoise.y,
     vmd.alpha = vmd.alpha,
-    fit.rep = fit.rep,
-    fit.candidates = fit.candidates,
+    min_K = min_K,
+    n.fit = n.fit,
+    n.candidates = n.candidates,
     optimum.range.size = optimum_size$optimum.range.size,
     cutoff_probability = cutoff_probability,
     quality_penalty = quality_penalty,
     verbose.all = verbose.all,
-    verbose.report = verbose.report,
-    showPlots.all = showPlots.all,
-    showPlots.report = showPlots.report,
-    savePlots = savePlots
+    verbose = verbose,
+    plot.all = plot.all,
+    plot = plot,
+    plotFun.all = plotFun.all,
+    plotFun = plotFun,
+    Nmin_factor = Nmin_factor
   )
 
   # add a de-noising remark
@@ -734,7 +791,7 @@ sdar.lazy <- function(data, x, y,
   }
 
   # append/sort plots to the results
-  if (savePlots) {
+  if (plotFun.all) {
     results$plots <- results$plots %>% append(list(
       "glm.optimum_size" = optimum_size$plots$plot.modelpredictions
     ))

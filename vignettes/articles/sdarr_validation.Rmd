@@ -111,7 +111,7 @@ E3076_DS1_2018 %>%
   {
     ggplot(data = ., aes(
       x = extensometer, y = force,
-      color = "E3076_DS1_2018"
+      color = "Reference Data Set\n(E3076_DS1_2018)"
     )) +
       geom_line() +
       theme_bw() +
@@ -131,8 +131,7 @@ E3076_DS1_2018 %>%
 # Run the algorithm
 sdar.results <- E3076_DS1_2018 %>%
   sdar(extensometer, force,
-       showPlots = "n",
-       savePlots = TRUE
+       plot = FALSE, plotFun = TRUE
   )
 
 # show the plot of the final fit
@@ -152,7 +151,7 @@ sdar.results$plots$final.fit %>%
     plot.data %>% ggplot(aes(
       x = x.data,
       y = y.data,
-      color = "E3076_DS1_2018"
+      color = "Reference Data Set\n(E3076_DS1_2018)"
     )) +
       geom_line() +
       geom_line(
@@ -179,11 +178,14 @@ The results of the analysis using `sdar()` are practically identical to the resu
 
 ```{r sdar.lazy_check, fig.height=4, fig.width=6}
 # Run the algorithm (after setting a random seed)
+# As the data set is rather short, the algorithm might refuse to use 
+# the random sub-sampling as it will require more computational effort. 
+# Enforce by setting enforce_subsampling = TRUE.
 set.seed(50041180)
 sdar.lazy.results <- E3076_DS1_2018 %>%
   sdar.lazy(extensometer, force,
             enforce_subsampling = TRUE,
-            showPlots = "n", savePlots = TRUE
+            plot = FALSE, plotFun = TRUE
   )
 
 # show the plot of the final fit
@@ -201,7 +203,7 @@ sdar.lazy.results$plots$final.fit %>%
 
     # create the ggplot2
     plot.data %>%
-      ggplot(aes(x = x.data, y = y.data, color = "E3076_DS1_2018")) +
+      ggplot(aes(x = x.data, y = y.data, color = "Reference Data Set\n(E3076_DS1_2018)")) +
       geom_line() +
       geom_line(
         data = plot.data %>%
@@ -293,7 +295,7 @@ Comparing the regression curves of `sdar.lazy()` and `sdar()` over the mechanica
 
   ggplot(
     data = plot.data,
-    aes(x = x.data, y = y.data, color = "E3076_DS1_2018")
+    aes(x = x.data, y = y.data, color = "Reference Data Set\n(E3076_DS1_2018)")
   ) +
     geom_line() +
     geom_line(

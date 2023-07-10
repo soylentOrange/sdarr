@@ -8,8 +8,8 @@
 optimum_size_for_downsampling <- function(data.normalized,
                                           cutoff_probability,
                                           verbose = FALSE,
-                                          showPlots = FALSE,
-                                          savePlots = FALSE) {
+                                          plot = FALSE,
+                                          plotFun = FALSE) {
 
   # find optimum fit-range for down-sampling
   normalized.ranges <- seq.int(
@@ -123,8 +123,15 @@ optimum_size_for_downsampling <- function(data.normalized,
     "max.pm" = max.pm
   )
 
+  # print message
+  if (verbose) {
+    message(paste0("  Optimum size for sub-sampling is ",
+                   optimum.range.size, " (from ",
+                   nrow(data.normalized), ") samples.\n"))
+  }
+
   # Let's get plotty...
-  if (showPlots || savePlots) {
+  if (plot || plotFun) {
     # create plot function
     plot.modelpredictions <- carrier::crate(
       function(value) {
@@ -184,7 +191,7 @@ optimum_size_for_downsampling <- function(data.normalized,
       plot.main = "Probability of passing Data Quality Check"
     )
 
-    if (savePlots) {
+    if (plotFun) {
       results <- results %>% append(list(
         "plots" = list(
           "plot.modelpredictions" = plot.modelpredictions
@@ -193,7 +200,7 @@ optimum_size_for_downsampling <- function(data.normalized,
     }
 
     # Plot Shifted, Truncated and Normalized Test Record
-    if (showPlots) {
+    if (plot) {
       plot.modelpredictions()
     }
   }

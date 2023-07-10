@@ -2,7 +2,6 @@
 
 export("%>%")
 export(sdar)
-export(sdar.downsample)
 export(sdar.lazy)
 export(synthesize_test_data)
 importFrom(magrittr,"%>%")

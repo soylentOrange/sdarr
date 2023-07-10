@@ -92,8 +92,8 @@ check_data_quality.noise <- function(data.normalized,
 #' @noRd
 check_data_quality.resolution <- function(data.normalized,
                                           verbose = FALSE,
-                                          showPlots = FALSE,
-                                          savePlots = FALSE,
+                                          plot = FALSE,
+                                          plotFun = FALSE,
                                           warn = TRUE) {
   # The optimum digital resolution, δ (delta.optimal), for the normalized data
   # set is:
@@ -128,7 +128,7 @@ check_data_quality.resolution <- function(data.normalized,
 
   sdar.hist.x <- graphics::hist(
     normalized.resolution$delta.delta.x / delta.optimal,
-    breaks = bin.breaks.x, plot = showPlots,
+    breaks = bin.breaks.x, plot = plot,
     main = "Histogram for assessment of x-Resolution",
     xlab = "\u2206\u2206xi (binned by \u03B4)", warn.unused = FALSE
   )
@@ -150,7 +150,7 @@ check_data_quality.resolution <- function(data.normalized,
 
   sdar.hist.y <- graphics::hist(
     normalized.resolution$delta.delta.y / delta.optimal,
-    breaks = bin.breaks.y, plot = showPlots,
+    breaks = bin.breaks.y, plot = plot,
     main = "Histogram for assessment of y-Resolution",
     xlab = "\u2206\u2206yi (binned by \u03B4)", warn.unused = FALSE
   )
@@ -218,7 +218,7 @@ check_data_quality.resolution <- function(data.normalized,
   )
 
   # add plots if requested
-  if (savePlots) {
+  if (plotFun) {
     hist.x <- carrier::crate(
       function(value) {
         graphics::hist(
@@ -273,17 +273,18 @@ check_data_quality.resolution <- function(data.normalized,
 #' @noRd
 check_data_quality <- function(data.normalized,
                                verbose = FALSE,
-                               showPlots = FALSE,
-                               savePlots = FALSE) {
+                               plot = FALSE,
+                               plotFun = FALSE) {
   # get and check data quality metrics
   list(
     "Num.Obs.normalized" = nrow(data.normalized),
     "digitalResolution" = check_data_quality.resolution(data.normalized,
       verbose = verbose,
-      showPlots = showPlots,
-      savePlots = savePlots
+      plot = plot,
+      plotFun = plotFun
     ),
-    "Noise" = check_data_quality.noise(data.normalized, verbose)
+    "Noise" = check_data_quality.noise(data.normalized,
+                                       verbose = verbose)
   ) %>%
     {
       results <- .
@@ -329,8 +330,8 @@ check_data_quality.lazy <- function(data.normalized) {
 check_fit_quality <- function(data.normalized,
                               fit,
                               verbose = FALSE,
-                              showPlots = FALSE,
-                              savePlots = FALSE,
+                              plot = FALSE,
+                              plotFun = FALSE,
                               warn = TRUE) {
   # shorthands for slope and intercept
   m <- fit[["m"]]
@@ -438,7 +439,7 @@ check_fit_quality <- function(data.normalized,
   }
 
   # Let's get plotty...
-  if (showPlots || savePlots) {
+  if (plot || plotFun) {
     # generate function for plotting the residuals over normalized x
     plot.residuals <- carrier::crate(
       function(value) {
@@ -506,7 +507,7 @@ check_fit_quality <- function(data.normalized,
     )
 
     # Plot Residuals
-    if (showPlots) {
+    if (plot) {
       plot.residuals()
     }
   }
@@ -533,7 +534,7 @@ check_fit_quality <- function(data.normalized,
   )
 
   # append plot
-  if (savePlots) {
+  if (plotFun) {
     results <- results %>% append(list("plots" = list(
       "plot.residuals" = plot.residuals
     )))
@@ -553,9 +554,12 @@ check_fit_quality <- function(data.normalized,
 #'
 #' @noRd
 check_fit_quality.lazy <- function(data.normalized, fit) {
-  fit_quality_metrics <- check_fit_quality(data.normalized,
-                                           fit,
-                                           FALSE, FALSE, FALSE, FALSE)
+  fit_quality_metrics <- check_fit_quality(data.normalized = data.normalized,
+                                           fit = fit,
+                                           verbose = FALSE,
+                                           plot = FALSE,
+                                           plotFun = FALSE,
+                                           warn = FALSE)
 
   list(
     "passed.check" = fit_quality_metrics$passed.check,

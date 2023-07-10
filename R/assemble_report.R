@@ -10,8 +10,9 @@ assemble_report <- function(normalized_data,
                             fit,
                             fitQualityMetrics,
                             verbose = FALSE,
-                            showPlots = FALSE,
-                            savePlots = FALSE) {
+                            plot = FALSE,
+                            plotFun.all = FALSE,
+                            plotFun = FALSE) {
   # print messages
   if (verbose) {
     message("  Data Quality Metric: Digital Resolution")
@@ -136,16 +137,17 @@ assemble_report <- function(normalized_data,
 
 
   # get values (and possibly print output)
-  unnormalized_results <- unnormalize_results(normalized_data,
-    otr.info,
-    dataQualityMetrics,
-    fit,
-    fitQualityMetrics,
+  unnormalized_results <- unnormalize_results(
+    normalized_data = normalized_data,
+    otr.info = otr.info,
+    dataQualityMetrics = dataQualityMetrics,
+    fit = fit,
+    fitQualityMetrics = fitQualityMetrics,
     verbose = verbose
   )
 
   # Let's get plotty...
-  if (showPlots || savePlots) {
+  if (plot || plotFun || plotFun.all) {
     # shorthands
     if (!is.null(otr.info)) {
       # paste names and unit for plotting
@@ -236,7 +238,7 @@ assemble_report <- function(normalized_data,
 
 
     # Plot Residuals
-    if (showPlots) {
+    if (plot) {
       plot.fit()
     }
   }
@@ -249,12 +251,18 @@ assemble_report <- function(normalized_data,
   )
 
   # append plot
-  if (savePlots) {
+  if (plotFun || plotFun.all) {
     results <- results %>% append(list("plots" = list(
-      "plot.fit" = plot.fit,
+      "plot.fit" = plot.fit
+    )))
+  }
+
+  # append more plots
+  if (plotFun.all) {
+    results$plots <- results$plots %>% append(list(
       "plot.otr" = normalized_data$plots$plot.otr,
       "plot.normalized" = normalized_data$plots$plot.normalized
-    )))
+    ))
   }
 
   # return results

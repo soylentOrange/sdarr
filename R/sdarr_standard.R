@@ -1,18 +1,21 @@
 #' Run the SDAR algorithm on prepared data
 #' @noRd
-sdar_execute <- function(prepared_data, otr.info,
+sdar_execute <- function(prepared_data,
+                         otr.info,
                          verbose.all = FALSE,
-                         verbose.report = TRUE,
-                         showPlots.all = FALSE,
-                         showPlots.report = TRUE,
-                         savePlots = FALSE) {
+                         verbose = TRUE,
+                         plot.all = FALSE,
+                         plot = TRUE,
+                         plotFun.all = FALSE,
+                         plotFun = FALSE,
+                         Nmin_factor = 0.2) {
 
   # maybe the offset for step 1 needs to be raised later
   raise_offset_times <- 0
   optimum_fit_is_found <- FALSE
 
   # Give a welcome message
-  if (verbose.report) {
+  if (verbose) {
     message("SDAR-algorithm\n")
   }
 
@@ -27,22 +30,23 @@ sdar_execute <- function(prepared_data, otr.info,
       denoise.x = FALSE,
       denoise.y = FALSE,
       verbose = verbose.all,
-      showPlots = showPlots.all,
-      savePlots = savePlots
+      plot = plot.all,
+      plotFun = plotFun.all
     )
 
     # check data quality
     data_quality_metrics <- check_data_quality(
-      normalized_data$data.normalized,
-      verbose.all,
-      showPlots.all,
-      savePlots
+      data.normalized = normalized_data$data.normalized,
+      verbose = verbose.all,
+      plot = plot.all,
+      plotFun = plotFun.all
     )
 
     # find best fit
     optimum_fit <- find_linear_regressions(
-      normalized_data$data.normalized,
-      verbose.all
+      data.normalized = normalized_data$data.normalized,
+      verbose = verbose.all,
+      Nmin_factor = Nmin_factor
     )
 
     # check if the offset needs to be raised
@@ -60,23 +64,24 @@ sdar_execute <- function(prepared_data, otr.info,
 
   # check fit quality
   fit_quality_metrics <- check_fit_quality(
-    normalized_data$data.normalized,
-    optimum_fit,
-    verbose.all,
-    showPlots.all,
-    savePlots
+    data.normalized = normalized_data$data.normalized,
+    fit = optimum_fit,
+    verbose = verbose.all,
+    plot = plot.all,
+    plotFun = plotFun.all
   )
 
   # un-normalize data and summarize
   assembled_results <- assemble_report(
-    normalized_data,
-    otr.info,
-    data_quality_metrics,
-    optimum_fit,
-    fit_quality_metrics,
-    verbose.report,
-    showPlots.report,
-    savePlots
+    normalized_data = normalized_data,
+    otr.info = otr.info,
+    dataQualityMetrics = data_quality_metrics,
+    fit = optimum_fit,
+    fitQualityMetrics = fit_quality_metrics,
+    verbose = verbose,
+    plot = plot,
+    plotFun.all = plotFun.all,
+    plotFun = plotFun
   )
 
   # re-do the final fit to find confidence intervals for slope and intercepts
@@ -130,16 +135,22 @@ sdar_execute <- function(prepared_data, otr.info,
     "Fit_Quality_Metrics" = assembled_results$Fit_Quality_Metrics
   )
 
-  # append/sort plots to the results
-  if (savePlots) {
+  # append plot
+  if (plotFun || plotFun.all) {
     results <- results %>% append(list("plots" = list(
-      "final.fit" = assembled_results$plots$plot.fit,
+      "final.fit" = assembled_results$plots$plot.fit
+    )))
+  }
+
+  # append more plots
+  if (plotFun.all) {
+    results$plots <- results$plots %>% append(list(
       "otr" = assembled_results$plots$plot.otr,
       "normalized" = assembled_results$plots$plot.normalized,
       "hist.x" = assembled_results$Data_Quality_Metrics$digitalResolution$plots$hist.x,
       "hist.y" = assembled_results$Data_Quality_Metrics$digitalResolution$plots$hist.y,
       "residuals" = assembled_results$Fit_Quality_Metrics$plots$plot.residuals
-    )))
+    ))
 
     results$Data_Quality_Metrics$digitalResolution$plots <- NULL
     results$Fit_Quality_Metrics$plots <- NULL
@@ -154,14 +165,15 @@ sdar_execute <- function(prepared_data, otr.info,
 #'
 #' @description Run the SDAR algorithm as standardized in ASTM E3076-18. Will
 #'   use numerous linear regressions (`.lm.fit()` from the stats-package) and
-#'   can be painfully slow for test data with high resolution.
-#'   See the article on [validation](
-#'   https://soylentorange.github.io/sdarr/articles/sdarr_validation.html)
-#'   on the [package-website](https://soylentorange.github.io/sdarr/) for further information.
+#'   can be painfully slow for test data with high resolution. See the article
+#'   on [validation](
+#'   https://soylentorange.github.io/sdarr/articles/sdarr_validation.html) on
+#'   the [package-website](https://soylentorange.github.io/sdarr/) for further
+#'   information.
 #'
-#' @note The function can use parallel processing via the furrr-package. To use
-#'   this feature, set up a plan other than the default sequential strategy
-#'   beforehand.
+#' @note The function can use parallel processing via the
+#'   [furrr-package](https://furrr.futureverse.org/). To use this feature, set
+#'   up a plan other than the default sequential strategy beforehand.
 #'
 #' @references Lucon, E. (2019). Use and validation of the slope determination
 #'   by the analysis of residuals (SDAR) algorithm (NIST TN 2050; p. NIST TN
@@ -182,13 +194,12 @@ sdar_execute <- function(prepared_data, otr.info,
 #' @param x,y <[`tidy-select`][dplyr::dplyr_tidy_select]> Columns with x and y
 #'   within data.
 #'
-#' @param verbose,showPlots Give informational messages and plots during
-#'   computation. Defaults to `"report"` to only show a report and a plot of the
-#'   final fit. Set to `"all"` to also give messages from the individual steps.
-#'   Set to `"none"` to be quiet. Can be abbreviated.
+#' @param verbose,plot Give a summarizing report / show a plot of the final fit.
 #'
-#' @param savePlots Set to `TRUE` to get plot-functions with the result for
-#'   later use.
+#' @param plotFun Set to `TRUE` to get a plot-function for the final fit with
+#'   the results for later use.
+#'
+#' @param ... <[`dynamic-dots`][rlang::dyn-dots]> What these dots do (std).
 #'
 #' @seealso [sdar.lazy()] for the random sub-sampling modification of the
 #'   SDAR-algorithm.
@@ -220,27 +231,38 @@ sdar_execute <- function(prepared_data, otr.info,
 #'
 #' @returns A list containing a data.frame with the results of the final fit,
 #'   lists with the quality- and fit-metrics, and a list containing the crated
-#'   plot-functions (if `savePlots = TRUE`).
+#'   plot-function(s) (if `plotFun = TRUE`).
 #'
 #' @export
 sdar <- function(data, x, y,
-                 verbose = "report",
-                 showPlots = "report",
-                 savePlots = FALSE) {
+                 verbose = TRUE,
+                 plot = TRUE,
+                 plotFun = FALSE,
+                 ...) {
 
   # to be furrr-safe, enquote the tidy arguments here
   x <- rlang::enquo(x)
   y <- rlang::enquo(y)
 
-  # determine verbosity level
-  verbose.all <- ifelse(verbose == "a" || verbose == "all", TRUE, FALSE)
-  verbose.report <- ifelse(verbose == "r" || verbose == "report", TRUE, FALSE)
-  verbose.report <- verbose.report || verbose.all
+  # take care of dynamic dots
+  additional_parameters <- rlang::list2(...)
+  Nmin_factor <- try({additional_parameters$Nmin_factor}, silent = TRUE)
+  if(!is.numeric(Nmin_factor)) Nmin_factor <- 0.2
+  verbose.all <- try({additional_parameters$verbose.all}, silent = TRUE)
+  if(!is.logical(verbose.all)) verbose.all <- FALSE
+  plot.all <- try({additional_parameters$plot.all}, silent = TRUE)
+  if(!is.logical(plot.all)) plot.all <- FALSE
+  plotFun.all <- try({additional_parameters$plotFun.all}, silent = TRUE)
+  if(!is.logical(plotFun.all)) plotFun.all <- FALSE
 
-  # determine plot level
-  showPlots.all <- ifelse(showPlots == "a" || showPlots == "all", TRUE, FALSE)
-  showPlots.report <- ifelse(showPlots == "r" || showPlots == "report", TRUE, FALSE)
-  showPlots.report <- showPlots.report || showPlots.all
+  # save final fit plot, when plotFun.all is set
+  plotFun <- plotFun || plotFun.all
+
+  # give messages for report, when verbose.all is set
+  verbose <- verbose || verbose.all
+
+  # show final fit plot, when plot.all is set
+  plot <- plot || plot.all
 
   # get units for data
   x.label.unit <- data %>%
@@ -273,9 +295,9 @@ sdar <- function(data, x, y,
   # prepare data, add an index and remove NA from data
   prepared_data <- data.frame(
     x.data = data %>% dplyr::select(!!x) %>% unlist(TRUE, FALSE),
-    y.data = data %>% dplyr::select(!!y) %>% unlist(TRUE, FALSE),
-    otr.idx = seq.int(nrow(data))
+    y.data = data %>% dplyr::select(!!y) %>% unlist(TRUE, FALSE)
   ) %>%
+    dplyr::mutate("otr.idx" = as.numeric(rownames(.))) %>%
     tidyr::drop_na()
 
   # assemble information of the original test record
@@ -291,19 +313,21 @@ sdar <- function(data, x, y,
   )
 
   # Give a welcome message
-  if (verbose.report) {
+  if (verbose) {
     message("Determination of Slope in the Linear Region of a Test Record:")
   }
 
   # execute the SDAR-algorithm
-  sdar_execute(
-    prepared_data,
-    otr.info,
-    verbose.all,
-    verbose.report,
-    showPlots.all,
-    showPlots.report,
-    savePlots
+  result <- sdar_execute(
+    prepared_data = prepared_data,
+    otr.info = otr.info,
+    verbose.all = verbose.all,
+    verbose = verbose,
+    plot.all = plot.all,
+    plot = plot,
+    plotFun.all = plotFun.all,
+    plotFun = plotFun,
+    Nmin_factor = Nmin_factor
   ) %>%
     return()
 }

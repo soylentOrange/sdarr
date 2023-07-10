@@ -9,15 +9,17 @@
 #' @returns a list of the best candidates
 #'
 #' @noRd
-find_linear_regressions.lazy <- function(data.normalized, nCandidates) {
+execute_find_linear_regressions <- function(data.normalized,
+                                            fit.candidates,
+                                            Nmin_factor = 0.2) {
   # should at least return 1 fit
-  if (nCandidates < 1) {
-    nCandidates <- 1
+  if (fit.candidates < 1) {
+    fit.candidates <- 1
   }
 
   # find minimum size of window for linear regression
   samples <- data.normalized %>% nrow()
-  Nmin <- max(floor(samples * 0.2), 10)
+  Nmin <- max(floor(samples * Nmin_factor), 10)
 
   # find number of required fits
   Nfits <- 0.5 * ((samples - Nmin + 1)^2 + (samples - Nmin + 1))
@@ -61,7 +63,8 @@ find_linear_regressions.lazy <- function(data.normalized, nCandidates) {
     dplyr::select(c("start", "end")) %>%
     dplyr::mutate("fit.idx" = seq.int(nrow(.))) %>%
     tidyr::nest(.by = "fit.idx", .key = "bounds") %>%
-    dplyr::mutate("fit" = furrr::future_map(.data$bounds, carrier::crate(\(bound) {
+    dplyr::mutate("fit" = furrr::future_map(.data$bounds,
+                                            carrier::crate(\(bound) {
       # satisfy pipe addiction...
       `%>%` <- magrittr::`%>%`
 
@@ -70,24 +73,30 @@ find_linear_regressions.lazy <- function(data.normalized, nCandidates) {
 
       # grab data to analyze
       fit.input <- data.normalized %>%
-        dplyr::filter(dplyr::between(.data[["otr.idx"]], fit.range[1], fit.range[2]))
+        dplyr::filter(dplyr::between(as.numeric(rownames(.)),
+                                     fit.range[1], fit.range[2]))
 
-      fit.result <- .lm.fit(cbind(1, fit.input$x.normalized), fit.input$y.normalized)
+      # use basic .lm.fit for increasing speed
+      fit.result <- .lm.fit(cbind(1, fit.input$x.normalized),
+                            fit.input$y.normalized)
 
       mean_y <- mean(fit.input$y.normalized)
-      norm_residual <- sum((fit.result$residuals)^2) / sum((fit.input$y.normalized - mean_y)^2)
+      norm_residual <- sum((fit.result$residuals)^2) /
+        sum((fit.input$y.normalized - mean_y)^2)
+
       data.frame(
         norm.residual = norm_residual,
         m = fit.result$coefficients[2],
         b = fit.result$coefficients[1],
-        otr.idx.start = fit.range[1],
-        otr.idx.end = fit.range[2]
+        otr.idx.start = fit.input$otr.idx[1],
+        otr.idx.end = fit.input$otr.idx[length(fit.input$otr.idx)]
       )
-    }, data.normalized = data.normalized, .lm.fit = .lm.fit), .options = furrr::furrr_options(globals = FALSE))) %>%
+    }, data.normalized = data.normalized, .lm.fit = .lm.fit),
+    .options = furrr::furrr_options(globals = FALSE))) %>%
     tidyr::unnest(cols = "fit") %>%
     dplyr::select(-c("fit.idx", "bounds")) %>%
     dplyr::arrange(.data$norm.residual) %>%
-    utils::head(nCandidates) %>%
+    utils::head(fit.candidates) %>%
     dplyr::mutate("offset_raise_required" = dplyr::case_when(
       otr.idx.end == samples ~ TRUE,
       TRUE ~ FALSE
@@ -100,7 +109,8 @@ find_linear_regressions.lazy <- function(data.normalized, nCandidates) {
     "otr.idx.start" = optimum.fits$otr.idx.start %>% unlist(TRUE, FALSE),
     "otr.idx.end" = optimum.fits$otr.idx.end %>% unlist(TRUE, FALSE),
     "norm.residual" = optimum.fits$norm.residual %>% unlist(TRUE, FALSE),
-    "offset_raise_required" = optimum.fits$offset_raise_required %>% unlist(TRUE, FALSE)
+    "offset_raise_required" = optimum.fits$offset_raise_required %>%
+      unlist(TRUE, FALSE)
   ) %>%
     return()
 }
@@ -115,9 +125,15 @@ find_linear_regressions.lazy <- function(data.normalized, nCandidates) {
 #' A wrapper for the actual implementation
 #'
 #' @noRd
-find_linear_regressions <- function(data.normalized, verbose = FALSE) {
+find_linear_regressions <- function(data.normalized,
+                                    verbose = FALSE,
+                                    Nmin_factor = 0.2) {
+
   # find optimum fit
-  optimum.fit <- find_linear_regressions.lazy(data.normalized, 1)
+  optimum.fit <- execute_find_linear_regressions(
+    data.normalized = data.normalized,
+    fit.candidates = 1,
+    Nmin_factor = Nmin_factor)
 
   # Assemble results
   results <- optimum.fit %>%
@@ -128,15 +144,18 @@ find_linear_regressions <- function(data.normalized, verbose = FALSE) {
   if (verbose) {
     # find minimum size of window for linear regression
     samples <- data.normalized %>% nrow()
-    Nmin <- max(floor(samples * 0.2), 10)
+    Nmin <- max(floor(samples * Nmin_factor), 10)
 
     # find number of required fits
     Nfits <- 0.5 * ((samples - Nmin + 1)^2 + (samples - Nmin + 1))
 
     message("  linear regressions")
-    message(paste0("      total points in the search-range:            ", samples))
-    message(paste0("      --> minimum number of points for linear-fit: ", Nmin))
-    message(paste0("      --> total number of linear fits:             ", Nfits))
+    message(paste0("      total points in the search-range:            ",
+                   samples))
+    message(paste0("      --> minimum number of points for linear-fit: ",
+                   Nmin))
+    message(paste0("      --> total number of linear fits:             ",
+                   Nfits))
     message(paste0(
       "      --> optimum fit found between indices:      ",
       results$otr.idx.start %>% unlist(TRUE, FALSE), " and ",
@@ -163,13 +182,16 @@ find_linear_regressions <- function(data.normalized, verbose = FALSE) {
 #' Refer to chapter 6.6 in ASTM E3076-18
 #'
 #' @description
-#' A wrapper for the actual implementation in a lzy variant
+#' A wrapper for the actual implementation in a lazy variant
 #'
 #' @noRd
 find_linear_regressions.subsampled <- function(data.normalized,
                                                fit.rep = 10,
                                                fit.candidates = 10,
-                                               range.size) {
+                                               range.size,
+                                               Nmin_factor = 0.2) {
+
+  # do the fitting (several times) on sub-sampled data
   best.fits <- seq.int(fit.rep) %>%
     purrr::map(carrier::crate(
       function(value) {
@@ -182,8 +204,7 @@ find_linear_regressions.subsampled <- function(data.normalized,
           otr.idx[length(otr.idx)],
           sample(otr.idx[2:length(otr.idx) - 1], size = size - 2)
         ) %>%
-          sort() %>%
-          {
+          sort() %>% {
             data.frame("mc.idx" = value, "otr.idx" = .)
           }
       },
@@ -193,7 +214,8 @@ find_linear_regressions.subsampled <- function(data.normalized,
     )) %>%
     purrr::list_rbind() %>%
     tidyr::nest(.by = "mc.idx", .key = "otr.idcs") %>%
-    dplyr::mutate(data.quality.check = furrr::future_map(.data$otr.idcs, carrier::crate(
+    dplyr::mutate("data.quality.check" = furrr::future_map(.data$otr.idcs,
+                                                         carrier::crate(
       function(value) {
         # satisfy pipe addiction...
         `%>%` <- magrittr::`%>%`
@@ -220,28 +242,30 @@ find_linear_regressions.subsampled <- function(data.normalized,
 
         # do linear regressions
         fits <- data.normalized.fits %>%
-          find_linear_regressions.lazy(fit.candidates) %>%
-          dplyr::mutate("rownum" = seq.int(nrow(.))) %>%
-          split(.$rownum) %>%
+          execute_find_linear_regressions(fit.candidates = fit.candidates,
+                                          Nmin_factor = Nmin_factor) %>%
+          split(rownames(.)) %>%
           purrr::map(carrier::crate(
             function(value) {
               # satisfy pipe addiction...
               `%>%` <- magrittr::`%>%`
 
-              fit_quality_metrics <- check_fit_quality.lazy(data.normalized.fits, value) %>% as.data.frame()
+              fit_quality_metrics <- check_fit_quality.lazy(
+                data.normalized.fits, value
+                ) %>% as.data.frame()
               value <- value %>%
                 dplyr::bind_cols(fit_quality_metrics)
             },
             data.normalized.fits = data.normalized.fits,
             check_fit_quality.lazy = check_fit_quality.lazy
           )) %>%
-          purrr::list_rbind() %>%
-          dplyr::select(-c("rownum"))
+          purrr::list_rbind()
       },
       data.normalized = data.normalized,
-      find_linear_regressions.lazy = find_linear_regressions.lazy,
+      execute_find_linear_regressions = execute_find_linear_regressions,
       fit.candidates = fit.candidates,
-      check_fit_quality.lazy = check_fit_quality.lazy
+      check_fit_quality.lazy = check_fit_quality.lazy,
+      Nmin_factor = Nmin_factor
     ))) %>%
     dplyr::select(c("mc.idx", "data.quality.check", "fit")) %>%
     tidyr::unnest("fit") %>%
