@@ -91,8 +91,12 @@ It allows for automated and objective linear-fitting of mechanical test-data. Se
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You can install the development version of sdarr from <a href="https://github.com/" class="external-link">GitHub</a> with:</p>
+<p>You can install the latest release version of sdarr from <a href="https://github.com/" class="external-link">GitHub</a> with:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># install.packages("devtools")</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"soylentOrange/sdarr@*release"</span><span class="op">)</span></span></code></pre></div>
+<p>You can install the development version of sdarr from <a href="https://github.com/" class="external-link">GitHub</a> with:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("devtools")</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"soylentOrange/sdarr"</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -104,7 +108,7 @@ It allows for automated and objective linear-fitting of mechanical test-data. Se
 </h3>
 <p>A basic example of using <code><a href="reference/sdar.html">sdar()</a></code> on a synthetic data set, which is based on the properties of aluminium (Al 6060 T66) as given in the <a href="https://ntrl.ntis.gov/NTRL/dashboard/searchResults/titleDetail/PB2003106632.xhtml" class="external-link">Metallic Material Properties Development and Standardization (MMPDS) Handbook</a>. A toe-region and a non-zero intercept are added to make the test data less boring.</p>
 <p><code><a href="reference/sdar.html">sdar()</a></code> analyzes the data and will give a small report as a message. It should confirm the Young’s-modulus of 68 GPa and an intercept of 10 MPa. To make use of multi-core processing, configure <a href="https://furrr.futureverse.org/" class="external-link">furrr</a> to use a multisession strategy.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://soylentorange.github.io/sdarr/">sdarr</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># setup multisession calculations with a maximum of 8 cores</span></span>
@@ -171,7 +175,7 @@ It allows for automated and objective linear-fitting of mechanical test-data. Se
 <p>A basic example of <code><a href="reference/sdar.lazy.html">sdar.lazy()</a></code>, a random sub-sampling modification of the SDAR-algorithm on a synthetic data set, which is based on the properties of aluminium (Al 6060 T66) as given in the <a href="https://ntrl.ntis.gov/NTRL/dashboard/searchResults/titleDetail/PB2003106632.xhtml" class="external-link">Metallic Material Properties Development and Standardization (MMPDS) Handbook</a>. A toe-region and a non-zero intercept are added to make the test data less boring (see above).</p>
 <p><code><a href="reference/sdar.lazy.html">sdar.lazy()</a></code> analyzes the data for the optimum size of the fitting region via random sub-sampling. It will give a small report as a message after finding the optimum fit. It should confirm the Young’s-modulus of 68 GPa and an intercept of 10 MPa. As the synthetic data set is noise-free (except for quantization-noise), only one random sub-sampling run will do.</p>
 <p>To make use of multi-core processing, configure <a href="https://furrr.futureverse.org/" class="external-link">furrr</a> to use a multisession strategy (see above).</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># set a random seed</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">50041180</span><span class="op">)</span></span>
 <span></span>
@@ -229,11 +233,11 @@ It allows for automated and objective linear-fitting of mechanical test-data. Se
 </h3>
 <p><code><a href="reference/sdar.html">sdar()</a></code> and <code><a href="reference/sdar.lazy.html">sdar.lazy()</a></code> will create diagnostic plots throughout calculations, which will only be shown when requested (i.e. set <code>plotFun = TRUE</code> for obtaining a <a href="https://github.com/r-lib/carrier" class="external-link">crated</a> plot-function of the final fit, or <code>plotFun.all = TRUE</code> for all additional diagnostic plots). To have a plot drawn later, you can call the provided plot-function from the results, when you set <code>plotFun = TRUE</code> (or <code>plotFun.all = TRUE</code>).</p>
 <p>The plot-functions are <a href="https://github.com/r-lib/carrier" class="external-link">crated</a>, so you can easily tap their environment to convert it into e.g. a <a href="https://ggplot2.tidyverse.org/" class="external-link">ggplot2-graphic</a>.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># show plot of final fit using the plot function from the result (see above)</span></span>
 <span><span class="va">Al_6060_T66.result.lazy</span><span class="op">$</span><span class="va">plots</span><span class="op">$</span><span class="fu">final.fit</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-example-plot-fun-1.png" width="100%"></p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># satisfy pipe addiction...</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://magrittr.tidyverse.org" class="external-link">magrittr</a></span><span class="op">)</span></span>
 <span><span class="co"># make nice and shiny graphics withh ggplot2...</span></span>
