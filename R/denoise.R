@@ -10,15 +10,14 @@ denoise_vector.internal <- function(data,
                                     alpha = 2000,
                                     K = 100,
                                     verbose = FALSE) {
-
   # de-noise with the optimum number of modes
   data.vmd <- VMDecomp::vmd(
     data,
     alpha = alpha,
-    tau = 0,   # noise-tolerance (no strict fidelity enforcement)
+    tau = 0, # noise-tolerance (no strict fidelity enforcement)
     K = K,
     DC = TRUE, # a DC part imposed
-    init = 1,  # initialize omegas uniformly
+    init = 1, # initialize omegas uniformly
     tol = 1e-6,
     verbose = verbose
   )
@@ -36,10 +35,9 @@ denoise_vector.internal <- function(data,
 #'
 #' @noRd
 denoise_vector <- function(data,
-                              alpha = 2000,
-                              K = 100,
-                              verbose = FALSE) {
-
+                           alpha = 2000,
+                           K = 100,
+                           verbose = FALSE) {
   # de-noise
   vmd <- denoise_vector.internal(data, alpha, K, verbose)
 
@@ -47,12 +45,11 @@ denoise_vector <- function(data,
   return(vmd$u[, 1])
 }
 
-#FIXME
+# FIXME
 denoise_vector.tst <- function(data,
-                           alpha = 2000,
-                           K = 100,
-                           verbose = FALSE) {
-
+                               alpha = 2000,
+                               K = 100,
+                               verbose = FALSE) {
   # de-noise
   vmd <- denoise_vector.internal(data, alpha, K, verbose)
 
@@ -72,7 +69,6 @@ denoise_vector.dc <- function(data,
                               alpha = 2000,
                               K = 100,
                               verbose = FALSE) {
-
   # de-noise
   vmd <- denoise_vector.internal(data, alpha, K, verbose)
 

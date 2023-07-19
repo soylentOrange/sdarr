@@ -144,7 +144,7 @@ Al_6060_T66.result.lazy <- sdar.lazy(Al_6060_T66,
 #> Determination of Slope in the Linear Region of a Test Record:
 #> Random sub-sampling modification of the SDAR-algorithm
 #>   Random sub-sampling information:
-#>       251 points of 337 points in the normalized range were used.
+#>       264 points of 337 points in the normalized range were used.
 #>       0 % of sub-sampled normalized ranges passed the data quality checks.
 #>       100 % of linear regressions passed the fit quality checks.
 #>       0 % of linear regressions passed all quality checks.
@@ -169,20 +169,20 @@ Al_6060_T66.result.lazy <- sdar.lazy(Al_6060_T66,
 #>       --> pass
 #>   Fit Quality Metric: Curvature
 #>     1st Quartile
-#>       Relative Residual Slope: 0.000682244584706368
+#>       Relative Residual Slope: 0.000812246632204075
 #>       Number of Points:        40
 #>       --> pass
 #>     4th Quartile
-#>       Relative Residual Slope: -0.000682244584669766
+#>       Relative Residual Slope: -0.00184852454264567
 #>       Number of Points:        40
 #>       --> pass
 #>   Fit Quality Metric: Fit Range
-#>       relative fit range:      0.811095571095571
+#>       relative fit range:      0.806022700949734
 #>       --> pass
 #>   Un-normalized fit
-#>       Final Slope:             67994.5054945054 MPa
-#>       True Intercept:          10.0009699535978 MPa
-#>       y-Range:                 25.8590698242188 MPa - 84.7732543945312 MPa
+#>       Final Slope:             67994.0635412075 MPa
+#>       True Intercept:          10.001200695084 MPa
+#>       y-Range:                 25.8590698242188 MPa - 85.14404296875 MPa
 ```
 
 ### Plot Functions
@@ -200,7 +200,6 @@ you can easily tap their environment to convert it into e.g. a
 [ggplot2-graphic](https://ggplot2.tidyverse.org/).
 
 ``` r
-
 # show plot of final fit using the plot function from the result (see above)
 Al_6060_T66.result.lazy$plots$final.fit()
 ```
@@ -211,51 +210,61 @@ Al_6060_T66.result.lazy$plots$final.fit()
 # satisfy pipe addiction...
 library(magrittr)
 # make nice and shiny graphics withh ggplot2...
-library(ggplot2) 
+library(ggplot2)
 
 # plot the final fit using ggplot2
-Al_6060_T66.result.lazy %>% {
-  
-  # tap the environment of the crated plot-function
-  plot.env <- rlang::fn_env(.$plots$final.fit)
+Al_6060_T66.result.lazy %>%
+  {
+    # tap the environment of the crated plot-function
+    plot.env <- rlang::fn_env(.$plots$final.fit)
 
-  # get data and labels
-  plot.data <- plot.env$plot.data
-  plot.main <- plot.env$plot.main
-  plot.xlab <- plot.env$plot.xlab
-  plot.ylab <- plot.env$plot.ylab
-  plot.y.data.max <- plot.data$y.data %>% max()
-  plot.y.lowerBound <- plot.env$y.lowerBound
-  plot.y.upperBound <- plot.env$y.upperBound
+    # get data and labels
+    plot.data <- plot.env$plot.data
+    plot.main <- plot.env$plot.main
+    plot.xlab <- plot.env$plot.xlab
+    plot.ylab <- plot.env$plot.ylab
+    plot.y.data.max <- plot.data$y.data %>% max()
+    plot.y.lowerBound <- plot.env$y.lowerBound
+    plot.y.upperBound <- plot.env$y.upperBound
 
-  # create the ggplot2
-  plot.data %>% ggplot(aes(x = x.data, y = y.data, color = "Test data\n(Al 6060 T66)")) +
-    geom_line() +
-    geom_line(
-      data = plot.data %>%
-        dplyr::filter(y.fit <= plot.y.data.max),
-      aes(x = x.data, y = y.fit, color = "fit (sdar.lazy)")
-    ) +
-    geom_hline(aes(color = "fit range", 
-                   yintercept = plot.y.lowerBound),
-               linetype = "dashed",
-               show.legend = TRUE) +
-    geom_hline(aes(color = "fit range", 
-                   yintercept = plot.y.upperBound),
-               linetype = "dashed",
-               show.legend = TRUE) +
-    theme_bw() +
-    labs(
-      title = plot.main,
-      x = plot.xlab,
-      y = plot.ylab,
-      caption = paste0("Result of the random sub-sampling SDAR-algorithm:\n\nFinal Slope: ",
-                       round(.$sdar$finalSlope/1000, 1), " GPa\nTrue Offset: ",
-                       round(.$sdar$trueIntercept, 1), " MPa\n\nFit Range: ",
-                       round(plot.y.lowerBound, 1), " MPa - ",
-                       round(plot.y.upperBound, 1), " MPa")
-    )
-}
+    # create the ggplot2
+    plot.data %>% ggplot(aes(x = x.data, y = y.data, color = "Test data\n(Al 6060 T66)")) +
+      geom_line() +
+      geom_line(
+        data = plot.data %>%
+          dplyr::filter(y.fit <= plot.y.data.max),
+        aes(x = x.data, y = y.fit, color = "fit (sdar.lazy)")
+      ) +
+      geom_hline(
+        aes(
+          color = "fit range",
+          yintercept = plot.y.lowerBound
+        ),
+        linetype = "dashed",
+        show.legend = TRUE
+      ) +
+      geom_hline(
+        aes(
+          color = "fit range",
+          yintercept = plot.y.upperBound
+        ),
+        linetype = "dashed",
+        show.legend = TRUE
+      ) +
+      theme_bw() +
+      labs(
+        title = plot.main,
+        x = plot.xlab,
+        y = plot.ylab,
+        caption = paste0(
+          "Result of the random sub-sampling SDAR-algorithm:\n\nFinal Slope: ",
+          round(.$sdar$finalSlope / 1000, 1), " GPa\nTrue Offset: ",
+          round(.$sdar$trueIntercept, 1), " MPa\n\nFit Range: ",
+          round(plot.y.lowerBound, 1), " MPa - ",
+          round(plot.y.upperBound, 1), " MPa"
+        )
+      )
+  }
 ```
 
 <img src="man/figures/README-example-plot-fun-gg-1.png" width="100%" />

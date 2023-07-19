@@ -10,7 +10,6 @@ optimum_size_for_downsampling <- function(data.normalized,
                                           verbose = FALSE,
                                           plot = FALSE,
                                           plotFun = FALSE) {
-
   # find optimum fit-range for down-sampling
   normalized.ranges <- seq.int(
     50,
@@ -125,9 +124,11 @@ optimum_size_for_downsampling <- function(data.normalized,
 
   # print message
   if (verbose) {
-    message(paste0("  Optimum size for sub-sampling is ",
-                   optimum.range.size, " (from ",
-                   nrow(data.normalized), ") samples.\n"))
+    message(paste0(
+      "  Optimum size for sub-sampling is ",
+      optimum.range.size, " (from ",
+      nrow(data.normalized), ") samples.\n"
+    ))
   }
 
   # Let's get plotty...

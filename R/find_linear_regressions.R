@@ -64,35 +64,40 @@ execute_find_linear_regressions <- function(data.normalized,
     dplyr::mutate("fit.idx" = seq.int(nrow(.))) %>%
     tidyr::nest(.by = "fit.idx", .key = "bounds") %>%
     dplyr::mutate("fit" = furrr::future_map(.data$bounds,
-                                            carrier::crate(\(bound) {
-      # satisfy pipe addiction...
-      `%>%` <- magrittr::`%>%`
+      carrier::crate(\(bound) {
+        # satisfy pipe addiction...
+        `%>%` <- magrittr::`%>%`
 
-      # get indices for fit
-      fit.range <- bound %>% unlist(TRUE, FALSE)
+        # get indices for fit
+        fit.range <- bound %>% unlist(TRUE, FALSE)
 
-      # grab data to analyze
-      fit.input <- data.normalized %>%
-        dplyr::filter(dplyr::between(as.numeric(rownames(.)),
-                                     fit.range[1], fit.range[2]))
+        # grab data to analyze
+        fit.input <- data.normalized %>%
+          dplyr::filter(dplyr::between(
+            as.numeric(rownames(.)),
+            fit.range[1], fit.range[2]
+          ))
 
-      # use basic .lm.fit for increasing speed
-      fit.result <- .lm.fit(cbind(1, fit.input$x.normalized),
-                            fit.input$y.normalized)
+        # use basic .lm.fit for increasing speed
+        fit.result <- .lm.fit(
+          cbind(1, fit.input$x.normalized),
+          fit.input$y.normalized
+        )
 
-      mean_y <- mean(fit.input$y.normalized)
-      norm_residual <- sum((fit.result$residuals)^2) /
-        sum((fit.input$y.normalized - mean_y)^2)
+        mean_y <- mean(fit.input$y.normalized)
+        norm_residual <- sum((fit.result$residuals)^2) /
+          sum((fit.input$y.normalized - mean_y)^2)
 
-      data.frame(
-        norm.residual = norm_residual,
-        m = fit.result$coefficients[2],
-        b = fit.result$coefficients[1],
-        otr.idx.start = fit.input$otr.idx[1],
-        otr.idx.end = fit.input$otr.idx[length(fit.input$otr.idx)]
-      )
-    }, data.normalized = data.normalized, .lm.fit = .lm.fit),
-    .options = furrr::furrr_options(globals = FALSE))) %>%
+        data.frame(
+          norm.residual = norm_residual,
+          m = fit.result$coefficients[2],
+          b = fit.result$coefficients[1],
+          otr.idx.start = fit.input$otr.idx[1],
+          otr.idx.end = fit.input$otr.idx[length(fit.input$otr.idx)]
+        )
+      }, data.normalized = data.normalized, .lm.fit = .lm.fit),
+      .options = furrr::furrr_options(globals = FALSE)
+    )) %>%
     tidyr::unnest(cols = "fit") %>%
     dplyr::select(-c("fit.idx", "bounds")) %>%
     dplyr::arrange(.data$norm.residual) %>%
@@ -128,12 +133,12 @@ execute_find_linear_regressions <- function(data.normalized,
 find_linear_regressions <- function(data.normalized,
                                     verbose = FALSE,
                                     Nmin_factor = 0.2) {
-
   # find optimum fit
   optimum.fit <- execute_find_linear_regressions(
     data.normalized = data.normalized,
     fit.candidates = 1,
-    Nmin_factor = Nmin_factor)
+    Nmin_factor = Nmin_factor
+  )
 
   # Assemble results
   results <- optimum.fit %>%
@@ -150,12 +155,18 @@ find_linear_regressions <- function(data.normalized,
     Nfits <- 0.5 * ((samples - Nmin + 1)^2 + (samples - Nmin + 1))
 
     message("  linear regressions")
-    message(paste0("      total points in the search-range:            ",
-                   samples))
-    message(paste0("      --> minimum number of points for linear-fit: ",
-                   Nmin))
-    message(paste0("      --> total number of linear fits:             ",
-                   Nfits))
+    message(paste0(
+      "      total points in the search-range:            ",
+      samples
+    ))
+    message(paste0(
+      "      --> minimum number of points for linear-fit: ",
+      Nmin
+    ))
+    message(paste0(
+      "      --> total number of linear fits:             ",
+      Nfits
+    ))
     message(paste0(
       "      --> optimum fit found between indices:      ",
       results$otr.idx.start %>% unlist(TRUE, FALSE), " and ",
@@ -190,7 +201,6 @@ find_linear_regressions.subsampled <- function(data.normalized,
                                                fit.candidates = 10,
                                                range.size,
                                                Nmin_factor = 0.2) {
-
   # do the fitting (several times) on sub-sampled data
   best.fits <- seq.int(fit.rep) %>%
     purrr::map(carrier::crate(
@@ -204,7 +214,8 @@ find_linear_regressions.subsampled <- function(data.normalized,
           otr.idx[length(otr.idx)],
           sample(otr.idx[2:length(otr.idx) - 1], size = size - 2)
         ) %>%
-          sort() %>% {
+          sort() %>%
+          {
             data.frame("mc.idx" = value, "otr.idx" = .)
           }
       },
@@ -215,21 +226,21 @@ find_linear_regressions.subsampled <- function(data.normalized,
     purrr::list_rbind() %>%
     tidyr::nest(.by = "mc.idx", .key = "otr.idcs") %>%
     dplyr::mutate("data.quality.check" = furrr::future_map(.data$otr.idcs,
-                                                         carrier::crate(
-      function(value) {
-        # satisfy pipe addiction...
-        `%>%` <- magrittr::`%>%`
+      carrier::crate(
+        function(value) {
+          # satisfy pipe addiction...
+          `%>%` <- magrittr::`%>%`
 
-        # select data by index
-        data.normalized %>%
-          dplyr::filter(.data$otr.idx %in% value$otr.idx) %>%
-          check_data_quality.lazy() %>%
-          as.data.frame()
-      },
-      data.normalized = data.normalized,
-      check_data_quality.lazy = check_data_quality.lazy
-    ),
-    .options = furrr::furrr_options(globals = FALSE)
+          # select data by index
+          data.normalized %>%
+            dplyr::filter(.data$otr.idx %in% value$otr.idx) %>%
+            check_data_quality.lazy() %>%
+            as.data.frame()
+        },
+        data.normalized = data.normalized,
+        check_data_quality.lazy = check_data_quality.lazy
+      ),
+      .options = furrr::furrr_options(globals = FALSE)
     )) %>%
     dplyr::mutate("fit" = purrr::map(.data$otr.idcs, carrier::crate(
       function(value) {
@@ -242,8 +253,10 @@ find_linear_regressions.subsampled <- function(data.normalized,
 
         # do linear regressions
         fits <- data.normalized.fits %>%
-          execute_find_linear_regressions(fit.candidates = fit.candidates,
-                                          Nmin_factor = Nmin_factor) %>%
+          execute_find_linear_regressions(
+            fit.candidates = fit.candidates,
+            Nmin_factor = Nmin_factor
+          ) %>%
           split(rownames(.)) %>%
           purrr::map(carrier::crate(
             function(value) {
@@ -252,7 +265,7 @@ find_linear_regressions.subsampled <- function(data.normalized,
 
               fit_quality_metrics <- check_fit_quality.lazy(
                 data.normalized.fits, value
-                ) %>% as.data.frame()
+              ) %>% as.data.frame()
               value <- value %>%
                 dplyr::bind_cols(fit_quality_metrics)
             },

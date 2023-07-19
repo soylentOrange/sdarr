@@ -472,31 +472,75 @@ sdar.downsample <- function(data, x, y,
                             plotFun = FALSE,
                             cutoff_probability = 0.875,
                             ...) {
-
   # to be furrr-safe, enquote the tidy arguments here
   x <- rlang::enquo(x)
   y <- rlang::enquo(y)
 
   # take care of dynamic dots
   additional_parameters <- rlang::list2(...)
-  Nmin_factor <- try({additional_parameters$Nmin_factor}, silent = TRUE)
-  if(!is.numeric(Nmin_factor)) Nmin_factor <- 0.2
-  verbose.all <- try({additional_parameters$verbose.all}, silent = TRUE)
-  if(!is.logical(verbose.all)) verbose.all <- FALSE
-  plot.all <- try({additional_parameters$plot.all}, silent = TRUE)
-  if(!is.logical(plot.all)) plot.all <- FALSE
-  plotFun.all <- try({additional_parameters$plotFun.all}, silent = TRUE)
-  if(!is.logical(plotFun.all)) plotFun.all <- FALSE
-  n.candidates <- try({additional_parameters$n.candidates}, silent = TRUE)
-  if(!is.numeric(n.candidates)) n.candidates <- 20
-  enforce_denoising <- try({additional_parameters$enforce_denoising}, silent = TRUE)
-  if(!is.logical(enforce_denoising)) enforce_denoising <- FALSE
-  quality_penalty <- try({additional_parameters$quality_penalty}, silent = TRUE)
-  if(!is.numeric(quality_penalty)) quality_penalty <- 0.1
-  alpha <- try({additional_parameters$alpha}, silent = TRUE)
-  if(!is.numeric(alpha)) alpha <- 2000
-  K <- try({additional_parameters$K}, silent = TRUE)
-  if(!is.numeric(K)) K <- 100
+  Nmin_factor <- try(
+    {
+      additional_parameters$Nmin_factor
+    },
+    silent = TRUE
+  )
+  if (!is.numeric(Nmin_factor)) Nmin_factor <- 0.2
+  verbose.all <- try(
+    {
+      additional_parameters$verbose.all
+    },
+    silent = TRUE
+  )
+  if (!is.logical(verbose.all)) verbose.all <- FALSE
+  plot.all <- try(
+    {
+      additional_parameters$plot.all
+    },
+    silent = TRUE
+  )
+  if (!is.logical(plot.all)) plot.all <- FALSE
+  plotFun.all <- try(
+    {
+      additional_parameters$plotFun.all
+    },
+    silent = TRUE
+  )
+  if (!is.logical(plotFun.all)) plotFun.all <- FALSE
+  n.candidates <- try(
+    {
+      additional_parameters$n.candidates
+    },
+    silent = TRUE
+  )
+  if (!is.numeric(n.candidates)) n.candidates <- 20
+  enforce_denoising <- try(
+    {
+      additional_parameters$enforce_denoising
+    },
+    silent = TRUE
+  )
+  if (!is.logical(enforce_denoising)) enforce_denoising <- FALSE
+  quality_penalty <- try(
+    {
+      additional_parameters$quality_penalty
+    },
+    silent = TRUE
+  )
+  if (!is.numeric(quality_penalty)) quality_penalty <- 0.1
+  alpha <- try(
+    {
+      additional_parameters$alpha
+    },
+    silent = TRUE
+  )
+  if (!is.numeric(alpha)) alpha <- 2000
+  K <- try(
+    {
+      additional_parameters$K
+    },
+    silent = TRUE
+  )
+  if (!is.numeric(K)) K <- 100
 
   # save final fit plot, when plotFun.all is set
   plotFun <- plotFun || plotFun.all
@@ -560,7 +604,7 @@ sdar.downsample <- function(data, x, y,
     message("Determination of Slope in the Linear Region of a Test Record:")
   }
 
-  if(enforce_denoising) {
+  if (enforce_denoising) {
     if (verbose) {
       message("  Proceeding with de-noised data...\n")
       denoise.x <- TRUE
@@ -596,9 +640,9 @@ sdar.downsample <- function(data, x, y,
     # get initial data quality metrics
     data_quality_metrics <- check_data_quality.lazy(normalized_data$data.normalized)
     denoise.x <- !(data_quality_metrics$passed.check.noise.x &&
-                     data_quality_metrics$passed.check.resolution.x)
+      data_quality_metrics$passed.check.resolution.x)
     denoise.y <- !(data_quality_metrics$passed.check.noise.y &&
-                     data_quality_metrics$passed.check.resolution.y)
+      data_quality_metrics$passed.check.resolution.y)
 
     # Check for noise in data quality metrics
     if (denoise.x || denoise.y) {

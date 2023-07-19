@@ -104,7 +104,6 @@ normalize_data <- function(data,
                            verbose = FALSE,
                            plot = FALSE,
                            plotFun = FALSE) {
-
   # just normalize and return normalized data (with info and (possibly) plots)
   if (denoise.x == FALSE && denoise.y == FALSE) {
     normalized_data <- normalize_data.execute(
@@ -125,9 +124,6 @@ normalize_data <- function(data,
     # denoise x and y (in a limited range of the original data, saving time...)
     data_denoised <- data %>%
       dplyr::filter(.data$otr.idx <= normalized_data$tangency.point$otr.idx.tangent * 2)
-    #FIXME
-    print(normalized_data$tangency.point$otr.idx.tangent)
-    print(normalized_data$tangency.point$otr.idx.tangent * 2)
 
 
     # de-noise x-data
@@ -239,7 +235,7 @@ normalize_data <- function(data,
     }
 
     # create function for plot of de-noised Original Test Record
-    if(denoise.y || denoise.x) {
+    if (denoise.y || denoise.x) {
       plot.otr.denoised <- carrier::crate(
         function(value) {
           plot(
@@ -313,7 +309,7 @@ normalize_data <- function(data,
     ))
 
     # append plot of de-noised (partial) data, if available
-    if(denoise.y || denoise.x) {
+    if (denoise.y || denoise.x) {
       results$plots <- results$plots %>% append(list(
         "plot.otr.denoised" = plot.otr.denoised
       ))

@@ -155,49 +155,54 @@ synthesize_test_data <- function(slope, yield.y, yield.xp = 0.002,
         }
         synthetic_data
       }
-    } %>% {
+    } %>%
+    {
       stats::splinefun(.$x, .$y,
-                       method = "monoH.FC",
-                       ties = list("ordered", mean))
+        method = "monoH.FC",
+        ties = list("ordered", mean)
+      )
     }
 
   # synthesize data starting with a regular sequence of x-values
   # (strain/displacement...) with added toe region
   # start with the sequence of x-values
-  data.frame("x" = seq(from = 0, to = ultimate.x, length.out = 2^enob.x)) %>% {
-    # add noise to x-data
-    synthetic_data <- .
-    synthetic_data.nrow <- nrow(synthetic_data)
-    # maximum value "recorded" x-data
-    x.max <- max(synthetic_data$x)
-    # hypothetical x-value at FS
-    x.max.FS <- x.max * 2^(enob.x_FS - enob.x)
-    # x-value worth at 1 bit of FS
-    x.resolution <- x.max.FS * 2^-enob.x_FS
-    # sd of noise
-    x.noise.sd <- (2^enob.x_noise - 1) * x.resolution
+  data.frame("x" = seq(from = 0, to = ultimate.x, length.out = 2^enob.x)) %>%
+    {
+      # add noise to x-data
+      synthetic_data <- .
+      synthetic_data.nrow <- nrow(synthetic_data)
+      # maximum value "recorded" x-data
+      x.max <- max(synthetic_data$x)
+      # hypothetical x-value at FS
+      x.max.FS <- x.max * 2^(enob.x_FS - enob.x)
+      # x-value worth at 1 bit of FS
+      x.resolution <- x.max.FS * 2^-enob.x_FS
+      # sd of noise
+      x.noise.sd <- (2^enob.x_noise - 1) * x.resolution
 
-    # add noise from a normal distribution
-    synthetic_data %>%
-      dplyr::mutate("x" = .data$x + stats::rnorm(synthetic_data.nrow, sd = x.noise.sd))
-  } %>% {
-    # add quantization noise
-    synthetic_data <- .
+      # add noise from a normal distribution
+      synthetic_data %>%
+        dplyr::mutate("x" = .data$x + stats::rnorm(synthetic_data.nrow, sd = x.noise.sd))
+    } %>%
+    {
+      # add quantization noise
+      synthetic_data <- .
 
-    # maximum value "recorded" x-data
-    x.max <- max(synthetic_data$x)
-    # hypothetical x-value at FS
-    x.max.FS <- x.max * 2^(enob.x_FS - enob.x)
-    # x-value worth at 1 bit of FS
-    x.resolution <- x.max.FS * 2^-enob.x_FS
+      # maximum value "recorded" x-data
+      x.max <- max(synthetic_data$x)
+      # hypothetical x-value at FS
+      x.max.FS <- x.max * 2^(enob.x_FS - enob.x)
+      # x-value worth at 1 bit of FS
+      x.resolution <- x.max.FS * 2^-enob.x_FS
 
-    synthetic_data %>%
-      dplyr::mutate("x" = round(.data$x / x.resolution, 0) * x.resolution)
-  } %>%
+      synthetic_data %>%
+        dplyr::mutate("x" = round(.data$x / x.resolution, 0) * x.resolution)
+    } %>%
     # order the x-data (in case adding noise mixed something up)
     dplyr::arrange(.data$x) %>%
     # use the splinefun with the toe region to synthesize y-data
-    dplyr::mutate("y" = synthetic_data.toed.sfun(.data$x)) %>% {
+    dplyr::mutate("y" = synthetic_data.toed.sfun(.data$x)) %>%
+    {
       # add noise to y-data
       synthetic_data <- .
       synthetic_data.nrow <- nrow(synthetic_data)
@@ -215,7 +220,8 @@ synthesize_test_data <- function(slope, yield.y, yield.xp = 0.002,
         dplyr::mutate("y" = .data$y + stats::rnorm(synthetic_data.nrow, sd = y.noise.sd))
     } %>%
     # add offset to y-data
-    dplyr::mutate("y" = .data$y + offset) %>% {
+    dplyr::mutate("y" = .data$y + offset) %>%
+    {
       # add quantization noise
       synthetic_data <- .
 
@@ -231,7 +237,7 @@ synthesize_test_data <- function(slope, yield.y, yield.xp = 0.002,
     } %>%
     # set labels
     labelled::set_variable_labels(.labels = list(x = x.unit, y = y.unit)) %>%
-    #set names
+    # set names
     magrittr::set_names(c(x.name, y.name)) %>%
     return()
 }

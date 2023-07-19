@@ -9,7 +9,6 @@ sdar_execute <- function(prepared_data,
                          plotFun.all = FALSE,
                          plotFun = FALSE,
                          Nmin_factor = 0.2) {
-
   # maybe the offset for step 1 needs to be raised later
   raise_offset_times <- 0
   optimum_fit_is_found <- FALSE
@@ -199,7 +198,9 @@ sdar_execute <- function(prepared_data,
 #' @param plotFun Set to `TRUE` to get a plot-function for the final fit with
 #'   the results for later use.
 #'
-#' @param ... <[`dynamic-dots`][rlang::dyn-dots]> What these dots do (std).
+#' @param ... <[`dynamic-dots`][rlang::dyn-dots]> Pass parameters to downstream
+#'  functions: set `verbose.all`, `plot.all` and `plotFun.all` to `TRUE` to get
+#'  additional diagnostic information during processing data.
 #'
 #' @seealso [sdar.lazy()] for the random sub-sampling modification of the
 #'   SDAR-algorithm.
@@ -239,21 +240,40 @@ sdar <- function(data, x, y,
                  plot = TRUE,
                  plotFun = FALSE,
                  ...) {
-
   # to be furrr-safe, enquote the tidy arguments here
   x <- rlang::enquo(x)
   y <- rlang::enquo(y)
 
   # take care of dynamic dots
   additional_parameters <- rlang::list2(...)
-  Nmin_factor <- try({additional_parameters$Nmin_factor}, silent = TRUE)
-  if(!is.numeric(Nmin_factor)) Nmin_factor <- 0.2
-  verbose.all <- try({additional_parameters$verbose.all}, silent = TRUE)
-  if(!is.logical(verbose.all)) verbose.all <- FALSE
-  plot.all <- try({additional_parameters$plot.all}, silent = TRUE)
-  if(!is.logical(plot.all)) plot.all <- FALSE
-  plotFun.all <- try({additional_parameters$plotFun.all}, silent = TRUE)
-  if(!is.logical(plotFun.all)) plotFun.all <- FALSE
+  Nmin_factor <- try(
+    {
+      additional_parameters$Nmin_factor
+    },
+    silent = TRUE
+  )
+  if (!is.numeric(Nmin_factor)) Nmin_factor <- 0.2
+  verbose.all <- try(
+    {
+      additional_parameters$verbose.all
+    },
+    silent = TRUE
+  )
+  if (!is.logical(verbose.all)) verbose.all <- FALSE
+  plot.all <- try(
+    {
+      additional_parameters$plot.all
+    },
+    silent = TRUE
+  )
+  if (!is.logical(plot.all)) plot.all <- FALSE
+  plotFun.all <- try(
+    {
+      additional_parameters$plotFun.all
+    },
+    silent = TRUE
+  )
+  if (!is.logical(plotFun.all)) plotFun.all <- FALSE
 
   # save final fit plot, when plotFun.all is set
   plotFun <- plotFun || plotFun.all

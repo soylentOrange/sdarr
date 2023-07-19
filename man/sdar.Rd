@@ -18,7 +18,9 @@ within data.}
 \item{plotFun}{Set to \code{TRUE} to get a plot-function for the final fit with
 the results for later use.}
 
-\item{...}{<\code{\link[rlang:dyn-dots]{dynamic-dots}}> What these dots do (std).}
+\item{...}{<\code{\link[rlang:dyn-dots]{dynamic-dots}}> Pass parameters to downstream
+functions: set \code{verbose.all}, \code{plot.all} and \code{plotFun.all} to \code{TRUE} to get
+additional diagnostic information during processing data.}
 }
 \value{
 A list containing a data.frame with the results of the final fit,

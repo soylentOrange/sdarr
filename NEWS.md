@@ -1,4 +1,4 @@
-# sdarr 0.4.5
+# sdarr 0.5.0
 
 * Change of function-interfaces for simplicity.
 * Added down-sampling variant of the SDAR-algorithm (under development).
@@ -6,17 +6,8 @@
 * Fixed typos.
 * Use tidyverse_style
 * Reduced use of global variables to minimum (?)
-* Modified (lengthy) example of sdarr() with "donttest". 
-* Added (web-only) article for de-noising feature. 
+* Modified (lengthy) example of sdarr() with "donttest".
 * Moved the vignette on validation to (web-only) articles.
-* Update documentation.
-
-# sdarr 0.4.4
-
-* Update documentation.
-
-# sdarr 0.4.3
-
 * Update documentation.
 
 # sdarr 0.4.2

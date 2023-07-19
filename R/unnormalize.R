@@ -14,7 +14,6 @@ unnormalize_results <- function(normalized_data,
                                 fitQualityMetrics,
                                 verbose = FALSE,
                                 warn = TRUE) {
-
   # shorthands for calculations
   y.tangent <- normalized_data[["tangency.point"]][["y.tangent"]]
   x.tangent <- normalized_data[["tangency.point"]][["x.tangent"]]
@@ -81,7 +80,8 @@ unnormalize_results <- function(normalized_data,
     if (!all.checks.passed) {
       warning(
         "Quality checks failed: result might be inaccurate!\n",
-        call. = FALSE)
+        call. = FALSE
+      )
     }
   }
 

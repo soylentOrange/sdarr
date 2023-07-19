@@ -19,7 +19,6 @@ sdar_execute.lazy <- function(prepared_data,
                               plotFun.all = FALSE,
                               plotFun = FALSE,
                               Nmin_factor = 0.2) {
-
   # Give a (long) welcome message
   if (verbose) {
     message("Random sub-sampling modification of the SDAR-algorithm\n")
@@ -165,7 +164,7 @@ sdar_execute.lazy <- function(prepared_data,
   # re-do normalization without de-noising
   plot.otr.denoised <- NULL
   if (denoise.x || denoise.y) {
-    if(plotFun.all) {
+    if (plotFun.all) {
       # save the plot of de-noised data
       plot.otr.denoised <- normalized_data$plots$plot.otr.denoised
     }
@@ -380,7 +379,7 @@ sdar_execute.lazy <- function(prepared_data,
     ))
 
     # append plot of de-noised (partial) data, if available
-    if(!is.null(plot.otr.denoised)) {
+    if (!is.null(plot.otr.denoised)) {
       results$plots <- results$plots %>% append(list(
         "otr.denoised" = plot.otr.denoised
       ))
@@ -394,6 +393,10 @@ sdar_execute.lazy <- function(prepared_data,
   return(results)
 }
 
+#FIXME - fragment of documentation...
+# and
+#   [robustness against
+#   noise](https://soylentorange.github.io/sdarr/articles/excessive_noise_levels.html)
 
 #' @title Random sub-sampling variant of the SDAR-algorithm
 #'
@@ -403,11 +406,9 @@ sdar_execute.lazy <- function(prepared_data,
 #'   painfully slow for test data with high resolution. The lazy variant of the
 #'   algorithm will use several random sub-samples of the data to find the best
 #'   estimate for the fit-range within the data. Additionally, the test data
-#'   will be de-noised using Variational Mode Decomposition in case initial data
-#'   quality checks have failed. See the articles on [validation](
-#'   https://soylentorange.github.io/sdarr/articles/sdarr_validation.html) and
-#'   [robustness against
-#'   noise](https://soylentorange.github.io/sdarr/articles/excessive_noise_levels.html)
+#'   can be de-noised using Variational Mode Decomposition in case initial data
+#'   quality checks have failed (highly experimental). See the article on [validation](
+#'   https://soylentorange.github.io/sdarr/articles/sdarr_validation.html)
 #'   on the [package-website](https://soylentorange.github.io/sdarr/) for
 #'   further information.
 #'
@@ -442,7 +443,11 @@ sdar_execute.lazy <- function(prepared_data,
 #' @param cutoff_probability Cut-off probability for estimating optimum size of
 #'   sub-sampled data range via logistic regression.
 #'
-#' @param ... <[`dynamic-dots`][rlang::dyn-dots]> What these dots do (lazy).
+#' @param ... <[`dynamic-dots`][rlang::dyn-dots]> Pass parameters to downstream
+#'  functions: set `verbose.all`, `plot.all` and `plotFun.all` to `TRUE` to get
+#'  additional diagnostic information during processing data. Set
+#'  `enforce_subsampling` to `TRUE` to run the random sub-sampling algorithm
+#'  even though it might be slower than the standard SDAR-algorithm.
 #'
 #' @seealso [sdar()] for the standard SDAR-algorithm.
 #'
@@ -484,7 +489,6 @@ sdar.lazy <- function(data, x, y,
                       n.fit = 5,
                       cutoff_probability = 0.9,
                       ...) {
-
   # to be furrr-safe, enquote the tidy arguments here
   x <- rlang::enquo(x)
   y <- rlang::enquo(y)
@@ -511,26 +515,76 @@ sdar.lazy <- function(data, x, y,
 
   # take care of dynamic dots
   additional_parameters <- rlang::list2(...)
-  Nmin_factor <- try({additional_parameters$Nmin_factor}, silent = TRUE)
-  if(!is.numeric(Nmin_factor)) Nmin_factor <- 0.2
-  verbose.all <- try({additional_parameters$verbose.all}, silent = TRUE)
-  if(!is.logical(verbose.all)) verbose.all <- FALSE
-  plot.all <- try({additional_parameters$plot.all}, silent = TRUE)
-  if(!is.logical(plot.all)) plot.all <- FALSE
-  plotFun.all <- try({additional_parameters$plotFun.all}, silent = TRUE)
-  if(!is.logical(plotFun.all)) plotFun.all <- FALSE
-  n.candidates <- try({additional_parameters$n.candidates}, silent = TRUE)
-  if(!is.numeric(n.candidates)) n.candidates <- 20
-  enforce_subsampling <- try({additional_parameters$enforce_subsampling}, silent = TRUE)
-  if(!is.logical(enforce_subsampling)) enforce_subsampling <- FALSE
-  enforce_denoising <- try({additional_parameters$enforce_denoising}, silent = TRUE)
-  if(!is.logical(enforce_denoising)) enforce_denoising <- FALSE
-  quality_penalty <- try({additional_parameters$quality_penalty}, silent = TRUE)
-  if(!is.numeric(quality_penalty)) quality_penalty <- 0.1
-  alpha <- try({additional_parameters$alpha}, silent = TRUE)
-  if(!is.numeric(alpha)) alpha <- 2000
-  K <- try({additional_parameters$K}, silent = TRUE)
-  if(!is.numeric(K)) K <- 100
+  Nmin_factor <- try(
+    {
+      additional_parameters$Nmin_factor
+    },
+    silent = TRUE
+  )
+  if (!is.numeric(Nmin_factor)) Nmin_factor <- 0.2
+  verbose.all <- try(
+    {
+      additional_parameters$verbose.all
+    },
+    silent = TRUE
+  )
+  if (!is.logical(verbose.all)) verbose.all <- FALSE
+  plot.all <- try(
+    {
+      additional_parameters$plot.all
+    },
+    silent = TRUE
+  )
+  if (!is.logical(plot.all)) plot.all <- FALSE
+  plotFun.all <- try(
+    {
+      additional_parameters$plotFun.all
+    },
+    silent = TRUE
+  )
+  if (!is.logical(plotFun.all)) plotFun.all <- FALSE
+  n.candidates <- try(
+    {
+      additional_parameters$n.candidates
+    },
+    silent = TRUE
+  )
+  if (!is.numeric(n.candidates)) n.candidates <- 20
+  enforce_subsampling <- try(
+    {
+      additional_parameters$enforce_subsampling
+    },
+    silent = TRUE
+  )
+  if (!is.logical(enforce_subsampling)) enforce_subsampling <- FALSE
+  enforce_denoising <- try(
+    {
+      additional_parameters$enforce_denoising
+    },
+    silent = TRUE
+  )
+  if (!is.logical(enforce_denoising)) enforce_denoising <- FALSE
+  quality_penalty <- try(
+    {
+      additional_parameters$quality_penalty
+    },
+    silent = TRUE
+  )
+  if (!is.numeric(quality_penalty)) quality_penalty <- 0.1
+  alpha <- try(
+    {
+      additional_parameters$alpha
+    },
+    silent = TRUE
+  )
+  if (!is.numeric(alpha)) alpha <- 2000
+  K <- try(
+    {
+      additional_parameters$K
+    },
+    silent = TRUE
+  )
+  if (!is.numeric(K)) K <- 100
 
   # save final fit plot, when plotFun.all is set
   plotFun <- plotFun || plotFun.all
@@ -594,7 +648,7 @@ sdar.lazy <- function(data, x, y,
     message("Determination of Slope in the Linear Region of a Test Record:")
   }
 
-  if(enforce_denoising) {
+  if (enforce_denoising) {
     if (verbose) {
       message("  Proceeding with de-noised data...\n")
       denoise.x <- TRUE
@@ -629,7 +683,7 @@ sdar.lazy <- function(data, x, y,
 
     # get initial data quality metrics
     data_quality_metrics <- check_data_quality.lazy(normalized_data$data.normalized)
-    #FIXME
+    # FIXME
     # denoise.x <- !(data_quality_metrics$passed.check.noise.x &&
     #                  data_quality_metrics$passed.check.resolution.x)
     # denoise.y <- !(data_quality_metrics$passed.check.noise.y &&

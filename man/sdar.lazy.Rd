@@ -33,7 +33,11 @@ the results for later use.}
 \item{cutoff_probability}{Cut-off probability for estimating optimum size of
 sub-sampled data range via logistic regression.}
 
-\item{...}{<\code{\link[rlang:dyn-dots]{dynamic-dots}}> What these dots do (lazy).}
+\item{...}{<\code{\link[rlang:dyn-dots]{dynamic-dots}}> Pass parameters to downstream
+functions: set \code{verbose.all}, \code{plot.all} and \code{plotFun.all} to \code{TRUE} to get
+additional diagnostic information during processing data. Set
+\code{enforce_subsampling} to \code{TRUE} to run the random sub-sampling algorithm
+even though it might be slower than the standard SDAR-algorithm.}
 }
 \value{
 A list containing a data.frame with the results of the final fit,
@@ -48,9 +52,8 @@ numerous linear regressions (\code{.lm.fit()} from the stats-package), it can be
 painfully slow for test data with high resolution. The lazy variant of the
 algorithm will use several random sub-samples of the data to find the best
 estimate for the fit-range within the data. Additionally, the test data
-will be de-noised using Variational Mode Decomposition in case initial data
-quality checks have failed. See the articles on \href{https://soylentorange.github.io/sdarr/articles/sdarr_validation.html}{validation} and
-\href{https://soylentorange.github.io/sdarr/articles/excessive_noise_levels.html}{robustness against noise}
+can be de-noised using Variational Mode Decomposition in case initial data
+quality checks have failed (highly experimental). See the article on \href{https://soylentorange.github.io/sdarr/articles/sdarr_validation.html}{validation}
 on the \href{https://soylentorange.github.io/sdarr/}{package-website} for
 further information.
 }

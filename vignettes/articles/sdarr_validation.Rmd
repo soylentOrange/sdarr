@@ -131,7 +131,7 @@ E3076_DS1_2018 %>%
 # Run the algorithm
 sdar.results <- E3076_DS1_2018 %>%
   sdar(extensometer, force,
-       plot = FALSE, plotFun = TRUE
+    plot = FALSE, plotFun = TRUE
   )
 
 # show the plot of the final fit
@@ -178,14 +178,14 @@ The results of the analysis using `sdar()` are practically identical to the resu
 
 ```{r sdar.lazy_check, fig.height=4, fig.width=6}
 # Run the algorithm (after setting a random seed)
-# As the data set is rather short, the algorithm might refuse to use 
-# the random sub-sampling as it will require more computational effort. 
+# As the data set is rather short, the algorithm might refuse to use
+# the random sub-sampling as it will require more computational effort.
 # Enforce by setting enforce_subsampling = TRUE.
 set.seed(50041180)
 sdar.lazy.results <- E3076_DS1_2018 %>%
   sdar.lazy(extensometer, force,
-            enforce_subsampling = TRUE,
-            plot = FALSE, plotFun = TRUE
+    enforce_subsampling = TRUE,
+    plot = FALSE, plotFun = TRUE
   )
 
 # show the plot of the final fit

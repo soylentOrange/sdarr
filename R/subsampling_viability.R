@@ -10,7 +10,6 @@ subsampling_viability <- function(rangeSize.original,
                                   n.fit,
                                   verbose = FALSE,
                                   Nmin_factor = 0.2) {
-
   Nmin.plain <- max(floor(rangeSize.original * 0.2), 10)
   Nfits.plain <- 0.5 * ((rangeSize.original - Nmin.plain + 1)^2 +
     (rangeSize.original - Nmin.plain + 1))
@@ -38,7 +37,6 @@ optimum_size_for_subsampling <- function(data.normalized,
                                          verbose = FALSE,
                                          plot = FALSE,
                                          plotFun = FALSE) {
-
   # find optimum fit-range for sub-sampling
   normalized.ranges <- seq.int(
     50,
@@ -127,7 +125,7 @@ optimum_size_for_subsampling <- function(data.normalized,
   # check if we can satisfy cutoff_probability,
   # possibly adjust it
   max.pm <- normalized.ranges.modelpredictions$pm %>% max(na.rm = TRUE)
-  cutoff_probability <- max.pm*cutoff_probability
+  cutoff_probability <- max.pm * cutoff_probability
 
   # find optimum range size by (possibly adjusted) cutoff_probability
   optimum.range.size <- normalized.ranges.modelpredictions %>%
@@ -145,9 +143,11 @@ optimum_size_for_subsampling <- function(data.normalized,
 
   # print message
   if (verbose) {
-    message(paste0("  Optimum size for sub-sampling is ",
-                   optimum.range.size, " (from ",
-                   nrow(data.normalized), ") samples.\n"))
+    message(paste0(
+      "  Optimum size for sub-sampling is ",
+      optimum.range.size, " (from ",
+      nrow(data.normalized), ") samples.\n"
+    ))
   }
 
   # Let's get plotty...
