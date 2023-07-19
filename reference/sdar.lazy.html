@@ -5,9 +5,8 @@ numerous linear regressions (.lm.fit() from the stats-package), it can be
 painfully slow for test data with high resolution. The lazy variant of the
 algorithm will use several random sub-samples of the data to find the best
 estimate for the fit-range within the data. Additionally, the test data
-will be de-noised using Variational Mode Decomposition in case initial data
-quality checks have failed. See the articles on validation and
-robustness against noise
+can be de-noised using Variational Mode Decomposition in case initial data
+quality checks have failed (highly experimental). See the article on validation
 on the package-website for
 further information."><title>Random sub-sampling variant of the SDAR-algorithm — sdar.lazy • sdarr</title><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous"><!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Random sub-sampling variant of the SDAR-algorithm — sdar.lazy"><meta property="og:description" content="Run a random sub-sampling modification of the SDAR algorithm as
 originally standardized in ASTM E3076-18. As the original version uses
@@ -15,9 +14,8 @@ numerous linear regressions (.lm.fit() from the stats-package), it can be
 painfully slow for test data with high resolution. The lazy variant of the
 algorithm will use several random sub-samples of the data to find the best
 estimate for the fit-range within the data. Additionally, the test data
-will be de-noised using Variational Mode Decomposition in case initial data
-quality checks have failed. See the articles on validation and
-robustness against noise
+can be de-noised using Variational Mode Decomposition in case initial data
+quality checks have failed (highly experimental). See the article on validation
 on the package-website for
 further information."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -30,7 +28,7 @@ further information."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/
     
     <a class="navbar-brand me-2" href="../index.html">sdarr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,7 +42,6 @@ further information."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/excessive_noise_levels.html">Excessive noise in test data</a>
     <a class="dropdown-item" href="../articles/sdarr_validation.html">Validation against Reference Data Set</a>
   </div>
 </li>
@@ -79,9 +76,8 @@ numerous linear regressions (<code><a href="https://rdrr.io/r/stats/lmfit.html" 
 painfully slow for test data with high resolution. The lazy variant of the
 algorithm will use several random sub-samples of the data to find the best
 estimate for the fit-range within the data. Additionally, the test data
-will be de-noised using Variational Mode Decomposition in case initial data
-quality checks have failed. See the articles on <a href="https://soylentorange.github.io/sdarr/articles/sdarr_validation.html">validation</a> and
-<a href="https://soylentorange.github.io/sdarr/articles/excessive_noise_levels.html">robustness against noise</a>
+can be de-noised using Variational Mode Decomposition in case initial data
+quality checks have failed (highly experimental). See the article on <a href="https://soylentorange.github.io/sdarr/articles/sdarr_validation.html">validation</a>
 on the <a href="https://soylentorange.github.io/sdarr/">package-website</a> for
 further information.</p>
     </div>
@@ -92,16 +88,12 @@ further information.</p>
 <span>  <span class="va">data</span>,</span>
 <span>  <span class="va">x</span>,</span>
 <span>  <span class="va">y</span>,</span>
-<span>  verbose <span class="op">=</span> <span class="st">"report"</span>,</span>
-<span>  showPlots <span class="op">=</span> <span class="st">"report"</span>,</span>
-<span>  savePlots <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  fit.rep <span class="op">=</span> <span class="fl">5</span>,</span>
-<span>  fit.candidates <span class="op">=</span> <span class="fl">20</span>,</span>
-<span>  cutoff_probability <span class="op">=</span> <span class="fl">0.975</span>,</span>
-<span>  quality_penalty <span class="op">=</span> <span class="fl">0.1</span>,</span>
-<span>  enforce_subsampling <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  enforce_denoising <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  vmd.alpha <span class="op">=</span> <span class="fl">1000</span></span>
+<span>  verbose <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  plot <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  plotFun <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  n.fit <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  cutoff_probability <span class="op">=</span> <span class="fl">0.9</span>,</span>
+<span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -117,26 +109,17 @@ as units.</p></dd>
 within data.</p></dd>
 
 
-<dt>verbose, showPlots</dt>
-<dd><p>Give informational messages and plots during
-computation. Defaults to <code>"report"</code> to only show a report and a plot of the
-final fit. Set to <code>"all"</code> to also give messages from the individual steps.
-Set to <code>"none"</code> to be quiet. Can be abbreviated.</p></dd>
+<dt>verbose, plot</dt>
+<dd><p>Give a summarizing report / show a plot of the final fit.</p></dd>
 
 
-<dt>savePlots</dt>
-<dd><p>Set to <code>TRUE</code> to get plot-functions with the result for
-later use.</p></dd>
+<dt>plotFun</dt>
+<dd><p>Set to <code>TRUE</code> to get a plot-function for the final fit with
+the results for later use.</p></dd>
 
 
-<dt>fit.rep</dt>
+<dt>n.fit</dt>
 <dd><p>Repetitions of random sub-sampling and fitting.</p></dd>
-
-
-<dt>fit.candidates</dt>
-<dd><p>Give a number for selecting optimum fit candidates
-(ordered decreasingly by normalized residuals) for each of the repetitions
-of random sub-sampling.</p></dd>
 
 
 <dt>cutoff_probability</dt>
@@ -144,25 +127,12 @@ of random sub-sampling.</p></dd>
 sub-sampled data range via logistic regression.</p></dd>
 
 
-<dt>quality_penalty</dt>
-<dd><p>Factor to down-weight fits with inferior data- and
-fit-quality metrics.</p></dd>
-
-
-<dt>enforce_subsampling</dt>
-<dd><p>Set to <code>TRUE</code>, to use sub-sampling method even
-when it is computationally more expensive than the standard SDAR-algorithm.</p></dd>
-
-
-<dt>enforce_denoising</dt>
-<dd><p>Set to <code>TRUE</code>, to enforce de-noising of the test
-record for finding the final fitting range.</p></dd>
-
-
-<dt>vmd.alpha</dt>
-<dd><p>A numeric value specifying the balancing parameter of the
-data-fidelity constraint in <a href="https://rdrr.io/pkg/VMDecomp/man/vmd.html" class="external-link">VMDecomp::vmd</a> for de-noising when original
-data is failing the data quality checks.</p></dd>
+<dt>...</dt>
+<dd><p>&lt;<code><a href="https://rlang.r-lib.org/reference/dyn-dots.html" class="external-link">dynamic-dots</a></code>&gt; Pass parameters to downstream
+functions: set <code>verbose.all</code>, <code>plot.all</code> and <code>plotFun.all</code> to <code>TRUE</code> to get
+additional diagnostic information during processing data. Set
+<code>enforce_subsampling</code> to <code>TRUE</code> to run the random sub-sampling algorithm
+even though it might be slower than the standard SDAR-algorithm.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -171,13 +141,15 @@ data is failing the data quality checks.</p></dd>
 
 <p>A list containing a data.frame with the results of the final fit,
 lists with the quality- and fit-metrics, and a list containing the crated
-plot-functions (if <code>savePlots = TRUE</code>).</p>
+plot-function(s) (if <code>plotFun = TRUE</code> or, for all diagnostic plots
+<code>plotFun.all = TRUE</code>).</p>
     </div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
-    <p>The function can use parallel processing via the furrr-package. To use
-this feature, set up a plan other than the default sequential strategy
-beforehand. As random values are drawn, set a random seed beforehand to get
+    <p>The function can use parallel processing via the
+<a href="https://furrr.futureverse.org/" class="external-link">furrr-package</a>. To use this feature, set
+up a plan other than the default sequential strategy beforehand. Also, as
+random values are drawn, set a <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">random seed</a></code> beforehand to get
 reproducible results.</p>
     </div>
     <div class="section level2">
@@ -219,21 +191,17 @@ https://doi.org/10.1109/TSP.2013.2288675</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># use sdar.lazy() to analyze the synthetic test record</span></span></span>
-<span class="r-in"><span><span class="co"># (using relaxed settings for the noise-free synthetic data)</span></span></span>
+<span class="r-in"><span><span class="co"># (relaxed setting of 2 random sub-samples for the noise-free data)</span></span></span>
 <span class="r-in"><span><span class="co"># will print a report and give a plot of the final fit</span></span></span>
 <span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu">sdar.lazy</span><span class="op">(</span><span class="va">Al_6060_T66</span>, <span class="va">strain</span>, <span class="va">stress</span>,</span></span>
-<span class="r-in"><span>  cutoff_probability <span class="op">=</span> <span class="fl">0.8</span>,</span></span>
-<span class="r-in"><span>  fit.rep <span class="op">=</span> <span class="fl">2</span></span></span>
+<span class="r-in"><span>  n.fit <span class="op">=</span> <span class="fl">2</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Determination of Slope in the Linear Region of a Test Record:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Random sub-sampling modification of the SDAR-algorithm</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   Random sub-sampling information:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       224 points of 336 points in the normalized range were used.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       0 % of sub-sampled normalized ranges passed the data quality checks.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       100 % of linear regressions passed the fit quality checks.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       0 % of linear regressions passed all quality checks.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   lazy algorithm requires more fits than standard SDAR-algorithm:  </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     41820 vs. 36585 fits.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   Standard SDAR-algorithm will be used...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> SDAR-algorithm</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   Data Quality Metric: Digital Resolution</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>     x</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>       Relative x-Resolution:   0.333333333333333</span>
@@ -254,20 +222,20 @@ https://doi.org/10.1109/TSP.2013.2288675</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>       --&gt; pass</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   Fit Quality Metric: Curvature</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>     1st Quartile</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       Relative Residual Slope: 0.000448939761219324</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       Number of Points:        49</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       Relative Residual Slope: 0.000482965710562425</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       Number of Points:        50</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>       --&gt; pass</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>     4th Quartile</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       Relative Residual Slope: -0.00550750017914249</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       Number of Points:        49</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       Relative Residual Slope: -0.00559026483597765</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       Number of Points:        50</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>       --&gt; pass</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   Fit Quality Metric: Fit Range</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       relative fit range:      0.663791874554526</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       relative fit range:      0.660379365360752</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>       --&gt; pass</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   Un-normalized fit</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       Final Slope:             67997.5878101132 MPa</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       True Intercept:          0.000943505782742159 MPa</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       y-Range:                 0.38055419921875 MPa - 74.0243530273438 MPa</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       Final Slope:             67997.613940326 MPa</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       True Intercept:          0.000924493437320731 MPa</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       y-Range:                 0 MPa - 74.0243530273438 MPa</span>
 <span class="r-plt img"><img src="sdar.lazy-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
