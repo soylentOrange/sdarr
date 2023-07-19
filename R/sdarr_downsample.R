@@ -5,7 +5,7 @@
 #                                     normalized_data.hint = NULL,
 #                                     denoise.x = FALSE,
 #                                     denoise.y = FALSE,
-#                                     vmd.alpha = 1000,
+#                                     alpha = 2000,
 #                                     fit.candidates,
 #                                     optimum.range.size,
 #                                     cutoff_probability,
@@ -42,7 +42,7 @@
 #         raise_offset_times = raise_offset_times,
 #         denoise.x = denoise.x,
 #         denoise.y = denoise.y,
-#         vmd.alpha = vmd.alpha,
+#         alpha = alpha,
 #         verbose = verbose.all,
 #         plot = plot.all,
 #         plotFun = plotFun.all
@@ -493,10 +493,10 @@ sdar.downsample <- function(data, x, y,
   if(!is.logical(enforce_denoising)) enforce_denoising <- FALSE
   quality_penalty <- try({additional_parameters$quality_penalty}, silent = TRUE)
   if(!is.numeric(quality_penalty)) quality_penalty <- 0.1
-  vmd.alpha <- try({additional_parameters$vmd.alpha}, silent = TRUE)
-  if(!is.numeric(vmd.alpha)) vmd.alpha <- 1000
-  min_K <- try({additional_parameters$min_K}, silent = TRUE)
-  if(!is.numeric(min_K)) min_K <- 3
+  alpha <- try({additional_parameters$alpha}, silent = TRUE)
+  if(!is.numeric(alpha)) alpha <- 2000
+  K <- try({additional_parameters$K}, silent = TRUE)
+  if(!is.numeric(K)) K <- 100
 
   # save final fit plot, when plotFun.all is set
   plotFun <- plotFun || plotFun.all
@@ -573,8 +573,8 @@ sdar.downsample <- function(data, x, y,
         raise_offset_times = 0,
         denoise.x = denoise.x,
         denoise.y = denoise.y,
-        vmd.alpha = vmd.alpha,
-        min_K = min_K,
+        alpha = alpha,
+        K = K,
         verbose = FALSE,
         plot = FALSE,
         plotFun = TRUE
@@ -610,8 +610,8 @@ sdar.downsample <- function(data, x, y,
         raise_offset_times = 0,
         denoise.x = denoise.x,
         denoise.y = denoise.y,
-        vmd.alpha = vmd.alpha,
-        min_K = min_K,
+        alpha = alpha,
+        K = K,
         verbose = FALSE,
         plot = FALSE,
         plotFun = TRUE
@@ -739,7 +739,7 @@ sdar.downsample <- function(data, x, y,
   #   normalized_data.hint = normalized_data,
   #   denoise.x = denoise.x,
   #   denoise.y = denoise.y,
-  #   vmd.alpha = vmd.alpha,
+  #   alpha = alpha,
   #   fit.candidates = fit.candidates,
   #   optimum.range.size = optimum_size$optimum.range.size,
   #   cutoff_probability = cutoff_probability,

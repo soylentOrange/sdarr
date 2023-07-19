@@ -5,8 +5,8 @@ sdar_execute.lazy <- function(prepared_data,
                               normalized_data.hint = NULL,
                               denoise.x = FALSE,
                               denoise.y = FALSE,
-                              vmd.alpha = 2000,
-                              min_K = 2,
+                              alpha = 2000,
+                              K = 100,
                               n.fit,
                               n.candidates,
                               optimum.range.size,
@@ -45,8 +45,8 @@ sdar_execute.lazy <- function(prepared_data,
         raise_offset_times = raise_offset_times,
         denoise.x = denoise.x,
         denoise.y = denoise.y,
-        vmd.alpha = vmd.alpha,
-        min_K = min_K,
+        alpha = alpha,
+        K = K,
         verbose = verbose.all,
         plot = plot.all,
         plotFun = plotFun.all
@@ -502,11 +502,11 @@ sdar.lazy <- function(data, x, y,
   # @param enforce_denoising Set to `TRUE`, to enforce de-noising of the test
   #   record for finding the final fitting range.
 
-  # @param vmd.alpha A numeric value specifying the balancing parameter of the
+  # @param alpha A numeric value specifying the balancing parameter of the
   #   data-fidelity constraint in [VMDecomp::vmd] for de-noising when original
   #   data is failing the data quality checks.
 
-  # @param min_K a numeric value specifying the minimum value of the K (modes)
+  # @param K a numeric value specifying the minimum value of the K (modes)
   #   parameter (from which decomposition starts)
 
   # take care of dynamic dots
@@ -527,10 +527,10 @@ sdar.lazy <- function(data, x, y,
   if(!is.logical(enforce_denoising)) enforce_denoising <- FALSE
   quality_penalty <- try({additional_parameters$quality_penalty}, silent = TRUE)
   if(!is.numeric(quality_penalty)) quality_penalty <- 0.1
-  vmd.alpha <- try({additional_parameters$vmd.alpha}, silent = TRUE)
-  if(!is.numeric(vmd.alpha)) vmd.alpha <- 1000
-  min_K <- try({additional_parameters$min_K}, silent = TRUE)
-  if(!is.numeric(min_K)) min_K <- 2
+  alpha <- try({additional_parameters$alpha}, silent = TRUE)
+  if(!is.numeric(alpha)) alpha <- 2000
+  K <- try({additional_parameters$K}, silent = TRUE)
+  if(!is.numeric(K)) K <- 100
 
   # save final fit plot, when plotFun.all is set
   plotFun <- plotFun || plotFun.all
@@ -607,8 +607,8 @@ sdar.lazy <- function(data, x, y,
         raise_offset_times = 0,
         denoise.x = denoise.x,
         denoise.y = denoise.y,
-        vmd.alpha = vmd.alpha,
-        min_K = min_K,
+        alpha = alpha,
+        K = K,
         verbose = FALSE,
         plot = FALSE,
         plotFun = TRUE
@@ -629,10 +629,14 @@ sdar.lazy <- function(data, x, y,
 
     # get initial data quality metrics
     data_quality_metrics <- check_data_quality.lazy(normalized_data$data.normalized)
-    denoise.x <- !(data_quality_metrics$passed.check.noise.x &&
-                     data_quality_metrics$passed.check.resolution.x)
-    denoise.y <- !(data_quality_metrics$passed.check.noise.y &&
-                     data_quality_metrics$passed.check.resolution.y)
+    #FIXME
+    # denoise.x <- !(data_quality_metrics$passed.check.noise.x &&
+    #                  data_quality_metrics$passed.check.resolution.x)
+    # denoise.y <- !(data_quality_metrics$passed.check.noise.y &&
+    #                  data_quality_metrics$passed.check.resolution.y)
+    denoise.x <- FALSE
+    denoise.y <- FALSE
+
 
     # Check for noise in data quality metrics
     if (denoise.x || denoise.y) {
@@ -644,8 +648,8 @@ sdar.lazy <- function(data, x, y,
         raise_offset_times = 0,
         denoise.x = denoise.x,
         denoise.y = denoise.y,
-        vmd.alpha = vmd.alpha,
-        min_K = min_K,
+        alpha = alpha,
+        K = K,
         verbose = FALSE,
         plot = FALSE,
         plotFun = TRUE
@@ -697,29 +701,6 @@ sdar.lazy <- function(data, x, y,
     plotFun = plotFun.all
   )
 
-  # # check for possible errors in determination of optimum size
-  # if (optimum_size$cutoff_probability.matched == FALSE) {
-  #   if (enforce_subsampling == TRUE) {
-  #     # Give an informational message and proceed using the found quasi-optimum
-  #     # size
-  #     if (verbose) {
-  #       message("  Failed to satisfy cutoff_probability. Lowering our expectations...\n")
-  #     }
-  #   } else {
-  #     if (verbose) {
-  #       message("  Failed to satisfy cutoff_probability. Standard SDAR-algorithm will be used...\n")
-  #     }
-  #
-  #     # execute the standard SDAR-algorithm
-  #     result <- sdar_execute(
-  #       prepared_data, otr.info, verbose.all, verbose,
-  #       plot.all, showPlots.report, savePlots
-  #     )
-  #     result$sdar <- result$sdar %>% dplyr::mutate("method" = "SDAR")
-  #     return(result)
-  #   }
-  # }
-
   # check for viability of sub-sampling-approach
   viability <- subsampling_viability(
     nrow(normalized_data$data.normalized),
@@ -769,8 +750,8 @@ sdar.lazy <- function(data, x, y,
     normalized_data.hint = normalized_data,
     denoise.x = denoise.x,
     denoise.y = denoise.y,
-    vmd.alpha = vmd.alpha,
-    min_K = min_K,
+    alpha = alpha,
+    K = K,
     n.fit = n.fit,
     n.candidates = n.candidates,
     optimum.range.size = optimum_size$optimum.range.size,

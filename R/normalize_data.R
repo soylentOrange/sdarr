@@ -99,8 +99,8 @@ normalize_data <- function(data,
                            raise_offset_times = 0,
                            denoise.x = FALSE,
                            denoise.y = FALSE,
-                           vmd.alpha = 2000,
-                           min_K = 2,
+                           alpha = 2000,
+                           K = 100,
                            verbose = FALSE,
                            plot = FALSE,
                            plotFun = FALSE) {
@@ -124,7 +124,10 @@ normalize_data <- function(data,
 
     # denoise x and y (in a limited range of the original data, saving time...)
     data_denoised <- data %>%
-      dplyr::filter(.data$otr.idx <= normalized_data$tangency.point$otr.idx.tangent * 1.1)
+      dplyr::filter(.data$otr.idx <= normalized_data$tangency.point$otr.idx.tangent * 2)
+    #FIXME
+    print(normalized_data$tangency.point$otr.idx.tangent)
+    print(normalized_data$tangency.point$otr.idx.tangent * 2)
 
 
     # de-noise x-data
@@ -132,8 +135,8 @@ normalize_data <- function(data,
       data_denoised$x.data <- denoise_vector(
         data_denoised$x.data %>%
           as.numeric(),
-        vmd.alpha = vmd.alpha,
-        min_K = min_K,
+        alpha = alpha,
+        K = K,
         verbose = verbose
       )
     }
@@ -143,8 +146,8 @@ normalize_data <- function(data,
       data_denoised$y.data <- denoise_vector(
         data_denoised$y.data %>%
           as.numeric(),
-        vmd.alpha = vmd.alpha,
-        min_K = min_K,
+        alpha = alpha,
+        K = K,
         verbose = verbose
       )
     }
