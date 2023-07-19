@@ -23,6 +23,14 @@ sub-sampling within the normalized range of the test-data.
 
 ## Installation
 
+You can install the latest release version of sdarr from
+[GitHub](https://github.com/) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("soylentOrange/sdarr@*release")
+```
+
 You can install the development version of sdarr from
 [GitHub](https://github.com/) with:
 
