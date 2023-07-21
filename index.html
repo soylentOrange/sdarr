@@ -40,7 +40,7 @@
     
     <a class="navbar-brand me-2" href="index.html">sdarr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -87,7 +87,7 @@
 </h1></div>
 <p>The sdarr-package provides a R implementation of the algorithm for Slope Determination by Analysis of Residuals (SDAR) as standardized in <a href="https://doi.org/10.1520/E3076-18" class="external-link">ASTM E3076-18</a>.<br>
 It allows for automated and objective linear-fitting of mechanical test-data. See a detailed description of the algorithm in the <a href="https://doi.org/10.6028/NIST.TN.2050" class="external-link">NIST Technical Note 2050 by E. Lucon</a> or in <a href="https://doi.org/10.1520/JTE103038" class="external-link">Graham &amp; Adler (2011)</a>.</p>
-<p>As the SDAR-algorithm, implemented in <code><a href="reference/sdar.html">sdar()</a></code>, heavily uses linear regressions, a faster version <code><a href="reference/sdar.lazy.html">sdar.lazy()</a></code> was implemented, which finds the optimum region for the (one) final linear regression by random sub-sampling within the normalized range of the test-data.</p>
+<p>As the SDAR-algorithm, implemented in <code><a href="reference/sdar.html">sdar()</a></code>, heavily uses linear regressions, a faster version <code><a href="reference/sdar.lazy.html">sdar.lazy()</a></code> was implemented, which finds the optimum region for the final linear regression by random sub-sampling within the normalized range of the test-data.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -188,7 +188,7 @@ It allows for automated and objective linear-fitting of mechanical test-data. Se
 <span><span class="co">#&gt; Determination of Slope in the Linear Region of a Test Record:</span></span>
 <span><span class="co">#&gt; Random sub-sampling modification of the SDAR-algorithm</span></span>
 <span><span class="co">#&gt;   Random sub-sampling information:</span></span>
-<span><span class="co">#&gt;       264 points of 337 points in the normalized range were used.</span></span>
+<span><span class="co">#&gt;       124 points of 337 points in the normalized range were used.</span></span>
 <span><span class="co">#&gt;       0 % of sub-sampled normalized ranges passed the data quality checks.</span></span>
 <span><span class="co">#&gt;       100 % of linear regressions passed the fit quality checks.</span></span>
 <span><span class="co">#&gt;       0 % of linear regressions passed all quality checks.</span></span>
@@ -213,20 +213,20 @@ It allows for automated and objective linear-fitting of mechanical test-data. Se
 <span><span class="co">#&gt;       --&gt; pass</span></span>
 <span><span class="co">#&gt;   Fit Quality Metric: Curvature</span></span>
 <span><span class="co">#&gt;     1st Quartile</span></span>
-<span><span class="co">#&gt;       Relative Residual Slope: 0.000812246632204075</span></span>
+<span><span class="co">#&gt;       Relative Residual Slope: -0.00051072237819609</span></span>
 <span><span class="co">#&gt;       Number of Points:        40</span></span>
 <span><span class="co">#&gt;       --&gt; pass</span></span>
 <span><span class="co">#&gt;     4th Quartile</span></span>
-<span><span class="co">#&gt;       Relative Residual Slope: -0.00184852454264567</span></span>
+<span><span class="co">#&gt;       Relative Residual Slope: -0.00180699820639418</span></span>
 <span><span class="co">#&gt;       Number of Points:        40</span></span>
 <span><span class="co">#&gt;       --&gt; pass</span></span>
 <span><span class="co">#&gt;   Fit Quality Metric: Fit Range</span></span>
-<span><span class="co">#&gt;       relative fit range:      0.806022700949734</span></span>
+<span><span class="co">#&gt;       relative fit range:      0.801012891344383</span></span>
 <span><span class="co">#&gt;       --&gt; pass</span></span>
 <span><span class="co">#&gt;   Un-normalized fit</span></span>
-<span><span class="co">#&gt;       Final Slope:             67994.0635412075 MPa</span></span>
-<span><span class="co">#&gt;       True Intercept:          10.001200695084 MPa</span></span>
-<span><span class="co">#&gt;       y-Range:                 25.8590698242188 MPa - 85.14404296875 MPa</span></span></code></pre></div>
+<span><span class="co">#&gt;       Final Slope:             67993.9223512337 MPa</span></span>
+<span><span class="co">#&gt;       True Intercept:          10.0013157106795 MPa</span></span>
+<span><span class="co">#&gt;       y-Range:                 25.48828125 MPa - 85.14404296875 MPa</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="plot-functions">Plot Functions<a class="anchor" aria-label="anchor" href="#plot-functions"></a>

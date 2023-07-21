@@ -28,7 +28,7 @@ further information."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/
     
     <a class="navbar-brand me-2" href="../index.html">sdarr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -92,7 +92,7 @@ further information.</p>
 <span>  plot <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  plotFun <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  n.fit <span class="op">=</span> <span class="fl">5</span>,</span>
-<span>  cutoff_probability <span class="op">=</span> <span class="fl">0.9</span>,</span>
+<span>  cutoff_probability <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -186,22 +186,24 @@ https://doi.org/10.1109/TSP.2013.2288675</p>
 <span class="r-in"><span>  ultimate.y <span class="op">=</span> <span class="fl">215</span>,</span></span>
 <span class="r-in"><span>  ultimate.x <span class="op">=</span> <span class="fl">0.091</span>,</span></span>
 <span class="r-in"><span>  x.name <span class="op">=</span> <span class="st">"strain"</span>,</span></span>
-<span class="r-in"><span>  y.name <span class="op">=</span> <span class="st">"stress"</span></span></span>
+<span class="r-in"><span>  y.name <span class="op">=</span> <span class="st">"stress"</span>,</span></span>
+<span class="r-in"><span>  toe.start.y <span class="op">=</span> <span class="fl">3</span>, toe.end.y <span class="op">=</span> <span class="fl">10</span>,</span></span>
+<span class="r-in"><span>  toe.start.slope <span class="op">=</span> <span class="fl">13600</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># use sdar.lazy() to analyze the synthetic test record</span></span></span>
-<span class="r-in"><span><span class="co"># (relaxed setting of 2 random sub-samples for the noise-free data)</span></span></span>
+<span class="r-in"><span><span class="co"># use sdar.lazy() to analyze the (noise-free) synthetic test record</span></span></span>
 <span class="r-in"><span><span class="co"># will print a report and give a plot of the final fit</span></span></span>
 <span class="r-in"><span><span class="co"># \donttest{</span></span></span>
-<span class="r-in"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu">sdar.lazy</span><span class="op">(</span><span class="va">Al_6060_T66</span>, <span class="va">strain</span>, <span class="va">stress</span>,</span></span>
-<span class="r-in"><span>  n.fit <span class="op">=</span> <span class="fl">2</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu">sdar.lazy</span><span class="op">(</span><span class="va">Al_6060_T66</span>, <span class="va">strain</span>, <span class="va">stress</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Determination of Slope in the Linear Region of a Test Record:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   lazy algorithm requires more fits than standard SDAR-algorithm:  </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>     43056 vs. 36585 fits.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   Standard SDAR-algorithm will be used...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> SDAR-algorithm</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Random sub-sampling modification of the SDAR-algorithm</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   Random sub-sampling information:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       115 points of 336 points in the normalized range were used.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       0 % of sub-sampled normalized ranges passed the data quality checks.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       100 % of linear regressions passed the fit quality checks.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       0 % of linear regressions passed all quality checks.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   Data Quality Metric: Digital Resolution</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>     x</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>       Relative x-Resolution:   0.333333333333333</span>
@@ -209,33 +211,33 @@ https://doi.org/10.1109/TSP.2013.2288675</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>       % in zeroth bin:         100</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>       --&gt; pass</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>     y</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       Relative y-Resolution:   0.333333333333333</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       % at this resolution:    0</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       % in zeroth bin:         100</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       Relative y-Resolution:   0.666666666666667</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       % at this resolution:    0.29940119760479</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       % in zeroth bin:         99.7005988023952</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>       --&gt; pass</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   Data Quality Metric: Noise</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>     x</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>       Relative x-Noise:        8.92753747230055e-15</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>       --&gt; pass</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>     y</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       Relative y-Noise:        0.0447086386959681</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       Relative y-Noise:        0.067704464397069</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>       --&gt; pass</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   Fit Quality Metric: Curvature</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>     1st Quartile</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       Relative Residual Slope: 0.000482965710562425</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       Number of Points:        50</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       Relative Residual Slope: 0.000952174929384526</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       Number of Points:        43</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>       --&gt; pass</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>     4th Quartile</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       Relative Residual Slope: -0.00559026483597765</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       Number of Points:        50</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       Relative Residual Slope: -0.00828279556415459</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       Number of Points:        43</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>       --&gt; pass</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   Fit Quality Metric: Fit Range</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       relative fit range:      0.660379365360752</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       relative fit range:      0.742763695829927</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>       --&gt; pass</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   Un-normalized fit</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       Final Slope:             67997.613940326 MPa</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       True Intercept:          0.000924493437320731 MPa</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       y-Range:                 0 MPa - 74.0243530273438 MPa</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       Final Slope:             67996.263282641 MPa</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       True Intercept:          0.00171211276791405 MPa</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>       y-Range:                 10.9573364257812 MPa - 75.1528930664062 MPa</span>
 <span class="r-plt img"><img src="sdar.lazy-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
