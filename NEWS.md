@@ -3,6 +3,10 @@
 * Added down-sampling variant of the SDAR-algorithm (under development).
 * Use de-noised data in sdarr.lazy() when data quality metrics fail on data-set.
 
+# sdarr 0.6.0
+
+* Major improvement of speed in sdar.lazy().
+
 # sdarr 0.5.0
 
 * Change of function-interfaces for simplicity.

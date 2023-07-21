@@ -51,7 +51,7 @@
 #
 #     # find optimum fits and determine summary of data & fit quality metrics
 #     optimum_fits <- find_linear_regressions.subsampled(
-#       normalized_data$data.normalized,
+#       normalized_data,
 #       1,
 #       fit.candidates,
 #       optimum.range.size

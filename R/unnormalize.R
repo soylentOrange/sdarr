@@ -1,3 +1,61 @@
+#' execute un-normalize fit results
+#'
+#' @noRd
+execute_unnormalize <- function(data.normalized,
+                                tangency.point,
+                                shift,
+                                fit) {
+  # shorthands for calculations
+  y.tangent <- tangency.point$y.tangent
+  x.tangent <- tangency.point$x.tangent
+  x.shift <- shift$x.shift
+  y.shift <- shift$y.shift
+  y.min <- data.normalized[data.normalized$otr.idx == fit$otr.idx.start,
+                           "y.normalized"]
+  y.max <- data.normalized[data.normalized$otr.idx == fit$otr.idx.end,
+                           "y.normalized"]
+  x.min <- data.normalized[data.normalized$otr.idx == fit$otr.idx.start,
+                           "x.normalized"]
+  x.max <- data.normalized[data.normalized$otr.idx == fit$otr.idx.end,
+                           "x.normalized"]
+  m <- fit$m
+  b <- fit$b
+
+  # Un-normalize fit
+  result <- list("finalSlope" = m * y.tangent / x.tangent,
+       "finalIntercept" = b * y.tangent,
+       "trueIntercept" = b * y.tangent - x.shift * m * y.tangent / x.tangent + y.shift,
+       "y.lowerBound" = y.min * y.tangent + y.shift,
+       "y.upperBound" = y.max * y.tangent + y.shift,
+       "x.lowerBound" = x.min * x.tangent + x.shift,
+       "x.upperBound" = x.max * x.tangent + x.shift)
+
+  # return result
+  return(result)
+}
+
+#' execute un-normalize fit results
+#'
+#' @noRd
+execute_unnormalize.data <- function(data.normalized,
+                                     tangency.point,
+                                     shift) {
+  # shorthands for calculations
+  y.tangent <- tangency.point$y.tangent
+  x.tangent <- tangency.point$x.tangent
+  x.shift <- shift$x.shift
+  y.shift <- shift$y.shift
+
+  # Un-normalize data
+  data.normalized %>%
+    dplyr::mutate(
+      x.unnormalized = .data$x.normalized * x.tangent + x.shift) %>%
+    dplyr::mutate(
+      y.unnormalized = .data$y.normalized * y.tangent + y.shift) %>%
+    dplyr::select(-c("x.normalized", "y.normalized")) %>%
+    return()
+}
+
 #' un-normalize fit results
 #'
 #' @note
@@ -14,18 +72,6 @@ unnormalize_results <- function(normalized_data,
                                 fitQualityMetrics,
                                 verbose = FALSE,
                                 warn = TRUE) {
-  # shorthands for calculations
-  y.tangent <- normalized_data[["tangency.point"]][["y.tangent"]]
-  x.tangent <- normalized_data[["tangency.point"]][["x.tangent"]]
-  x.shift <- normalized_data[["shift"]][["x.shift"]]
-  y.shift <- normalized_data[["shift"]][["y.shift"]]
-  y.min <- normalized_data[["data.normalized"]][fit[["otr.idx.start"]], "y.normalized"]
-  y.max <- normalized_data[["data.normalized"]][fit[["otr.idx.end"]], "y.normalized"]
-  x.min <- normalized_data[["data.normalized"]][fit[["otr.idx.start"]], "x.normalized"]
-  x.max <- normalized_data[["data.normalized"]][fit[["otr.idx.end"]], "x.normalized"]
-  m <- fit[["m"]]
-  b <- fit[["b"]]
-
   # get units if available
   if (!is.null(otr.info)) {
     x.unit <- otr.info$x$unit
@@ -46,13 +92,19 @@ unnormalize_results <- function(normalized_data,
   }
 
   # Un-normalize fit
-  finalSlope <- m * y.tangent / x.tangent
-  finalIntercept <- b * y.tangent
-  trueIntercept <- finalIntercept - x.shift * finalSlope + y.shift
-  y.lowerBound <- y.min * y.tangent + y.shift
-  y.upperBound <- y.max * y.tangent + y.shift
-  x.lowerBound <- x.min * x.tangent + x.shift
-  x.upperBound <- x.max * x.tangent + x.shift
+  fit.unnormalized <- execute_unnormalize(
+    data.normalized = normalized_data$data.normalized,
+    tangency.point = normalized_data$tangency.point,
+    shift = normalized_data$shift,
+    fit = fit)
+
+  finalSlope <- fit.unnormalized[["finalSlope"]]
+  finalIntercept <- fit.unnormalized[["finalIntercept"]]
+  trueIntercept <- fit.unnormalized[["trueIntercept"]]
+  y.lowerBound <- fit.unnormalized[["y.lowerBound"]]
+  y.upperBound <- fit.unnormalized[["y.upperBound"]]
+  x.lowerBound <- fit.unnormalized[["x.lowerBound"]]
+  x.upperBound <- fit.unnormalized[["x.upperBound"]]
 
   # assemble results
   all.checks.passed <- dataQualityMetrics[["passed.check"]] && fitQualityMetrics[["passed.check"]]

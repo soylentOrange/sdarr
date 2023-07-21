@@ -18,7 +18,7 @@ or in [Graham & Adler (2011)](https://doi.org/10.1520/JTE103038).
 
 As the SDAR-algorithm, implemented in `sdar()`, heavily uses linear
 regressions, a faster version `sdar.lazy()` was implemented, which finds
-the optimum region for the (one) final linear regression by random
+the optimum region for the final linear regression by random
 sub-sampling within the normalized range of the test-data.
 
 ## Installation
@@ -152,7 +152,7 @@ Al_6060_T66.result.lazy <- sdar.lazy(Al_6060_T66,
 #> Determination of Slope in the Linear Region of a Test Record:
 #> Random sub-sampling modification of the SDAR-algorithm
 #>   Random sub-sampling information:
-#>       264 points of 337 points in the normalized range were used.
+#>       124 points of 337 points in the normalized range were used.
 #>       0 % of sub-sampled normalized ranges passed the data quality checks.
 #>       100 % of linear regressions passed the fit quality checks.
 #>       0 % of linear regressions passed all quality checks.
@@ -177,20 +177,20 @@ Al_6060_T66.result.lazy <- sdar.lazy(Al_6060_T66,
 #>       --> pass
 #>   Fit Quality Metric: Curvature
 #>     1st Quartile
-#>       Relative Residual Slope: 0.000812246632204075
+#>       Relative Residual Slope: -0.00051072237819609
 #>       Number of Points:        40
 #>       --> pass
 #>     4th Quartile
-#>       Relative Residual Slope: -0.00184852454264567
+#>       Relative Residual Slope: -0.00180699820639418
 #>       Number of Points:        40
 #>       --> pass
 #>   Fit Quality Metric: Fit Range
-#>       relative fit range:      0.806022700949734
+#>       relative fit range:      0.801012891344383
 #>       --> pass
 #>   Un-normalized fit
-#>       Final Slope:             67994.0635412075 MPa
-#>       True Intercept:          10.001200695084 MPa
-#>       y-Range:                 25.8590698242188 MPa - 85.14404296875 MPa
+#>       Final Slope:             67993.9223512337 MPa
+#>       True Intercept:          10.0013157106795 MPa
+#>       y-Range:                 25.48828125 MPa - 85.14404296875 MPa
 ```
 
 ### Plot Functions

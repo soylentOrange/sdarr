@@ -184,7 +184,10 @@ The results of the analysis using `sdar()` are practically identical to the resu
 set.seed(50041180)
 sdar.lazy.results <- E3076_DS1_2018 %>%
   sdar.lazy(extensometer, force,
-    enforce_subsampling = TRUE,
+    # cutoff_probability = 0.5,
+    # n.fit = 5,
+    # n.candidates = 5,
+    # enforce_subsampling = TRUE,
     plot = FALSE, plotFun = TRUE
   )
 

@@ -12,7 +12,7 @@ sdar.lazy(
   plot = TRUE,
   plotFun = FALSE,
   n.fit = 5,
-  cutoff_probability = 0.9,
+  cutoff_probability = 0.5,
   ...
 )
 }
@@ -76,17 +76,16 @@ Al_6060_T66 <- synthesize_test_data(
   ultimate.y = 215,
   ultimate.x = 0.091,
   x.name = "strain",
-  y.name = "stress"
+  y.name = "stress",
+  toe.start.y = 3, toe.end.y = 10,
+  toe.start.slope = 13600
 )
 
 
-# use sdar.lazy() to analyze the synthetic test record
-# (relaxed setting of 2 random sub-samples for the noise-free data)
+# use sdar.lazy() to analyze the (noise-free) synthetic test record
 # will print a report and give a plot of the final fit
 \donttest{
-result <- sdar.lazy(Al_6060_T66, strain, stress,
-  n.fit = 2
-)
+result <- sdar.lazy(Al_6060_T66, strain, stress)
 }
 
 }

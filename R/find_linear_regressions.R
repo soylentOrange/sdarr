@@ -10,6 +10,8 @@
 #'
 #' @noRd
 execute_find_linear_regressions <- function(data.normalized,
+                                            tangency.point = NULL,
+                                            shift = NULL,
                                             fit.candidates,
                                             Nmin_factor = 0.2) {
   # should at least return 1 fit
@@ -107,17 +109,76 @@ execute_find_linear_regressions <- function(data.normalized,
       TRUE ~ FALSE
     ))
 
-  # Assemble results
-  data.frame(
-    "m" = optimum.fits$m %>% unlist(TRUE, FALSE),
-    "b" = optimum.fits$b %>% unlist(TRUE, FALSE),
-    "otr.idx.start" = optimum.fits$otr.idx.start %>% unlist(TRUE, FALSE),
-    "otr.idx.end" = optimum.fits$otr.idx.end %>% unlist(TRUE, FALSE),
-    "norm.residual" = optimum.fits$norm.residual %>% unlist(TRUE, FALSE),
-    "offset_raise_required" = optimum.fits$offset_raise_required %>%
-      unlist(TRUE, FALSE)
-  ) %>%
-    return()
+  # un-normalize data and find statistics for the fits
+  if(!is.null(tangency.point) && !is.null(shift)) {
+
+    data.unnormalized <- execute_unnormalize.data(
+      data.normalized, tangency.point, shift)
+
+    optimum.fits.detailed <- optimum.fits %>%
+      dplyr::mutate("rownum" = rownames(.)) %>%
+      tidyr::nest(.by = "rownum", .key = "fit") %>%
+      dplyr::mutate("fit.details" = furrr::future_map(
+        .data$fit, carrier::crate(function(value) {
+          # satisfy pipe addiction...
+          `%>%` <- magrittr::`%>%`
+
+          # grab data to re-analyze
+          fit.input <- data.unnormalized %>%
+            dplyr::filter(dplyr::between(
+              .data$otr.idx,
+              value$otr.idx.start, value$otr.idx.end
+            ))
+
+          # use plain lm() for statistics
+          fit.result.lm <- stats::lm(
+            y.unnormalized ~ x.unnormalized, data = fit.input)
+          fit.result.var <- diag(stats::vcov(fit.result.lm))
+
+          # un-normalize fit
+          fit.unnormalized <- execute_unnormalize(
+            data.normalized, tangency.point, shift, value
+          )
+
+          data.frame(
+            "n.samples" = nrow(fit.input),
+            "trueIntercept" = fit.result.lm$coefficients[[1]],
+            "finalSlope" = fit.result.lm$coefficients[[2]],
+            "y.lowerBound" = fit.unnormalized[["y.lowerBound"]],
+            "y.upperBound" = fit.unnormalized[["y.upperBound"]],
+            "x.lowerBound" = fit.unnormalized[["x.lowerBound"]],
+            "x.upperBound" = fit.unnormalized[["x.upperBound"]],
+            "trueIntercept.var" = fit.result.var[[1]],
+            "finalSlope.var" = fit.result.var[[2]]
+          )
+        }, data.unnormalized = data.unnormalized,
+        data.normalized = data.normalized,
+        tangency.point = tangency.point,
+        shift = shift,
+        execute_unnormalize = execute_unnormalize),
+        .options = furrr::furrr_options(globals = FALSE))) %>%
+      tidyr::unnest(cols = c("fit", "fit.details"))
+
+    # return detailed results
+    return(optimum.fits.detailed %>%
+             dplyr::select(c("m", "b",
+                             "otr.idx.start", "otr.idx.end",
+                             "norm.residual", "offset_raise_required",
+                             "n.samples", "trueIntercept",
+                             "finalSlope",
+                             "y.lowerBound",
+                             "y.upperBound",
+                             "x.lowerBound",
+                             "x.upperBound",
+                             "trueIntercept.var",
+                             "finalSlope.var")))
+  } else {
+    # return simple results
+    return(optimum.fits %>%
+             dplyr::select(c("m", "b",
+                             "otr.idx.start", "otr.idx.end",
+                             "norm.residual", "offset_raise_required")))
+  }
 }
 
 
@@ -130,12 +191,12 @@ execute_find_linear_regressions <- function(data.normalized,
 #' A wrapper for the actual implementation
 #'
 #' @noRd
-find_linear_regressions <- function(data.normalized,
+find_linear_regressions <- function(normalized_data,
                                     verbose = FALSE,
                                     Nmin_factor = 0.2) {
   # find optimum fit
   optimum.fit <- execute_find_linear_regressions(
-    data.normalized = data.normalized,
+    data.normalized = normalized_data$data.normalized,
     fit.candidates = 1,
     Nmin_factor = Nmin_factor
   )
@@ -148,7 +209,7 @@ find_linear_regressions <- function(data.normalized,
   # print messages
   if (verbose) {
     # find minimum size of window for linear regression
-    samples <- data.normalized %>% nrow()
+    samples <- normalized_data$data.normalized %>% nrow()
     Nmin <- max(floor(samples * Nmin_factor), 10)
 
     # find number of required fits
@@ -196,11 +257,11 @@ find_linear_regressions <- function(data.normalized,
 #' A wrapper for the actual implementation in a lazy variant
 #'
 #' @noRd
-find_linear_regressions.subsampled <- function(data.normalized,
-                                               fit.rep = 10,
-                                               fit.candidates = 10,
+find_linear_regressions.subsampled <- function(normalized_data,
+                                               fit.rep,
+                                               fit.candidates,
                                                range.size,
-                                               Nmin_factor = 0.2) {
+                                               Nmin_factor) {
   # do the fitting (several times) on sub-sampled data
   best.fits <- seq.int(fit.rep) %>%
     purrr::map(carrier::crate(
@@ -220,7 +281,7 @@ find_linear_regressions.subsampled <- function(data.normalized,
           }
       },
       size = range.size,
-      otr.idx = data.normalized$otr.idx %>%
+      otr.idx = normalized_data$data.normalized$otr.idx %>%
         unlist(TRUE, FALSE)
     )) %>%
     purrr::list_rbind() %>%
@@ -232,12 +293,12 @@ find_linear_regressions.subsampled <- function(data.normalized,
           `%>%` <- magrittr::`%>%`
 
           # select data by index
-          data.normalized %>%
+          normalized_data$data.normalized %>%
             dplyr::filter(.data$otr.idx %in% value$otr.idx) %>%
             check_data_quality.lazy() %>%
             as.data.frame()
         },
-        data.normalized = data.normalized,
+        normalized_data = normalized_data,
         check_data_quality.lazy = check_data_quality.lazy
       ),
       .options = furrr::furrr_options(globals = FALSE)
@@ -254,6 +315,8 @@ find_linear_regressions.subsampled <- function(data.normalized,
         # do linear regressions
         fits <- data.normalized.fits %>%
           execute_find_linear_regressions(
+            tangency.point = tangency.point,
+            shift = shift,
             fit.candidates = fit.candidates,
             Nmin_factor = Nmin_factor
           ) %>%
@@ -274,11 +337,13 @@ find_linear_regressions.subsampled <- function(data.normalized,
           )) %>%
           purrr::list_rbind()
       },
-      data.normalized = data.normalized,
+      data.normalized = normalized_data$data.normalized,
       execute_find_linear_regressions = execute_find_linear_regressions,
       fit.candidates = fit.candidates,
       check_fit_quality.lazy = check_fit_quality.lazy,
-      Nmin_factor = Nmin_factor
+      Nmin_factor = Nmin_factor,
+      tangency.point = normalized_data$tangency.point,
+      shift = normalized_data$shift
     ))) %>%
     dplyr::select(c("mc.idx", "data.quality.check", "fit")) %>%
     tidyr::unnest("fit") %>%

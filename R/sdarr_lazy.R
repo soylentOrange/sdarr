@@ -54,7 +54,7 @@ sdar_execute.lazy <- function(prepared_data,
 
     # find optimum fits and determine summary of data & fit quality metrics
     optimum_fits <- find_linear_regressions.subsampled(
-      normalized_data$data.normalized,
+      normalized_data,
       n.fit,
       n.candidates,
       optimum.range.size,
@@ -181,26 +181,9 @@ sdar_execute.lazy <- function(prepared_data,
     )
   }
 
-  # shorthands for calculations
-  y.tangent <- normalized_data[["tangency.point"]][["y.tangent"]]
-  x.tangent <- normalized_data[["tangency.point"]][["x.tangent"]]
-  x.shift <- normalized_data[["shift"]][["x.shift"]]
-  y.shift <- normalized_data[["shift"]][["y.shift"]]
-
-  # Un-normalize fits
-  optimum_fits <- optimum_fits %>%
-    dplyr::mutate(y.min = normalized_data$data.normalized[.data$otr.idx.start, "y.normalized"]) %>%
-    dplyr::mutate(y.max = normalized_data$data.normalized[.data$otr.idx.end, "y.normalized"]) %>%
-    dplyr::mutate(x.min = normalized_data$data.normalized[.data$otr.idx.start, "x.normalized"]) %>%
-    dplyr::mutate(x.max = normalized_data$data.normalized[.data$otr.idx.end, "x.normalized"]) %>%
-    dplyr::mutate(y.lowerBound = .data$y.min * y.tangent + y.shift) %>%
-    dplyr::mutate(y.upperBound = .data$y.max * y.tangent + y.shift) %>%
-    dplyr::mutate(x.lowerBound = .data$x.min * x.tangent + x.shift) %>%
-    dplyr::mutate(x.upperBound = .data$x.max * x.tangent + x.shift)
-
   # use linear regression to find weighed means of results
   # (otr.idx.start and .end, y and x bounds)
-  # will be used for reporting the results and one final fit
+  # will be used for reporting the results
   weighed.results <- optimum_fits %>%
     dplyr::select(c(
       "weight", "otr.idx.start", "otr.idx.end",
@@ -253,21 +236,48 @@ sdar_execute.lazy <- function(prepared_data,
   # linear regression on (complete) normalized data
   optimum.otr.idx.start <- round(weighed.results[[1, "otr.idx.start"]], 0)
   optimum.otr.idx.end <- round(weighed.results[[1, "otr.idx.end"]], 0)
-  optimum.fit <- stats::lm(y.normalized ~ x.normalized,
-    data = normalized_data$data.normalized %>%
-      dplyr::filter(dplyr::between(
-        .data$otr.idx,
-        optimum.otr.idx.start,
-        optimum.otr.idx.end
+  fit.input <- normalized_data$data.normalized %>%
+    dplyr::filter(dplyr::between(
+      .data$otr.idx,
+      optimum.otr.idx.start,
+      optimum.otr.idx.end
       ))
+
+  # use basic .lm.fit for normalized residual
+  fit.result <- .lm.fit(
+    cbind(1, fit.input$x.normalized),
+    fit.input$y.normalized
   )
 
+  # calculate normalized residual
+  mean_y <- mean(fit.input$y.normalized)
+  optimum_fit.norm_residual <- sum((fit.result$residuals)^2) /
+    sum((fit.input$y.normalized - mean_y)^2)
+
   optimum_fit <- data.frame(
-    "m" = optimum.fit$coefficients[[2]],
-    "b" = optimum.fit$coefficients[[1]],
+    "m" = fit.result$coefficients[2],
+    "b" = fit.result$coefficients[1],
     "otr.idx.start" = optimum.otr.idx.start,
     "otr.idx.end" = optimum.otr.idx.end
   )
+
+  # use plain lm() for statistics
+  optimum_fit.lm <- stats::lm(
+    y.data ~ x.data,
+    data = prepared_data[optimum_fit$otr.idx.start:optimum_fit$otr.idx.end,])
+  optimum_fit.var <- diag(stats::vcov(optimum_fit.lm))
+  optimum_fit.detailed <- optimum_fit %>%
+    cbind(data.frame(
+      "n.samples" = nrow(
+        prepared_data[optimum_fit$otr.idx.start:optimum_fit$otr.idx.end,]),
+      "trueIntercept" = optimum_fit.lm$coefficients[[1]],
+      "finalSlope" = optimum_fit.lm$coefficients[[2]],
+      "trueIntercept.var" = optimum_fit.var[[1]],
+      "finalSlope.var" = optimum_fit.var[[2]]
+    ))
+
+  # remove remains from calculation
+  rm(mean_y, fit.result, fit.input)
 
   # check fit quality
   fit_quality_metrics <- check_fit_quality(
@@ -277,6 +287,143 @@ sdar_execute.lazy <- function(prepared_data,
     plot = plot.all,
     plotFun = plotFun.all
   )
+
+  # calculate weight for optimum fit and merge fit on complete data and fits
+  # from random sub-sampling
+  optimum_fits.mixed <- optimum_fit.detailed %>%
+    cbind(data.frame("norm.residual" = optimum_fit.norm_residual)) %>%
+    dplyr::mutate("norm.residual" = dplyr::case_when(
+      .data$norm.residual < 10 * .Machine$double.eps ~ 10 * .Machine$double.eps,
+      TRUE ~ .data$norm.residual
+    )) %>%
+    # penalize by data quality metrics
+    dplyr::mutate("data.quality.penalty" = 1.0) %>%
+    dplyr::mutate("data.quality.penalty" = dplyr::case_when(
+      data_quality_metrics$digitalResolution$x$passed.check == FALSE ~ .data$data.quality.penalty * quality_penalty,
+      TRUE ~ .data$data.quality.penalty
+    )) %>%
+    dplyr::mutate(data.quality.penalty = dplyr::case_when(
+      data_quality_metrics$digitalResolution$y$passed.check == FALSE ~ .data$data.quality.penalty * quality_penalty,
+      TRUE ~ .data$data.quality.penalty
+    )) %>%
+    dplyr::mutate(data.quality.penalty = dplyr::case_when(
+      data_quality_metrics$Noise$x$passed.check == FALSE ~ .data$data.quality.penalty * quality_penalty,
+      TRUE ~ .data$data.quality.penalty
+    )) %>%
+    dplyr::mutate(data.quality.penalty = dplyr::case_when(
+      data_quality_metrics$Noise$y$passed.check == FALSE ~ .data$data.quality.penalty * quality_penalty,
+      TRUE ~ .data$data.quality.penalty
+    )) %>%
+    # penalize by fit quality metrics
+    dplyr::mutate("fit.quality.penalty" = 1.0 ) %>%
+    dplyr::mutate("fit.quality.penalty" = dplyr::case_when(
+      fit_quality_metrics$Curvature$first_quartile$passed.check == FALSE ~ .data$fit.quality.penalty * quality_penalty,
+      TRUE ~ .data$fit.quality.penalty
+    )) %>%
+    dplyr::mutate("fit.quality.penalty" = dplyr::case_when(
+      fit_quality_metrics$Curvature$fourth_quartile$passed.check == FALSE ~ .data$fit.quality.penalty * quality_penalty,
+      TRUE ~ .data$fit.quality.penalty
+    )) %>%
+    dplyr::mutate("fit.quality.penalty" = dplyr::case_when(
+      fit_quality_metrics$Fit_range$passed.check == FALSE ~ .data$fit.quality.penalty * quality_penalty,
+      TRUE ~ .data$fit.quality.penalty
+    )) %>%
+    dplyr::mutate("quality.penalty" = .data$fit.quality.penalty * .data$data.quality.penalty) %>%
+    dplyr::mutate("weight" = .data$quality.penalty / .data$norm.residual) %>%
+    dplyr::select(c(
+      "finalSlope",
+      "trueIntercept",
+      "weight",
+      "n.samples",
+      "trueIntercept.var",
+      "finalSlope.var"
+    )) %>%
+    rbind(optimum_fits %>%
+            dplyr::select(c(
+              "finalSlope",
+              "trueIntercept",
+              "weight",
+              "n.samples",
+              "trueIntercept.var",
+              "finalSlope.var"
+            )))
+
+  # calculate sd from std.err
+  optimum_fits.mixed <- optimum_fits.mixed %>%
+    dplyr::mutate(
+      "trueIntercept.sd" = sqrt(.data$n.samples * .data$trueIntercept.var)) %>%
+    dplyr::mutate(
+      "finalSlope.sd" = sqrt(.data$n.samples * .data$finalSlope.var))
+
+  # calculate pooled sd for trueIntercept
+  trueIntercept.sd.pooled <- optimum_fits.mixed %>%
+    dplyr::select(c("n.samples", "trueIntercept.sd")) %>%
+    dplyr::mutate("nvar" = (.data$n.samples - 1) * .data$trueIntercept.sd) %>% {
+      data <- .
+      k <- nrow(data)
+      sqrt(sum(data$nvar) / (sum(data$n.samples) - k))
+    }
+
+  # calculate pooled sd for finalSlope
+  finalSlope.sd.pooled <- optimum_fits.mixed %>%
+    dplyr::select(c("n.samples", "finalSlope.sd")) %>%
+    dplyr::mutate("nvar" = (.data$n.samples - 1) * .data$finalSlope.sd) %>% {
+      data <- .
+      k <- nrow(data)
+      sqrt(sum(data$nvar) / (sum(data$n.samples) - k))
+    }
+
+  # use linear regression to find weighed means of (mixed) results
+  # (finalSlope and trueIntercept)
+  # will be used for reporting the results
+  weighed.fit.results <- optimum_fits.mixed %>%
+    dplyr::select(c("weight", "finalSlope", "trueIntercept", "n.samples")) %>%
+    as.list() %>%
+    {
+      res <- .
+      weight <- .[["weight"]]
+      res$weight <- NULL
+      res %>%
+        purrr::map(carrier::crate(function(value) {
+          list(
+            "value" = value,
+            "weight" = weight
+          )
+        }, weight = weight)) %>%
+        purrr::map(carrier::crate(function(value) {
+          fit <- stats::lm(value ~ 1,
+                           data = data.frame(
+                             "value" = value$value,
+                             "weights" = value$weight
+                           ),
+                           weights = weights
+          )
+          # conf <- stats::confint(fit)
+          list(
+            "value" = fit$coefficients[[1]]#,
+            #"conf.low" = conf[[1]],
+            #"conf.high" = conf[[2]]
+          )
+        }))
+    } %>%
+    as.data.frame() %>%
+    {
+      value <- .
+      new.names <- c("finalSlope", "trueIntercept", "n.samples")
+      value %>% magrittr::set_names(new.names)
+    }
+
+  # get CI from pooled sd
+  t.val <- stats::qt(p = 0.025,
+                     df = round(weighed.fit.results$n.samples, 0 ) - 1)
+  trueIntercept.conf.low <- weighed.fit.results$trueIntercept +
+    t.val * trueIntercept.sd.pooled
+  trueIntercept.conf.high <- weighed.fit.results$trueIntercept -
+    t.val * trueIntercept.sd.pooled
+  finalSlope.conf.low <- weighed.fit.results$finalSlope +
+    t.val * trueIntercept.sd.pooled
+  finalSlope.conf.high <- weighed.fit.results$finalSlope -
+    t.val * trueIntercept.sd.pooled
 
   # un-normalize data and summarize
   assembled_results <- assemble_report(
@@ -291,13 +438,7 @@ sdar_execute.lazy <- function(prepared_data,
     plotFun = plotFun
   )
 
-  # re-do the final fit to find confidence intervals for slope and intercepts
-  final.fit.confint <- prepared_data[optimum_fit$otr.idx.start:optimum_fit$otr.idx.end, ] %>%
-    {
-      prepared_data.fit.lm <- stats::lm(y.data ~ x.data, data = .)
-    } %>%
-    stats::confint()
-
+  # get labels for results
   results.labels <- list(
     "finalSlope" = assembled_results$Slope_Determination_Results$finalSlope.unit,
     "finalSlope.conf.low" = assembled_results$Slope_Determination_Results$finalSlope.unit,
@@ -325,13 +466,14 @@ sdar_execute.lazy <- function(prepared_data,
     "passed.check.fit" = "(fit quality checks)"
   )
 
+  # assemble results
   sdar.results <- data.frame(
-    "finalSlope" = assembled_results$Slope_Determination_Results$finalSlope,
-    "finalSlope.conf.low" = final.fit.confint["x.data", 1],
-    "finalSlope.conf.high" = final.fit.confint["x.data", 2],
-    "trueIntercept" = assembled_results$Slope_Determination_Results$trueIntercept,
-    "trueIntercept.conf.low" = final.fit.confint["(Intercept)", 1],
-    "trueIntercept.conf.high" = final.fit.confint["(Intercept)", 2],
+    "finalSlope" = weighed.fit.results$finalSlope,
+    "finalSlope.conf.low" = finalSlope.conf.low,
+    "finalSlope.conf.high" = finalSlope.conf.high,
+    "trueIntercept" = weighed.fit.results$trueIntercept,
+    "trueIntercept.conf.low" = trueIntercept.conf.low,
+    "trueIntercept.conf.high" = trueIntercept.conf.high,
     "y.lowerBound" = assembled_results$Slope_Determination_Results$y.lowerBound,
     "y.lowerBound.conf.low" = weighed.results[[1, "y.lowerBound.conf.low"]],
     "y.lowerBound.conf.high" = weighed.results[[1, "y.lowerBound.conf.high"]],
@@ -468,17 +610,16 @@ sdar_execute.lazy <- function(prepared_data,
 #'   ultimate.y = 215,
 #'   ultimate.x = 0.091,
 #'   x.name = "strain",
-#'   y.name = "stress"
+#'   y.name = "stress",
+#'   toe.start.y = 3, toe.end.y = 10,
+#'   toe.start.slope = 13600
 #' )
 #'
 #'
-#' # use sdar.lazy() to analyze the synthetic test record
-#' # (relaxed setting of 2 random sub-samples for the noise-free data)
+#' # use sdar.lazy() to analyze the (noise-free) synthetic test record
 #' # will print a report and give a plot of the final fit
 #' \donttest{
-#' result <- sdar.lazy(Al_6060_T66, strain, stress,
-#'   n.fit = 2
-#' )
+#' result <- sdar.lazy(Al_6060_T66, strain, stress)
 #' }
 #'
 #' @export
@@ -487,7 +628,7 @@ sdar.lazy <- function(data, x, y,
                       plot = TRUE,
                       plotFun = FALSE,
                       n.fit = 5,
-                      cutoff_probability = 0.9,
+                      cutoff_probability = 0.5,
                       ...) {
   # to be furrr-safe, enquote the tidy arguments here
   x <- rlang::enquo(x)
@@ -549,7 +690,7 @@ sdar.lazy <- function(data, x, y,
     },
     silent = TRUE
   )
-  if (!is.numeric(n.candidates)) n.candidates <- 20
+  if (!is.numeric(n.candidates)) n.candidates <- 5
   enforce_subsampling <- try(
     {
       additional_parameters$enforce_subsampling

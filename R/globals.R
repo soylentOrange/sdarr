@@ -15,5 +15,8 @@ utils::globalVariables(c(
   "x.end.first_quartile",
   "x.start.fourth_quartile",
   "size",
-  "weights"
+  "weights",
+  "data.normalized",
+  "shift",
+  "tangency.point"
 ))

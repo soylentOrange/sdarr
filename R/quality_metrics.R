@@ -307,8 +307,6 @@ check_data_quality <- function(data.normalized,
     }
 }
 
-
-
 # simplified version of check_data_quality, will return only the (boolean)
 # result of the checks
 check_data_quality.lazy <- function(data.normalized) {

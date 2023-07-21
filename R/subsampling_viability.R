@@ -37,6 +37,15 @@ optimum_size_for_subsampling <- function(data.normalized,
                                          verbose = FALSE,
                                          plot = FALSE,
                                          plotFun = FALSE) {
+
+  # if data is rather short, just return the size of data
+  if(nrow(data.normalized) <= 50) {
+    return(list(
+      "optimum.range.size" = nrow(data.normalized),
+      "cutoff_probability.adjusted" = cutoff_probability
+    ))
+  }
+
   # find optimum fit-range for sub-sampling
   normalized.ranges <- seq.int(
     50,

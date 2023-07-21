@@ -43,7 +43,7 @@ sdar_execute <- function(prepared_data,
 
     # find best fit
     optimum_fit <- find_linear_regressions(
-      data.normalized = normalized_data$data.normalized,
+      normalized_data = normalized_data,
       verbose = verbose.all,
       Nmin_factor = Nmin_factor
     )
@@ -220,6 +220,8 @@ sdar_execute <- function(prepared_data,
 #'   ultimate.x = 0.091,
 #'   x.name = "strain",
 #'   y.name = "stress",
+#'   toe.start.y = 3, toe.end.y = 10,
+#'   toe.start.slope = 13600,
 #'   enob.x = 12
 #' )
 #'

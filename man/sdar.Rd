@@ -55,6 +55,8 @@ Al_6060_T66 <- synthesize_test_data(
   ultimate.x = 0.091,
   x.name = "strain",
   y.name = "stress",
+  toe.start.y = 3, toe.end.y = 10,
+  toe.start.slope = 13600,
   enob.x = 12
 )
 
