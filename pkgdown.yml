@@ -3,7 +3,8 @@ pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
   sdarr_validation: sdarr_validation.html
-last_built: 2023-07-23T04:42Z
+  speed_improvment: speed_improvment.html
+last_built: 2023-07-23T07:33Z
 urls:
   reference: https://soylentorange.github.io/sdarr/reference
   article: https://soylentorange.github.io/sdarr/articles
