@@ -153,7 +153,7 @@ sdarr_benchmark_result %>%
   
 ## Summary and Conclusion
 
-As expected, the standard SDAR-algorithm seems to scale quadratic with the number of point in the normalized data range. It also benefits the most from using several cores (except for some minor overhead of ~100ms when using 8 cores at very few points in the normalized data range).  
+As expected, the standard SDAR-algorithm seems to scale quadratic with the number of points in the normalized data range. It also benefits the most from using several cores (except for some minor overhead of ~100ms when using 8 cores at very few points in the normalized data range).  
 
 The random sub-sampling modification, which is available via `sdar.lazy()`, drastically reduces processing time compared to the standard SDAR-algorithm for higher resolution test data. For lower resolution test data, the algorithm will fall back to the standard SDAR-algorithm but still, there is some additional overhead to be considered.  
 Considering the results, the speed improvement of the random sub-sampling modification is apparent at 250 - 400 points in the normalized data range (depending on the number of cores used). 
