@@ -1,5 +1,5 @@
 ---
-title: "Speed-Improvement"
+title: "Speed Benchmarking the SDAR-algorithm"
 subtitle: Evaluation of Speed Benchmark Results
 output:
  html_document:
@@ -63,10 +63,15 @@ Side note: make sure to have benchmarking data available, i.e. run the benchmark
 speed_improvement_data <- rmarkdown::render(
   input = paste0(system.file(package = "sdarr"), 
                  "/rmd/speed_improvement_data.Rmd"),
-  params = list(use_cores = c(1, 4, 8), enob = c(11.3, 15.6),
-                length.out = 24,
-                sdarr_benchmark_result_filepath = file.path(
-                  getwd(), "sdarr_benchmark_result.rda")),
+  params = list(
+    # set Number of cores for benchmarking
+    use_cores = c(1, 4, 8), 
+    # synthetic data - set min and max effective number of bits
+    enob = c(11.3, 15.6),
+    # synthetic data - set Number of synthetic test records
+    length.out = 24,
+    sdarr_benchmark_result_filepath = file.path(
+      getwd(), "sdarr_benchmark_result.rda")),
   knit_root_dir = getwd(),
   output_dir = getwd()
   )
@@ -91,9 +96,9 @@ The results of the benchmarking contain speed estimations for normalized data ra
 
 ## Results
 
-The execution time of the different algorithms over the number of points in the normalized range is given in the next figure.
+The execution time of the different algorithms over the number of points in the normalized range is given in the plot.
 
-```{r plot benchmarking result, warning=FALSE, message=FALSE, results='asis'}
+```{r plot benchmarking result, warning=FALSE, message=FALSE, results='asis', fig.height=5.75}
 
 sdarr_benchmark_result %>% 
   dplyr::mutate("nWorkers" = as.character(.data$nWorkers)) %>% {
@@ -104,6 +109,7 @@ sdarr_benchmark_result %>%
   geom_line() +
   theme_bw() +
   labs(
+    title = "Processing Time over Number of Points in Normalized Range",
     x = "Points in normalized range",
     y = "Time (in seconds)"
   )
@@ -130,3 +136,7 @@ sdarr_benchmark_result %>%
   # show the plotly...
   config(displaylogo = FALSE, showSendToCloud = FALSE)
 ```
+
+## Summary and Conclusion
+
+Find this section in the article [Speed Benchmarking the SDAR-algorithm](https://soylentorange.github.io/sdarr/articles/speed_improvment.html) the [package-website](https://soylentorange.github.io/sdarr/index.html)...

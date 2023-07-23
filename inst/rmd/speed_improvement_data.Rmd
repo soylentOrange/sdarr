@@ -1,5 +1,5 @@
 ---
-title: "Speed-Improvement"
+title: "Speed Benchmarking the SDAR-algorithm"
 subtitle: Speed Benchmark of sdar and sdar.lazy
 output:
  html_document:

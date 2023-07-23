@@ -10,7 +10,6 @@ knitr::opts_chunk$set(
 )
 ```
 
-`
 ```{r setup, message = FALSE, warning = FALSE, include = FALSE}
 # attach required packages
 library(sdarr)

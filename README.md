@@ -2,6 +2,7 @@
 <!-- badges: start -->
 
 [![R-CMD-check](https://github.com/soylentOrange/sdarr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/soylentOrange/sdarr/actions/workflows/R-CMD-check.yaml)
+[![CRAN](http://www.r-pkg.org/badges/version/sdarr)](https://cran.r-project.org/package=sdarr)
 <!-- badges: end -->
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
