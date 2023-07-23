@@ -547,12 +547,12 @@ sdar_execute.lazy <- function(prepared_data,
 #'   numerous linear regressions (`.lm.fit()` from the stats-package), it can be
 #'   painfully slow for test data with high resolution. The lazy variant of the
 #'   algorithm will use several random sub-samples of the data to find the best
-#'   estimate for the fit-range within the data. Additionally, the test data
-#'   can be de-noised using Variational Mode Decomposition in case initial data
-#'   quality checks have failed (highly experimental). See the article on [validation](
-#'   https://soylentorange.github.io/sdarr/articles/sdarr_validation.html)
-#'   on the [package-website](https://soylentorange.github.io/sdarr/) for
-#'   further information.
+#'   estimate for the fit-range within the data and thus can speed up
+#'   calculations. See the article [Speed Benchmarking the
+#'   SDAR-algorithm](https://soylentorange.github.io/sdarr/articles/speed_improvment.html)
+#'   for further information. Additionally, the test data can be de-noised using
+#'   Variational Mode Decomposition in case initial data quality checks have
+#'   failed (highly experimental).
 #'
 #' @note The function can use parallel processing via the
 #'   [furrr-package](https://furrr.futureverse.org/). To use this feature, set
@@ -586,10 +586,10 @@ sdar_execute.lazy <- function(prepared_data,
 #'   sub-sampled data range via logistic regression.
 #'
 #' @param ... <[`dynamic-dots`][rlang::dyn-dots]> Pass parameters to downstream
-#'  functions: set `verbose.all`, `plot.all` and `plotFun.all` to `TRUE` to get
-#'  additional diagnostic information during processing data. Set
-#'  `enforce_subsampling` to `TRUE` to run the random sub-sampling algorithm
-#'  even though it might be slower than the standard SDAR-algorithm.
+#'   functions: set `verbose.all`, `plot.all` and `plotFun.all` to `TRUE` to get
+#'   additional diagnostic information during processing data. Set
+#'   `enforce_subsampling` to `TRUE` to run the random sub-sampling algorithm
+#'   even though it might be slower than the standard SDAR-algorithm.
 #'
 #' @seealso [sdar()] for the standard SDAR-algorithm.
 #'

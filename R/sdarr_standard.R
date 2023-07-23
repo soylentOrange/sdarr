@@ -165,10 +165,9 @@ sdar_execute <- function(prepared_data,
 #' @description Run the SDAR algorithm as standardized in ASTM E3076-18. Will
 #'   use numerous linear regressions (`.lm.fit()` from the stats-package) and
 #'   can be painfully slow for test data with high resolution. See the article
-#'   on [validation](
-#'   https://soylentorange.github.io/sdarr/articles/sdarr_validation.html) on
-#'   the [package-website](https://soylentorange.github.io/sdarr/) for further
-#'   information.
+#'   [Speed Benchmarking the
+#'   SDAR-algorithm](https://soylentorange.github.io/sdarr/articles/speed_improvment.html)
+#'   for further information.
 #'
 #' @note The function can use parallel processing via the
 #'   [furrr-package](https://furrr.futureverse.org/). To use this feature, set
@@ -199,8 +198,8 @@ sdar_execute <- function(prepared_data,
 #'   the results for later use.
 #'
 #' @param ... <[`dynamic-dots`][rlang::dyn-dots]> Pass parameters to downstream
-#'  functions: set `verbose.all`, `plot.all` and `plotFun.all` to `TRUE` to get
-#'  additional diagnostic information during processing data.
+#'   functions: set `verbose.all`, `plot.all` and `plotFun.all` to `TRUE` to get
+#'   additional diagnostic information during processing data.
 #'
 #' @seealso [sdar.lazy()] for the random sub-sampling modification of the
 #'   SDAR-algorithm.

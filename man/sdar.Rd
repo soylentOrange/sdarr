@@ -31,9 +31,8 @@ plot-function(s) (if \code{plotFun = TRUE}).
 Run the SDAR algorithm as standardized in ASTM E3076-18. Will
 use numerous linear regressions (\code{.lm.fit()} from the stats-package) and
 can be painfully slow for test data with high resolution. See the article
-on \href{https://soylentorange.github.io/sdarr/articles/sdarr_validation.html}{validation} on
-the \href{https://soylentorange.github.io/sdarr/}{package-website} for further
-information.
+\href{https://soylentorange.github.io/sdarr/articles/speed_improvment.html}{Speed Benchmarking the SDAR-algorithm}
+for further information.
 }
 \note{
 The function can use parallel processing via the

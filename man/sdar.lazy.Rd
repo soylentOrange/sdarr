@@ -51,11 +51,11 @@ originally standardized in ASTM E3076-18. As the original version uses
 numerous linear regressions (\code{.lm.fit()} from the stats-package), it can be
 painfully slow for test data with high resolution. The lazy variant of the
 algorithm will use several random sub-samples of the data to find the best
-estimate for the fit-range within the data. Additionally, the test data
-can be de-noised using Variational Mode Decomposition in case initial data
-quality checks have failed (highly experimental). See the article on \href{https://soylentorange.github.io/sdarr/articles/sdarr_validation.html}{validation}
-on the \href{https://soylentorange.github.io/sdarr/}{package-website} for
-further information.
+estimate for the fit-range within the data and thus can speed up
+calculations. See the article \href{https://soylentorange.github.io/sdarr/articles/speed_improvment.html}{Speed Benchmarking the SDAR-algorithm}
+for further information. Additionally, the test data can be de-noised using
+Variational Mode Decomposition in case initial data quality checks have
+failed (highly experimental).
 }
 \note{
 The function can use parallel processing via the
