@@ -1,0 +1,158 @@
+---
+title: "Speed-Improvement"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  out.width = "100%"
+)
+```
+
+`
+```{r setup, message = FALSE, warning = FALSE, include = FALSE}
+# attach required packages
+library(magrittr)
+library(ggplot2)
+library(plotly)
+```
+
+The SDAR-algorithm as standardized in [ASTM E3076-18](https://doi.org/10.1520/E3076-18) uses numerous linear regressions (.lm.fit() from the stats-package). As the number of linear regressions during the SDAR-algorithm scales with the square of the number of data points in the normalized data range, it can become painfully slow for test data with high resolution. An estimation is given in in [NIST Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050), which is using an excel-spreadsheet for the calculations. 
+
+## Data Set for Speed Estimation
+
+The Test Data Set for Speed Estimation was generated with different resolution for x (strain) from 11.3 to 15.7 effective bits. A total of 24 synthetic test records resembling tensile mechanical testing of aluminium (Al 6060 T66, values from [MMPDS Handbook](https://ntrl.ntis.gov/NTRL/dashboard/searchResults/titleDetail/PB2003106632.xhtml), with a toe region added and some minor noise in the synthetic stress data) was created using [sdarr::synthesize_test_data()](https://soylentorange.github.io/sdarr/reference/synthesize_test_data.html).
+
+Test data was evaluated with the [sequential plan](https://future.futureverse.org/reference/sequential.html) using one core, and the [multisession plan](https://future.futureverse.org/reference/multisession.html) using four and eight cores. The time for execution of [sdarr::sdar()](https://soylentorange.github.io/sdarr/reference/sdar.html), [sdarr:sdar.lazy()](https://soylentorange.github.io/sdarr/reference/sdar.lazy.html) and sdarr:sdar.lazy() with enforced sub-sampling was measured using pracma::tic,toc.  
+The evaluation was run on a 2021 MacBook Pro (with M1 Max processor and 64 GB Ram under macOS 13.4.1). 
+
+### Side Note on Bechmarking
+As benchmarking takes a significant amount of time, the results were pre-calculated (using the rmd-file speed_improvement_data.Rmd, which is available within the installed sdarr-package). Use `rmarkdown::render()` to have the benchmarking conducted on you computer and knitted to an html-document into the current working directory, i.e. run the following block:
+```
+# knit the benchmarking-rmd to html-file
+# (and save the result data in the current working directory)
+# caution: might take some time...
+speed_improvement_data <- rmarkdown::render(
+  input = paste0(system.file(package = "sdarr"), 
+                 "/rmd/speed_improvement_data.Rmd"),
+  params = list(use_cores = c(1, 4, 8), enob = c(11.3, 15.6),
+                length.out = 24,
+                sdarr_benchmark_result_filepath = file.path(
+                  getwd(), "sdarr_benchmark_result.rda")),
+  knit_root_dir = getwd(),
+  output_dir = getwd()
+  )
+  
+# knit the evaluation-rmd to html-file
+speed_improvement_evaluation <- rmarkdown::render(
+  input = paste0(system.file(package = "sdarr"), 
+                 "/rmd/speed_improvement_evaluation.Rmd"),
+  params = list(sdarr_benchmark_result_filepath = file.path(
+    getwd(), "sdarr_benchmark_result.rda")),
+  knit_root_dir = getwd(),
+  output_dir = getwd()
+  )
+  
+# view the knitted file
+utils::browseURL(speed_improvement_evaluation)
+```
+
+## Benchmarking Results Data Set
+
+```{r data, message = FALSE, warning = FALSE, include = FALSE}
+# copy-paste from the benchmarking result...
+sdarr_benchmark_result <- data.frame(
+  "time" = c(
+    2.977, 5.377, 8.203, 9.011, 11.031, 11.969, 12.844, 11.106, 15.535, 11.238,
+    10.096, 7.945, 3.324, 2.942, 3.027, 3.288, 3.092, 2.932, 2.998, 2.992, 
+    2.990, 3.020, 3.072, 3.173, 0.971, 2.036, 4.092, 5.922, 9.126, 11.645, 
+    14.581, 13.035, 12.521, 15.839, 9.171, 10.672, 7.129, 7.836, 2.798, 3.004, 
+    3.010, 3.197, 3.127, 3.013, 3.047, 2.953, 2.912, 3.009, 0.552, 1.606, 3.434, 
+    5.494, 8.432, 12.051, 15.971, 20.565, 26.144, 32.411, 39.538, 46.646, 
+    56.145, 66.497, 76.020, 86.383, 100.891, 113.278, 126.450, 141.316, 153.707, 
+    174.633, 192.665, 214.693, 1.764, 2.402, 3.119, 3.411, 4.162, 4.206, 4.516, 
+    4.450, 4.940, 4.448, 5.135, 2.526, 1.868, 1.813, 1.817, 1.805, 1.799, 1.790, 
+    1.820, 1.796, 1.845, 1.804, 1.865, 1.811, 0.434, 0.720, 1.270, 2.036, 
+    2.696, 4.609, 4.983, 4.356, 4.340, 4.748, 3.724, 3.494, 3.439, 2.207, 1.806, 
+    1.827, 1.829, 1.830, 1.941, 1.823, 1.836, 1.823, 1.847, 1.838, 0.260, 0.545, 
+    1.022, 1.726, 2.488, 3.483, 4.750, 5.998, 7.596, 9.048, 11.695, 13.143, 
+    15.470, 18.205, 20.340, 23.771, 27.689, 31.218, 34.145, 39.659, 42.075, 
+    46.737, 51.755, 58.029, 3.059, 3.350, 3.691, 4.028, 4.271, 4.323, 4.807, 
+    4.216, 4.418, 4.392, 3.831, 3.237, 3.426, 3.439, 3.038, 3.053, 3.041, 3.035, 
+    3.044, 3.037, 3.082, 3.115, 3.097, 3.192, 0.720, 0.822, 1.092, 1.460, 1.950, 
+    4.312, 4.744, 4.474, 4.800, 4.518, 3.606, 3.519, 3.677, 3.476, 3.034, 3.033, 
+    3.046, 3.073, 3.012, 2.979, 3.047, 3.038, 3.024, 3.181, 0.363, 0.510, 0.820, 
+    1.130, 1.624, 2.096, 2.808, 3.630, 4.535, 5.442, 6.694, 8.760, 9.774, 10.984, 
+    12.251, 14.155, 16.429, 18.160, 19.949, 22.338, 24.756, 27.902, 29.891, 
+    33.297),
+  "nWorkers" = c(rep(1, 72), rep(4, 72), rep(8, 72)),
+  "Num.Obs.normalized" = rep(c(
+    53, 95, 137, 179, 221, 263, 306, 346, 390, 432, 475, 516, 560, 601, 643, 
+    683, 731, 770, 810, 854, 891, 941, 977, 1021), 9),
+  "sdarr.function" = c(rep(
+  c(rep("sdar.lazy(enforce_subsampling = TRUE)", 24), 
+    rep("sdar.lazy()", 24), 
+    rep("sdar()", 24)), 3))) %>% 
+  labelled::set_variable_labels(.labels = list(
+    "time" = "(in seconds)", "nWorkers" = "Number of Workers", 
+    "sdarr.function" = "function used", 
+    "Num.Obs.normalized" = "Number of points in the normalized data range"
+  ))
+```
+
+The results of the benchmarking contain speed estimations for normalized data ranges from `r sdarr_benchmark_result$Num.Obs.normalized %>% min(na.rm = TRUE)` to `r sdarr_benchmark_result$Num.Obs.normalized %>% max(na.rm = TRUE)` points. A total of `r sdarr_benchmark_result$Num.Obs.normalized %>% unique() %>% length()` synthetic test records was analyzed using `r sdarr_benchmark_result$nWorkers %>% min(na.rm = TRUE)` to `r sdarr_benchmark_result$nWorkers %>% max(na.rm = TRUE)` cores. Data was pre-calculated (using the rmd-file speed_improvement_data.Rmd, which is available within the installed sdarr-package) and copy-pasted here.  
+
+## Results
+
+The execution time of the different algorithms over the number of points in the normalized range is given in the plot.
+
+```{r plot benchmarking result, warning=FALSE, message=FALSE, results='asis', echo=FALSE, fig.height=5.75}
+
+sdarr_benchmark_result %>% 
+  dplyr::mutate("nWorkers" = as.character(.data$nWorkers)) %>% {
+  # create the ggplot2
+  ggplot(., 
+         aes(x = Num.Obs.normalized, y = time, 
+             color = nWorkers, linetype = sdarr.function)) +
+  geom_line() +
+  theme_bw() +
+  labs(
+    title = "Processing Time over Number of Points in Normalized Range",
+    x = "Points in normalized range",
+    y = "Time (in seconds)"
+  )
+} %>%
+  ggplotly(dynamicTicks = TRUE, originalData = FALSE) %>%
+  
+  # set orientation of legend
+  layout(legend = list(orientation = 'h')) %>%
+  
+  # set label of legend
+  layout(legend=list(title=list(text='nWorkers, sdarr-function'))) %>%
+  
+  # set label position of legend
+  layout(legend=list(title=list(side='top'))) %>%
+  
+  # set y-position of legend (scale by height)
+  layout(legend = list(y = -0.2/1.15)) %>%
+  
+  # set size of plot
+  layout(autosize = FALSE,
+         width = 96 * 7,
+         height = 1.15 * 96 * 5) %>%
+  
+  # show the plotly...
+  config(displaylogo = FALSE, showSendToCloud = FALSE)
+```
+  
+  
+## Summary and Conclusion
+
+As expected, the standard SDAR-algorithm seems to scale quadratic with the number of point in the normalized data range. It also benefits the most from using several cores (except for some minor overhead of ~100ms when using 8 cores at very few points in the normalized data range).  
+
+The random sub-sampling modification, which is available via `sdar.lazy()`, drastically reduces processing time compared to the standard SDAR-algorithm for higher resolution test data. For lower resolution test data, the algorithm will fall back to the standard SDAR-algorithm but still, there is some additional overhead to be considered.  
+Considering the results, the speed improvement of the random sub-sampling modification is apparent at 250 - 400 points in the normalized data range (depending on the number of cores used). 
+At very high-resolution data (> 600 points in the normalized range), the execution time for `sdar.lazy()` seems to stabilize to a (more or less) constant value of 1.8 seconds (when using four cores) to 3 seconds (when using only one or eight cores).
+  
+Using using several cores for the SDAR-algorithm via setting [multisession plan](https://future.futureverse.org/reference/multisession.html) will drastically improve performance. Yet, the additional overhead might slow down processing when using the maximum available cores. Tweaking the plan (see the vignette [A Future for R: Future Topologies](https://cran.r-project.org/web/packages/future/vignettes/future-3-topologies.html) for further information) might increase overall performance when processing batches of data.  

@@ -1,0 +1,132 @@
+---
+title: "Speed-Improvement"
+subtitle: Evaluation of Speed Benchmark Results
+output:
+ html_document:
+   toc: true
+   toc_depth: 2 
+   toc_float: true
+   code_folding: hide
+   
+params:
+  sdarr_benchmark_result_filepath: "sdarr_benchmark_result.rda"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  out.width = "100%"
+)
+```
+
+The SDAR-algorithm as standardized in [ASTM E3076-18](https://doi.org/10.1520/E3076-18) uses numerous linear regressions (.lm.fit() from the stats-package). As the number of linear regressions during the SDAR-algorithm scales with the square of the number of data points in the normalized data range, it can become painfully slow for test data with high resolution. An estimation is given in in [NIST Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050), which is using an excel-spreadsheet for the calculations.   
+
+## R-Version
+
+```{r message=FALSE, warning=FALSE, echo=FALSE, results='asis'}
+cat("* R, Version ", as.character(R.Version()$major), ".", as.character(R.Version()$minor), "  \n", sep = '')
+require(rstudioapi)
+cat("+ RStudio, Version ", as.character(versionInfo()$version), "  \n", sep = '')
+```
+
+## Packages
+
+```{r setup, message = FALSE, warning = FALSE, echo=FALSE, results='asis'}
+# attach required packages
+library(magrittr)
+cat("* magrittr, Version ", as.character(packageVersion("magrittr")), "  \n", sep = '')
+library(ggplot2)
+cat("* ggplot2, Version ", as.character(packageVersion("ggplot2")), "  \n", sep = '')
+library(plotly)
+cat("* plotly, Version ", as.character(packageVersion("plotly")), "  \n", sep = '')
+```
+
+# Speed Benchmark
+
+As benchmarking takes a significant amount of time, results were pre-calculated (see the file: speed_improvement_data.Rmd in the rmd-folder of the sdarr-package) and are read from disk. The evaluation of the results is given here and is also found in the article on speed-improvement on the [package-website](https://soylentorange.github.io/sdarr/index.html).  
+
+```{r read benchmarking result, warning=FALSE, message=FALSE, results='asis'}
+
+# read benchmarking results
+load(params$sdarr_benchmark_result_filepath)
+```
+
+### Note on usage
+
+This file (and the rmd-file for actually performing the benchmarking) is available within the sdarr-package. Use `rmarkdown::render()` to have the evaluation of benchmarking knitted to an html-document into your current working directory.
+Side note: make sure to have benchmarking data available, i.e. run the benchmarking beforehand:
+```
+# knit the benchmarking-rmd to html-file
+# (and save the result data in the current working directory)
+# caution: might take some time...
+speed_improvement_data <- rmarkdown::render(
+  input = paste0(system.file(package = "sdarr"), 
+                 "/rmd/speed_improvement_data.Rmd"),
+  params = list(use_cores = c(1, 4, 8), enob = c(11.3, 15.6),
+                length.out = 24,
+                sdarr_benchmark_result_filepath = file.path(
+                  getwd(), "sdarr_benchmark_result.rda")),
+  knit_root_dir = getwd(),
+  output_dir = getwd()
+  )
+  
+# knit the evaluation-rmd to html-file
+speed_improvement_evaluation <- rmarkdown::render(
+  input = paste0(system.file(package = "sdarr"), 
+                 "/rmd/speed_improvement_evaluation.Rmd"),
+  params = list(sdarr_benchmark_result_filepath = file.path(
+    getwd(), "sdarr_benchmark_result.rda")),
+  knit_root_dir = getwd(),
+  output_dir = getwd()
+  )
+  
+# view the knitted file
+utils::browseURL(speed_improvement_evaluation)
+```
+
+## Benchmarking Results Data Set
+
+The results of the benchmarking contain speed estimations for normalized data ranges from `r sdarr_benchmark_result$Num.Obs.normalized %>% min(na.rm = TRUE)` to `r sdarr_benchmark_result$Num.Obs.normalized %>% max(na.rm = TRUE)` points. A total of `r sdarr_benchmark_result$Num.Obs.normalized %>% unique() %>% length()` synthetic test records was analyzed using `r sdarr_benchmark_result$nWorkers %>% min(na.rm = TRUE)` to `r sdarr_benchmark_result$nWorkers %>% max(na.rm = TRUE)` cores.
+
+## Results
+
+The execution time of the different algorithms over the number of points in the normalized range is given in the next figure.
+
+```{r plot benchmarking result, warning=FALSE, message=FALSE, results='asis'}
+
+sdarr_benchmark_result %>% 
+  dplyr::mutate("nWorkers" = as.character(.data$nWorkers)) %>% {
+  # create the ggplot2
+  ggplot(., 
+         aes(x = Num.Obs.normalized, y = time, 
+             color = nWorkers, linetype = sdarr.function)) +
+  geom_line() +
+  theme_bw() +
+  labs(
+    x = "Points in normalized range",
+    y = "Time (in seconds)"
+  )
+} %>%
+  ggplotly(dynamicTicks = TRUE, originalData = FALSE) %>%
+  
+  # set orientation of legend
+  layout(legend = list(orientation = 'h')) %>%
+  
+  # set label of legend
+  layout(legend=list(title=list(text='nWorkers, sdarr-function'))) %>%
+  
+  # set label position of legend
+  layout(legend=list(title=list(side='top'))) %>%
+  
+  # set y-position of legend (scale by height)
+  layout(legend = list(y = -0.2/1.15)) %>%
+  
+  # set size of plot
+  layout(autosize = TRUE,
+         width = 96 * 7,
+         height = 1.15 * 96 * 5) %>%
+  
+  # show the plotly...
+  config(displaylogo = FALSE, showSendToCloud = FALSE)
+```

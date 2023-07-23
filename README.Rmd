@@ -134,7 +134,8 @@ Al_6060_T66.result.lazy %>%
     plot.y.upperBound <- plot.env$y.upperBound
 
     # create the ggplot2
-    plot.data %>% ggplot(aes(x = x.data, y = y.data, color = "Test data\n(Al 6060 T66)")) +
+    plot.data %>% ggplot(aes(x = x.data, y = y.data,
+                             color = "Test data\n(Al 6060 T66)")) +
       geom_line() +
       geom_line(
         data = plot.data %>%

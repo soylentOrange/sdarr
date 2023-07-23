@@ -1,0 +1,271 @@
+---
+title: "Speed-Improvement"
+subtitle: Speed Benchmark of sdar and sdar.lazy
+output:
+ html_document:
+   toc: true
+   toc_depth: 2 
+   toc_float: true
+   code_folding: hide
+   
+params:
+  # adjust usage of cores for multisession plan here
+  # Number of cores for benchmarking
+  use_cores:
+   value: [1, 4, 8]
+  
+  # adjust resolution and number of synthetic data sets here 
+  # synthetic data - min and max effective number of bits
+  enob:
+   value: [11.3, 15.6]
+  # synthetic data - number of synthetic test records
+  length.out: 24
+  
+  # path to output file
+  sdarr_benchmark_result_filepath: "sdarr_benchmark_result.rda"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  out.width = "100%"
+)
+```
+
+The SDAR-algorithm as standardized in [ASTM E3076-18](https://doi.org/10.1520/E3076-18) uses numerous linear regressions (.lm.fit() from the stats-package). As the number of linear regressions during the SDAR-algorithm scales with the square of the number of data points in the normalized data range, it can become painfully slow for test data with high resolution. An estimation is given in in [NIST Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050), which is using an excel-spreadsheet for the calculations.   
+
+## R-Version
+
+```{r message=FALSE, warning=FALSE, echo=FALSE, results='asis'}
+cat("* R, Version ", as.character(R.Version()$major), ".", as.character(R.Version()$minor), "  \n", sep = '')
+require(rstudioapi)
+cat("+ RStudio, Version ", as.character(versionInfo()$version), "  \n", sep = '')
+```
+
+## Packages
+
+```{r setup, message = FALSE, warning = FALSE, echo=FALSE, results='asis'}
+# attach required packages
+library(sdarr)
+cat("* sdarr, Version ", as.character(packageVersion("sdarr")), "  \n", sep = '')
+library(magrittr)
+cat("* magrittr, Version ", as.character(packageVersion("magrittr")), "  \n", sep = '')
+library(purrr)
+cat("* purrr, Version ", as.character(packageVersion("purrr")), "  \n", sep = '')
+```
+
+# Speed Benchmark
+
+As benchmarking takes a significant amount of time, results are calculated here and stored as rda-file (embedded within the knitted file, see the final section). The evaluation and presentation of the results is found in the article on speed-improvement on the [package-website](https://soylentorange.github.io/sdarr/index.html) or see the file: speed_improvement_evaluation.Rmd in the rmd-folder of the sdarr-package.  
+
+### Note on usage
+
+This file (and the rmd-file for evaluating the results from benchmarking) is available within the sdarr-package. Use `rmarkdown::render()` to have the evaluation of benchmarking knitted to an html-document into your current working directory.
+Side note: make sure to have benchmarking data available, i.e. run the benchmarking beforehand:
+```
+# knit the benchmarking-rmd to html-file
+# (and save the result data in the current working directory)
+# caution: might take some time...
+speed_improvement_data <- rmarkdown::render(
+  input = paste0(system.file(package = "sdarr"), 
+                 "/rmd/speed_improvement_data.Rmd"),
+  params = list(use_cores = c(1, 4, 8), enob = c(11.3, 15.6),
+                length.out = 24,
+                sdarr_benchmark_result_filepath = file.path(
+                  getwd(), "sdarr_benchmark_result.rda")),
+  knit_root_dir = getwd(),
+  output_dir = getwd()
+  )
+  
+# knit the evaluation-rmd to html-file
+speed_improvement_evaluation <- rmarkdown::render(
+  input = paste0(system.file(package = "sdarr"), 
+                 "/rmd/speed_improvement_evaluation.Rmd"),
+  params = list(sdarr_benchmark_result_filepath = file.path(
+    getwd(), "sdarr_benchmark_result.rda")),
+  knit_root_dir = getwd(),
+  output_dir = getwd()
+  )
+  
+# view the knitted file
+utils::browseURL(speed_improvement_evaluation)
+```
+
+## Test Data Set
+
+Generate Test Data Set for Speed Estimation with different resolution for x (strain) from `r params$enob[[1]]` to `r params$enob[[2]]` effective bits.
+A total of `r params$length.out` synthetic test records resembling tensile mechanical testing of aluminium (Al 6060 T66, values from [MMPDS Handbook](https://ntrl.ntis.gov/NTRL/dashboard/searchResults/titleDetail/PB2003106632.xhtml), with a toe region added and some minor noise in the synthetic stress data) is created using [sdarr::synthesize_test_data()](https://soylentorange.github.io/sdarr/reference/synthesize_test_data.html).
+
+```{r generate data, warning=FALSE, message=FALSE, results='asis'}
+
+# set a random seed
+set.seed(50041180)
+
+# Synthesize a test record resembling Al 6060 T66 in different resolutions
+# (values from MMPDS Handbook)
+sdarr_benchmark_data <- seq(2^params$enob[[1]], 2^params$enob[[2]],
+                            length.out = params$length.out) %>%
+  log2() %>%
+  purrr::map(\(enob) {
+    synthesize_test_data(
+      slope = 68000, yield.y = 160,
+      ultimate.y = 215, ultimate.x = 0.091,
+      offset = 10,
+      enob.x = enob, enob.x_FS = enob,
+      enob.y = 16, enob.y_FS = 16,
+      enob.y_noise = 0.5,
+      toe.start.y = 3, toe.end.y = 10,
+      toe.start.slope = 13600
+    ) %>%
+      cbind(data.frame("enob" = enob))
+  }) 
+
+# replicate first test data set 
+# (as timing may be flawed by setting up the multisession plan)
+sdarr_benchmark_data <- append(
+  list(sdarr_benchmark_data[[1]], sdarr_benchmark_data[[1]]), 
+  sdarr_benchmark_data) 
+```
+
+## Run the Speed Benchmark
+
+Test data is evaluated with the [sequential plan](https://future.futureverse.org/reference/sequential.html) using one core, and the [multisession plan](https://future.futureverse.org/reference/multisession.html). The time for execution of [sdarr::sdar()](https://soylentorange.github.io/sdarr/reference/sdar.html), [sdarr:sdar.lazy()](https://soylentorange.github.io/sdarr/reference/sdar.lazy.html) and sdarr:sdar.lazy() with enforced sub-sampling is measured using pracma::tic,toc.
+
+```{r evaluate for speed, warning=FALSE, message=FALSE, results='asis'}
+
+# iterate over the synthetic data by requested number of cores
+# using crated functions to control the environment
+sdarr_benchmark_result <- params$use_cores %>% as.list() %>%
+  purrr::map(carrier::crate(function(cores) {
+    # satisfy pipe addiction...
+    `%>%` <- magrittr::`%>%`
+            
+    # setup plan
+    future::plan(future::multisession,
+      workers = min(c(parallelly::availableCores(), cores))
+    )
+    
+    # plain sdar
+    benchmark_result.internal <- sdarr_benchmark_data %>%
+      purrr::map(\(data) {
+        pracma::tic()
+        result <- sdarr::sdar(data, "strain", "stress",
+                              plot = FALSE, plotFun = FALSE, 
+                              verbose = FALSE)$sdar
+        result.time <- pracma::toc(FALSE)
+        data.frame("time" = result.time[[1]], 
+                   "nWorkers" = future::nbrOfWorkers(), 
+                   "sdar" = result,
+                   "sdar.method" = "standard SDAR")
+      }) %>% 
+      # remove first two entries (compensation of multisession setup lag)
+      .[-c(1,2)] %>%
+      purrr::list_rbind() %>%
+      dplyr::select(tidyr::ends_with("time"),
+                    tidyr::ends_with("nWorkers"),
+                    tidyr::ends_with("method"),
+                    tidyr::ends_with("Obs.normalized"),
+                    tidyr::ends_with("slope"),
+                    tidyr::ends_with("intercept"))
+    
+    # sdar.lazy
+    benchmark_result.internal <- sdarr_benchmark_data %>%
+      purrr::map(\(data) {
+        pracma::tic()
+        result <- sdarr::sdar.lazy(data, "strain", "stress", 
+                            plot = FALSE, plotFun = FALSE, 
+                            verbose = FALSE)$sdar
+        result.time <- pracma::toc(FALSE)
+        data.frame("time" = result.time[[1]], 
+                   "nWorkers" = future::nbrOfWorkers(), 
+                   "sdar" = result)
+      }) %>%  
+      # remove first two entries (compensation of multisession setup lag)
+      .[-c(1,2)] %>% 
+      purrr::list_rbind() %>%
+      dplyr::select(tidyr::ends_with("time"),
+                    tidyr::ends_with("nWorkers"),
+                    tidyr::ends_with("method"),
+                    tidyr::ends_with("Obs.normalized"),
+                    tidyr::ends_with("slope"),
+                    tidyr::ends_with("intercept")) %>%
+      rbind(benchmark_result.internal)
+    
+    # sdar.lazy with enforced sub-sampling
+    benchmark_result.internal <- sdarr_benchmark_data %>%
+      purrr::map(\(data) {
+        pracma::tic()
+        result <- sdarr::sdar.lazy(data, "strain", "stress",
+                                   plot = FALSE, plotFun = FALSE, 
+                                   verbose = FALSE,
+                                   enforce_subsampling = TRUE)$sdar
+        result.time <- pracma::toc(FALSE)
+        data.frame("time" = result.time[[1]], 
+                   "nWorkers" = future::nbrOfWorkers(), 
+                   "sdar" = result)
+      }) %>%  
+      # remove first two entries (compensation of multisession setup lag)
+      .[-c(1,2)] %>% 
+      purrr::list_rbind() %>%
+      dplyr::select(tidyr::ends_with("time"),
+                    tidyr::ends_with("nWorkers"),
+                    tidyr::ends_with("method"),
+                    tidyr::ends_with("Obs.normalized"),
+                    tidyr::ends_with("slope"),
+                    tidyr::ends_with("intercept")) %>%
+      dplyr::mutate(
+        "sdar.method" = "SDAR with enforced random sub-sampling") %>%
+      rbind(benchmark_result.internal)
+    
+    # switch back to the default (sequential) plan
+    future::plan(future::sequential)
+    
+    # return the result
+    benchmark_result.internal
+
+  }, sdarr_benchmark_data = sdarr_benchmark_data)) %>%
+  purrr::list_rbind() %>%
+  # format benchmarking results and add labels
+  magrittr::set_names(c("time", "nWorkers", 
+                        "sdar.method", "Num.Obs.normalized", 
+                        "finalSlope", "trueIntercept")) %>%
+  dplyr::mutate("finalSlope" = finalSlope/1000) %>%
+  dplyr::mutate("sdarr.function" = dplyr::case_when(
+    .data$sdar.method == "SDAR with enforced random sub-sampling" ~ 
+      "sdar.lazy(enforce_subsampling = TRUE)",
+    .data$sdar.method == "SDAR" ~ 
+      "sdar.lazy()",
+    .data$sdar.method == "SDAR with random sub-sampling" ~ 
+      "sdar.lazy()",
+    .data$sdar.method == "standard SDAR" ~ 
+      "sdar()"
+  )) %>%
+  dplyr::mutate("sdar.method" = dplyr::case_when(
+    .data$sdar.method == "SDAR with enforced random sub-sampling" ~ 
+      "sdar.lazy\n(enforced random sub-sampling)",
+    .data$sdar.method == "SDAR" ~ 
+      "sdar.lazy\n(falling back to SDAR)",
+    .data$sdar.method == "SDAR with random sub-sampling" ~ 
+      "sdar.lazy\n(with random sub-sampling)",
+    .data$sdar.method == "standard SDAR" ~ 
+      "sdar"
+  )) %>% 
+  labelled::set_variable_labels(.labels = list(
+    "time" = "(in seconds)", "nWorkers" = "Number of Workers", 
+    "sdar.method" = "actually applied method", 
+    "Num.Obs.normalized" = "Number of points in the normalized data range", 
+    "finalSlope" = "(in GPa)", "trueIntercept" = "(in MPa)"
+  ))
+```
+
+## Results
+
+```{r save results, warning=FALSE, message=FALSE, results='asis'}
+# save rda-file
+save(sdarr_benchmark_result, file = params$sdarr_benchmark_result_filepath)
+```
+
+Find the results of benchmarking (after about 90 minutes of calculation - at least on my computer...) saved onto disk and embedded into the knitted html-document:  
+
+* `r xfun::embed_file(params$sdarr_benchmark_result_filepath, text = "get rda-file with the results")`
