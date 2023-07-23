@@ -12,7 +12,7 @@ Description: Slope Determination by Analysis of Residuals (SDAR) for
     standard ASTM E3076-18 <doi:10.1520/E3076-18> or a detailed
     description in E. Lucon (2019) <doi:10.6028/NIST.TN.2050>). As the
     SDAR-algorithm heavily uses linear regressions, a faster version is
-    additionally available to find the optimum region for the (one) final
+    additionally available to find the optimum region for the final
     linear regression by random sub-sampling within the normalized range
     of the test-data.
 License: MIT + file LICENSE
@@ -42,8 +42,6 @@ Suggests:
     readr,
     rmarkdown,
     spelling
-VignetteBuilder: 
-    knitr
 Encoding: UTF-8
 Language: en-US
 Roxygen: list(markdown = TRUE)
