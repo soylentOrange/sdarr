@@ -1,48 +1,18 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://soylentorange.github.io/sdarr/404.html</loc>
-  </url>
-  <url>
-    <loc>https://soylentorange.github.io/sdarr/LICENSE-text.html</loc>
-  </url>
-  <url>
-    <loc>https://soylentorange.github.io/sdarr/LICENSE.html</loc>
-  </url>
-  <url>
-    <loc>https://soylentorange.github.io/sdarr/articles/index.html</loc>
-  </url>
-  <url>
-    <loc>https://soylentorange.github.io/sdarr/articles/sdarr_validation.html</loc>
-  </url>
-  <url>
-    <loc>https://soylentorange.github.io/sdarr/articles/speed_improvment.html</loc>
-  </url>
-  <url>
-    <loc>https://soylentorange.github.io/sdarr/authors.html</loc>
-  </url>
-  <url>
-    <loc>https://soylentorange.github.io/sdarr/index.html</loc>
-  </url>
-  <url>
-    <loc>https://soylentorange.github.io/sdarr/news/index.html</loc>
-  </url>
-  <url>
-    <loc>https://soylentorange.github.io/sdarr/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>https://soylentorange.github.io/sdarr/reference/pipe.html</loc>
-  </url>
-  <url>
-    <loc>https://soylentorange.github.io/sdarr/reference/sdar.html</loc>
-  </url>
-  <url>
-    <loc>https://soylentorange.github.io/sdarr/reference/sdar.lazy.html</loc>
-  </url>
-  <url>
-    <loc>https://soylentorange.github.io/sdarr/reference/sdarr-package.html</loc>
-  </url>
-  <url>
-    <loc>https://soylentorange.github.io/sdarr/reference/synthesize_test_data.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>https://soylentorange.github.io/sdarr/404.html</loc></url>
+<url><loc>https://soylentorange.github.io/sdarr/LICENSE-text.html</loc></url>
+<url><loc>https://soylentorange.github.io/sdarr/LICENSE.html</loc></url>
+<url><loc>https://soylentorange.github.io/sdarr/articles/index.html</loc></url>
+<url><loc>https://soylentorange.github.io/sdarr/articles/sdarr_validation.html</loc></url>
+<url><loc>https://soylentorange.github.io/sdarr/articles/speed_improvment.html</loc></url>
+<url><loc>https://soylentorange.github.io/sdarr/authors.html</loc></url>
+<url><loc>https://soylentorange.github.io/sdarr/index.html</loc></url>
+<url><loc>https://soylentorange.github.io/sdarr/news/index.html</loc></url>
+<url><loc>https://soylentorange.github.io/sdarr/reference/index.html</loc></url>
+<url><loc>https://soylentorange.github.io/sdarr/reference/pipe.html</loc></url>
+<url><loc>https://soylentorange.github.io/sdarr/reference/sdar.html</loc></url>
+<url><loc>https://soylentorange.github.io/sdarr/reference/sdar.lazy.html</loc></url>
+<url><loc>https://soylentorange.github.io/sdarr/reference/sdarr-package.html</loc></url>
+<url><loc>https://soylentorange.github.io/sdarr/reference/synthesize_test_data.html</loc></url>
 </urlset>
+
