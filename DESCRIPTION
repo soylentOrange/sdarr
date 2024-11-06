@@ -31,8 +31,7 @@ Imports:
     stats,
     stringr,
     tidyr,
-    utils,
-    VMDecomp
+    utils
 Suggests:
     future,
     ggplot2,

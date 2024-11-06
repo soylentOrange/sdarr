@@ -45,16 +45,14 @@ devtools::install_github("soylentOrange/sdarr")
 ### Standard SDAR-algorithm
 
 A basic example of using `sdar()` on a synthetic data set, which is
-based on the properties of aluminium (Al 6060 T66) as given in the
-[Metallic Material Properties Development and Standardization (MMPDS)
-Handbook](https://ntrl.ntis.gov/NTRL/dashboard/searchResults/titleDetail/PB2003106632.xhtml).
+based on the properties of aluminium (EN AW-6060-T66).
 A toe-region and a non-zero intercept are added to make the test data
 less boring.
 
 `sdar()` analyzes the data and will give a small report as a message. It
-should confirm the Young’s-modulus of 68 GPa and an intercept of 10 MPa.
+should confirm the Young’s-modulus of 69 GPa and an intercept of 10 MPa.
 To make use of multi-core processing, configure
-[furrr](https://furrr.futureverse.org/) to use a multisession strategy.
+[furrr](https://furrr.futureverse.org/) to use a multi-session strategy.
 
 ``` r
 library(sdarr)
@@ -65,11 +63,10 @@ future::plan(future::multisession,
   workers = min(c(parallelly::availableCores(), 8))
 )
 
-# Synthesize a test record resembling Al 6060 T66
-# (Values from MMPDS Handbook, with a toe region added)
+# Synthesize a test record resembling EN AW-6060-T66
 Al_6060_T66 <- synthesize_test_data(
-  slope = 68000, yield.y = 160,
-  ultimate.y = 215, ultimate.x = 0.091,
+  slope = 69000, yield.y = 160,
+  ultimate.y = 215, ultimate.x = 0.08,
   offset = 10,
   toe.start.y = 3, toe.end.y = 15,
   toe.start.slope = 13600
@@ -123,21 +120,19 @@ Al_6060_T66.result <- sdar(Al_6060_T66,
 
 A basic example of `sdar.lazy()`, a random sub-sampling modification of
 the SDAR-algorithm on a synthetic data set, which is based on the
-properties of aluminium (Al 6060 T66) as given in the [Metallic Material
-Properties Development and Standardization (MMPDS)
-Handbook](https://ntrl.ntis.gov/NTRL/dashboard/searchResults/titleDetail/PB2003106632.xhtml).
+properties of aluminium (EN AW-6060-T66).
 A toe-region and a non-zero intercept are added to make the test data
 less boring (see above).
 
 `sdar.lazy()` analyzes the data for the optimum size of the fitting
 region via random sub-sampling. It will give a small report as a message
 after finding the optimum fit. It should confirm the Young’s-modulus of
-68 GPa and an intercept of 10 MPa. As the synthetic data set is
+69 GPa and an intercept of 10 MPa. As the synthetic data set is
 noise-free (except for quantization-noise), only one random sub-sampling
 run will do.
 
 To make use of multi-core processing, configure
-[furrr](https://furrr.futureverse.org/) to use a multisession strategy
+[furrr](https://furrr.futureverse.org/) to use a multi-session strategy
 (see above).
 
 ``` r
@@ -238,7 +233,7 @@ Al_6060_T66.result.lazy %>%
 
     # create the ggplot2
     plot.data %>% ggplot(aes(x = x.data, y = y.data,
-                             color = "Test data\n(Al 6060 T66)")) +
+                             color = "Test data\n(EN AW-6060-T66)")) +
       geom_line() +
       geom_line(
         data = plot.data %>%

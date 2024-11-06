@@ -97,73 +97,20 @@ normalize_data.execute <- function(data, otr.info = NULL,
 normalize_data <- function(data,
                            otr.info = NULL,
                            raise_offset_times = 0,
-                           denoise.x = FALSE,
-                           denoise.y = FALSE,
-                           alpha = 2000,
-                           K = 100,
                            verbose = FALSE,
                            plot = FALSE,
                            plotFun = FALSE) {
-  # just normalize and return normalized data (with info and (possibly) plots)
-  if (denoise.x == FALSE && denoise.y == FALSE) {
-    normalized_data <- normalize_data.execute(
-      data = data,
-      otr.info = otr.info,
-      raise_offset_times = raise_offset_times,
-      return_data.normalized = TRUE
-    )
-  } else {
-    # do a first normalization on the data to get info on the range
-    normalized_data <- normalize_data.execute(
-      data = data,
-      otr.info = otr.info,
-      raise_offset_times = raise_offset_times,
-      return_data.normalized = FALSE
-    )
-
-    # denoise x and y (in a limited range of the original data, saving time...)
-    data_denoised <- data %>%
-      dplyr::filter(.data$otr.idx <= normalized_data$tangency.point$otr.idx.tangent * 2)
-
-
-    # de-noise x-data
-    if (denoise.x == TRUE) {
-      data_denoised$x.data <- denoise_vector(
-        data_denoised$x.data %>%
-          as.numeric(),
-        alpha = alpha,
-        K = K,
-        verbose = verbose
-      )
-    }
-
-    # de-noise y-data
-    if (denoise.y == TRUE) {
-      data_denoised$y.data <- denoise_vector(
-        data_denoised$y.data %>%
-          as.numeric(),
-        alpha = alpha,
-        K = K,
-        verbose = verbose
-      )
-    }
-
-    # do the normalization on the de-noised data
-    normalized_data <- normalize_data.execute(
-      data = data_denoised,
-      otr.info = otr.info,
-      raise_offset_times = raise_offset_times,
-      return_data.normalized = TRUE
-    )
-  }
+  # normalize and return normalized data (with info and (possibly) plots)
+  normalized_data <- normalize_data.execute(
+    data = data,
+    otr.info = otr.info,
+    raise_offset_times = raise_offset_times,
+    return_data.normalized = TRUE
+  )
 
   # print messages
   if (verbose) {
-    if (denoise.x || denoise.y) {
-      message("Normalize de-noised Test Data\n")
-    } else {
-      message("Normalize Test Data\n")
-    }
+    message("Normalize Test Data\n")
 
     message("  shift")
     message(paste0(
@@ -234,38 +181,6 @@ normalize_data <- function(data,
       plot.otr()
     }
 
-    # create function for plot of de-noised Original Test Record
-    if (denoise.y || denoise.x) {
-      plot.otr.denoised <- carrier::crate(
-        function(value) {
-          plot(
-            x = unlist(plot.data$x.data.denoised, TRUE, FALSE),
-            y = unlist(plot.data$y.data.denoised, TRUE, FALSE),
-            type = "l",
-            col = "red",
-            lwd = 1.25,
-            main = plot.main,
-            xlab = plot.xlab,
-            ylab = plot.ylab
-          )
-        },
-        plot.data = data.frame(
-          "x.data.denoised" = data_denoised$x.data %>% unlist(TRUE, FALSE),
-          "y.data.denoised" = data_denoised$y.data %>% unlist(TRUE, FALSE)
-        ),
-        plot.x = "x.data.denoised",
-        plot.y = "y.data.denoised",
-        plot.xlab = x.lab,
-        plot.ylab = y.lab,
-        plot.main = "De-noised Original Test Record (limited range)"
-      )
-
-      # Plot Original Test Record
-      if (plot) {
-        plot.otr.denoised()
-      }
-    }
-
     # create function for plot of Shifted, Truncated and Normalized Test Record
     plot.normalized <- carrier::crate(
       function(value) {
@@ -307,13 +222,6 @@ normalize_data <- function(data,
         "plot.normalized" = plot.normalized
       )
     ))
-
-    # append plot of de-noised (partial) data, if available
-    if (denoise.y || denoise.x) {
-      results$plots <- results$plots %>% append(list(
-        "plot.otr.denoised" = plot.otr.denoised
-      ))
-    }
   }
 
   # return results

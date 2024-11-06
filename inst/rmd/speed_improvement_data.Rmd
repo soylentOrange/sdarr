@@ -95,22 +95,21 @@ utils::browseURL(speed_improvement_evaluation)
 ## Test Data Set
 
 Generate Test Data Set for Speed Estimation with different resolution for x (strain) from `r params$enob[[1]]` to `r params$enob[[2]]` effective bits.
-A total of `r params$length.out` synthetic test records resembling tensile mechanical testing of aluminium (Al 6060 T66, values from [MMPDS Handbook](https://ntrl.ntis.gov/NTRL/dashboard/searchResults/titleDetail/PB2003106632.xhtml), with a toe region added and some minor noise in the synthetic stress data) is created using [sdarr::synthesize_test_data()](https://soylentorange.github.io/sdarr/reference/synthesize_test_data.html).
+A total of `r params$length.out` synthetic test records resembling tensile mechanical testing of aluminium (EN AW-6060-T66), with a toe region added and some minor noise in the synthetic stress data) is created using [sdarr::synthesize_test_data()](https://soylentorange.github.io/sdarr/reference/synthesize_test_data.html).
 
 ```{r generate data, warning=FALSE, message=FALSE, results='asis'}
 
 # set a random seed
 set.seed(50041180)
 
-# Synthesize a test record resembling Al 6060 T66 in different resolutions
-# (values from MMPDS Handbook)
+# Synthesize a test record resembling EN AW-6060-T66 in different resolutions.
 sdarr_benchmark_data <- seq(2^params$enob[[1]], 2^params$enob[[2]],
                             length.out = params$length.out) %>%
   log2() %>%
   purrr::map(\(enob) {
     synthesize_test_data(
-      slope = 68000, yield.y = 160,
-      ultimate.y = 215, ultimate.x = 0.091,
+      slope = 69000, yield.y = 160,
+      ultimate.y = 215, ultimate.x = 0.08,
       offset = 10,
       enob.x = enob, enob.x_FS = enob,
       enob.y = 16, enob.y_FS = 16,

@@ -21,7 +21,7 @@ The SDAR-algorithm as standardized in [ASTM E3076-18](https://doi.org/10.1520/E3
 
 ## Data Set for Speed Estimation
 
-The Test Data Set for Speed Estimation was generated with different resolution for x (strain) from 11.3 to 15.6 effective bits. A total of 24 synthetic test records resembling tensile mechanical testing of aluminium (Al 6060 T66, values from [MMPDS Handbook](https://ntrl.ntis.gov/NTRL/dashboard/searchResults/titleDetail/PB2003106632.xhtml), with a toe region added and some minor noise in the synthetic stress data) was created using [sdarr::synthesize_test_data()](https://soylentorange.github.io/sdarr/reference/synthesize_test_data.html).
+The Test Data Set for Speed Estimation was generated with different resolution for x (strain) from 11.3 to 15.6 effective bits. A total of 24 synthetic test records resembling tensile mechanical testing of aluminium (EN AW-6060-T66), with a toe region added and some minor noise in the synthetic stress data) was created using [sdarr::synthesize_test_data()](https://soylentorange.github.io/sdarr/reference/synthesize_test_data.html).
 
 Test data was evaluated with the [sequential plan](https://future.futureverse.org/reference/sequential.html) using one core, and the [multisession plan](https://future.futureverse.org/reference/multisession.html) using four and eight cores. The time for execution of [sdarr::sdar()](https://soylentorange.github.io/sdarr/reference/sdar.html), [sdarr:sdar.lazy()](https://soylentorange.github.io/sdarr/reference/sdar.lazy.html) and sdarr:sdar.lazy() with enforced sub-sampling was measured using pracma::tic,toc.  
 The evaluation was run on a 2021 MacBook Pro (with M1 Max processor and 64 GB Ram under macOS 13.4.1). 

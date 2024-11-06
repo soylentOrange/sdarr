@@ -26,8 +26,6 @@ sdar_execute <- function(prepared_data,
       data = prepared_data,
       otr.info = otr.info,
       raise_offset_times = raise_offset_times,
-      denoise.x = FALSE,
-      denoise.y = FALSE,
       verbose = verbose.all,
       plot = plot.all,
       plotFun = plotFun.all
@@ -205,18 +203,16 @@ sdar_execute <- function(prepared_data,
 #'   SDAR-algorithm.
 #'
 #' @examples
-#' # Synthesize a test record resembling Al 6060 T66
-#' # (Values according to Metallic Material Properties
-#' # Development and Standardization (MMPDS) Handbook).
+#' # Synthesize a test record resembling EN AW-6060-T66
 #' # Explicitly set names to "strain" and "stress",
 #' # set effective number of bits in the x-data to 12
 #' # to limit the number of data points.
 #'
 #' Al_6060_T66 <- synthesize_test_data(
-#'   slope = 68000,
+#'   slope = 69000,
 #'   yield.y = 160,
 #'   ultimate.y = 215,
-#'   ultimate.x = 0.091,
+#'   ultimate.x = 0.08,
 #'   x.name = "strain",
 #'   y.name = "stress",
 #'   toe.start.y = 3, toe.end.y = 10,

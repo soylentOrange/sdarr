@@ -18,10 +18,6 @@
 #'   Curves by Three Parameters; National Advisory Committee for Aeronautics
 #'   Technical Note. NACA-TN-902.
 #'
-#' @references Rice, R. C., Jackson, J. L., Bakuckas, J., & Thompson, S. (2003).
-#'   Metallic Materials Properties Development and Standardization (MMPDS)
-#'   (DOT/FAA/AR-MMPDS-01).
-#'
 #' @param slope Slope in the linear region.
 #'
 #' @param yield.y y-value at yield point.
@@ -72,14 +68,12 @@
 #'   given as variable labels.
 #'
 #' @examples
-#' # Synthesize a test record resembling Al 6060 T66
-#' # (Values according to Metallic Material Properties
-#' # Development and Standardization (MMPDS) Handbook)
+#' # Synthesize a test record resembling EN AW-6060-T66
 #' Al_6060_T66 <- synthesize_test_data(
-#'   slope = 68000,
+#'   slope = 69000,
 #'   yield.y = 160,
 #'   ultimate.y = 215,
-#'   ultimate.x = 0.091
+#'   ultimate.x = 0.08
 #' )
 #'
 #' plot(
