@@ -92,14 +92,12 @@ As random values are drawn, set a \code{\link[base:Random]{random seed}} beforeh
 to get reproducible results.
 }
 \examples{
-# Synthesize a test record resembling Al 6060 T66
-# (Values according to Metallic Material Properties
-# Development and Standardization (MMPDS) Handbook)
+# Synthesize a test record resembling EN AW-6060-T66
 Al_6060_T66 <- synthesize_test_data(
-  slope = 68000,
+  slope = 69000,
   yield.y = 160,
   ultimate.y = 215,
-  ultimate.x = 0.091
+  ultimate.x = 0.08
 )
 
 plot(
@@ -116,8 +114,4 @@ Hill, H. N. (1944). Determination of stress-strain relations from
 Ramberg, W., & Osgood, W. R. (1943). Description of Stress-Strain
 Curves by Three Parameters; National Advisory Committee for Aeronautics
 Technical Note. NACA-TN-902.
-
-Rice, R. C., Jackson, J. L., Bakuckas, J., & Thompson, S. (2003).
-Metallic Materials Properties Development and Standardization (MMPDS)
-(DOT/FAA/AR-MMPDS-01).
 }

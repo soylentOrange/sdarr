@@ -199,7 +199,7 @@ sdar_execute <- function(prepared_data,
 #'   functions: set `verbose.all`, `plot.all` and `plotFun.all` to `TRUE` to get
 #'   additional diagnostic information during processing data.
 #'
-#' @seealso [sdar.lazy()] for the random sub-sampling modification of the
+#' @seealso [sdar_lazy()] for the random sub-sampling modification of the
 #'   SDAR-algorithm.
 #'
 #' @examples
@@ -243,33 +243,16 @@ sdar <- function(data, x, y,
 
   # take care of dynamic dots
   additional_parameters <- rlang::list2(...)
-  Nmin_factor <- try(
-    {
-      additional_parameters$Nmin_factor
-    },
-    silent = TRUE
-  )
+  Nmin_factor <- try({additional_parameters$Nmin_factor}, silent = TRUE)
   if (!is.numeric(Nmin_factor)) Nmin_factor <- 0.2
-  verbose.all <- try(
-    {
-      additional_parameters$verbose.all
-    },
-    silent = TRUE
-  )
+
+  verbose.all <- try({additional_parameters$verbose.all}, silent = TRUE)
   if (!is.logical(verbose.all)) verbose.all <- FALSE
-  plot.all <- try(
-    {
-      additional_parameters$plot.all
-    },
-    silent = TRUE
-  )
+
+  plot.all <- try({additional_parameters$plot.all}, silent = TRUE)
   if (!is.logical(plot.all)) plot.all <- FALSE
-  plotFun.all <- try(
-    {
-      additional_parameters$plotFun.all
-    },
-    silent = TRUE
-  )
+
+  plotFun.all <- try({additional_parameters$plotFun.all}, silent = TRUE)
   if (!is.logical(plotFun.all)) plotFun.all <- FALSE
 
   # save final fit plot, when plotFun.all is set
@@ -298,22 +281,19 @@ sdar <- function(data, x, y,
   # get names of data
   x.name <- data %>%
     dplyr::select(!!x) %>%
-    names() %>%
-    {
+    names() %>% {
       .[[1]]
     }
   y.name <- data %>%
     dplyr::select(!!y) %>%
-    names() %>%
-    {
+    names() %>% {
       .[[1]]
     }
 
   # prepare data, add an index and remove NA from data
   prepared_data <- data.frame(
     x.data = data %>% dplyr::select(!!x) %>% unlist(TRUE, FALSE),
-    y.data = data %>% dplyr::select(!!y) %>% unlist(TRUE, FALSE)
-  ) %>%
+    y.data = data %>% dplyr::select(!!y) %>% unlist(TRUE, FALSE)) %>%
     dplyr::mutate("otr.idx" = as.numeric(rownames(.))) %>%
     tidyr::drop_na()
 

@@ -2,7 +2,7 @@
 
 export("%>%")
 export(sdar)
-export(sdar.lazy)
+export(sdar_lazy)
 export(synthesize_test_data)
 importFrom(magrittr,"%>%")
 importFrom(stats,.lm.fit)

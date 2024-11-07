@@ -40,18 +40,16 @@ The function can use parallel processing via the
 up a plan other than the default sequential strategy beforehand.
 }
 \examples{
-# Synthesize a test record resembling Al 6060 T66
-# (Values according to Metallic Material Properties
-# Development and Standardization (MMPDS) Handbook).
+# Synthesize a test record resembling EN AW-6060-T66
 # Explicitly set names to "strain" and "stress",
 # set effective number of bits in the x-data to 12
 # to limit the number of data points.
 
 Al_6060_T66 <- synthesize_test_data(
-  slope = 68000,
+  slope = 69000,
   yield.y = 160,
   ultimate.y = 215,
-  ultimate.x = 0.091,
+  ultimate.x = 0.08,
   x.name = "strain",
   y.name = "stress",
   toe.start.y = 3, toe.end.y = 10,
@@ -82,6 +80,6 @@ of Fit for the Linear Part of a Test Record. Journal of Testing and
 Evaluation - J TEST EVAL, 39. https://doi.org/10.1520/JTE103038
 }
 \seealso{
-\code{\link[=sdar.lazy]{sdar.lazy()}} for the random sub-sampling modification of the
+\code{\link[=sdar_lazy]{sdar_lazy()}} for the random sub-sampling modification of the
 SDAR-algorithm.
 }

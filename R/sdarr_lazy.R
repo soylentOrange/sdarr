@@ -530,10 +530,13 @@ sdar_execute.lazy <- function(prepared_data,
 #'
 #' @inheritParams sdar
 #'
-#' @param n.fit Repetitions of random sub-sampling and fitting.
+#' @param n.fit Repetitions of drawing a random sub-sample from the data in the
+#'   normalized and finding a fitting range to find an estimate for the final
+#'   fitting range.
 #'
 #' @param cutoff_probability Cut-off probability for estimating optimum size of
-#'   sub-sampled data range via logistic regression.
+#'   sub-sampled data range via logistic regression, which is predicting if
+#'   sub-sampled data will pass the quality checks.
 #'
 #' @param ... <[`dynamic-dots`][rlang::dyn-dots]> Pass parameters to downstream
 #'   functions: set `verbose.all`, `plot.all` and `plotFun.all` to `TRUE` to get
@@ -564,14 +567,14 @@ sdar_execute.lazy <- function(prepared_data,
 #' )
 #'
 #'
-#' # use sdar.lazy() to analyze the (noise-free) synthetic test record
+#' # use sdar_lazy() to analyze the (noise-free) synthetic test record
 #' # will print a report and give a plot of the final fit
 #' \donttest{
-#' result <- sdar.lazy(Al_6060_T66, strain, stress)
+#' result <- sdar_lazy(Al_6060_T66, strain, stress)
 #' }
 #'
 #' @export
-sdar.lazy <- function(data, x, y,
+sdar_lazy <- function(data, x, y,
                       verbose = TRUE,
                       plot = TRUE,
                       plotFun = FALSE,
@@ -594,53 +597,24 @@ sdar.lazy <- function(data, x, y,
 
   # take care of dynamic dots
   additional_parameters <- rlang::list2(...)
-  Nmin_factor <- try(
-    {
-      additional_parameters$Nmin_factor
-    },
-    silent = TRUE
-  )
+  Nmin_factor <- try({additional_parameters$Nmin_factor}, silent = TRUE)
   if (!is.numeric(Nmin_factor)) Nmin_factor <- 0.2
-  verbose.all <- try(
-    {
-      additional_parameters$verbose.all
-    },
-    silent = TRUE
-  )
+
+  verbose.all <- try({additional_parameters$verbose.all}, silent = TRUE)
   if (!is.logical(verbose.all)) verbose.all <- FALSE
-  plot.all <- try(
-    {
-      additional_parameters$plot.all
-    },
-    silent = TRUE
-  )
+
+  plot.all <- try({additional_parameters$plot.all}, silent = TRUE)
   if (!is.logical(plot.all)) plot.all <- FALSE
-  plotFun.all <- try(
-    {
-      additional_parameters$plotFun.all
-    },
-    silent = TRUE
-  )
+
+  plotFun.all <- try({additional_parameters$plotFun.all}, silent = TRUE)
   if (!is.logical(plotFun.all)) plotFun.all <- FALSE
-  n.candidates <- try(
-    {
-      additional_parameters$n.candidates
-    },
-    silent = TRUE
-  )
+
+  n.candidates <- try({additional_parameters$n.candidates}, silent = TRUE)
   if (!is.numeric(n.candidates)) n.candidates <- 5
-  enforce_subsampling <- try(
-    {
-      additional_parameters$enforce_subsampling
-    },
-    silent = TRUE
-  )
-  quality_penalty <- try(
-    {
-      additional_parameters$quality_penalty
-    },
-    silent = TRUE
-  )
+
+  enforce_subsampling <- try({additional_parameters$enforce_subsampling},
+                             silent = TRUE)
+  quality_penalty <- try({additional_parameters$quality_penalty}, silent = TRUE)
   if (!is.numeric(quality_penalty)) quality_penalty <- 0.1
 
   # save final fit plot, when plotFun.all is set
@@ -655,36 +629,31 @@ sdar.lazy <- function(data, x, y,
   # get units for data
   x.label.unit <- data %>%
     dplyr::select(!!x) %>%
-    labelled::var_label() %>%
-    {
+    labelled::var_label() %>% {
       .[[1]]
     }
   y.label.unit <- data %>%
     dplyr::select(!!y) %>%
-    labelled::var_label() %>%
-    {
+    labelled::var_label() %>% {
       .[[1]]
     }
 
   # get names of data
   x.name <- data %>%
     dplyr::select(!!x) %>%
-    names() %>%
-    {
+    names() %>% {
       .[[1]]
     }
   y.name <- data %>%
     dplyr::select(!!y) %>%
-    names() %>%
-    {
+    names() %>% {
       .[[1]]
     }
 
   # prepare data, add an index and remove NA from data
   prepared_data <- data.frame(
     x.data = data %>% dplyr::select(!!x) %>% unlist(TRUE, FALSE),
-    y.data = data %>% dplyr::select(!!y) %>% unlist(TRUE, FALSE)
-  ) %>%
+    y.data = data %>% dplyr::select(!!y) %>% unlist(TRUE, FALSE)) %>%
     dplyr::mutate("otr.idx" = as.numeric(rownames(.))) %>%
     tidyr::drop_na()
 

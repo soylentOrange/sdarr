@@ -1,6 +1,6 @@
 ---
 title: "Speed Benchmarking the SDAR-algorithm"
-subtitle: Speed Benchmark of sdar and sdar.lazy
+subtitle: Speed Benchmark of sdar and sdar_lazy
 output:
  html_document:
    toc: true
@@ -129,7 +129,7 @@ sdarr_benchmark_data <- append(
 
 ## Run the Speed Benchmark
 
-Test data is evaluated with the [sequential plan](https://future.futureverse.org/reference/sequential.html) using one core, and the [multisession plan](https://future.futureverse.org/reference/multisession.html). The time for execution of [sdarr::sdar()](https://soylentorange.github.io/sdarr/reference/sdar.html), [sdarr:sdar.lazy()](https://soylentorange.github.io/sdarr/reference/sdar.lazy.html) and sdarr:sdar.lazy() with enforced sub-sampling is measured using pracma::tic,toc.
+Test data is evaluated with the [sequential plan](https://future.futureverse.org/reference/sequential.html) using one core, and the [multisession plan](https://future.futureverse.org/reference/multisession.html). The time for execution of [sdarr::sdar()](https://soylentorange.github.io/sdarr/reference/sdar.html), [sdarr:sdar_lazy()](https://soylentorange.github.io/sdarr/reference/sdar_lazy.html) and sdarr:sdar_lazy() with enforced sub-sampling is measured using pracma::tic,toc.
 
 ```{r evaluate for speed, warning=FALSE, message=FALSE, results='asis'}
 
@@ -168,11 +168,11 @@ sdarr_benchmark_result <- params$use_cores %>% as.list() %>%
                     tidyr::ends_with("slope"),
                     tidyr::ends_with("intercept"))
     
-    # sdar.lazy
+    # sdar_lazy
     benchmark_result.internal <- sdarr_benchmark_data %>%
       purrr::map(\(data) {
         pracma::tic()
-        result <- sdarr::sdar.lazy(data, "strain", "stress", 
+        result <- sdarr::sdar_lazy(data, "strain", "stress", 
                             plot = FALSE, plotFun = FALSE, 
                             verbose = FALSE)$sdar
         result.time <- pracma::toc(FALSE)
@@ -191,11 +191,11 @@ sdarr_benchmark_result <- params$use_cores %>% as.list() %>%
                     tidyr::ends_with("intercept")) %>%
       rbind(benchmark_result.internal)
     
-    # sdar.lazy with enforced sub-sampling
+    # sdar_lazy with enforced sub-sampling
     benchmark_result.internal <- sdarr_benchmark_data %>%
       purrr::map(\(data) {
         pracma::tic()
-        result <- sdarr::sdar.lazy(data, "strain", "stress",
+        result <- sdarr::sdar_lazy(data, "strain", "stress",
                                    plot = FALSE, plotFun = FALSE, 
                                    verbose = FALSE,
                                    enforce_subsampling = TRUE)$sdar
@@ -232,21 +232,21 @@ sdarr_benchmark_result <- params$use_cores %>% as.list() %>%
   dplyr::mutate("finalSlope" = finalSlope/1000) %>%
   dplyr::mutate("sdarr.function" = dplyr::case_when(
     .data$sdar.method == "SDAR with enforced random sub-sampling" ~ 
-      "sdar.lazy(enforce_subsampling = TRUE)",
+      "sdar_lazy(enforce_subsampling = TRUE)",
     .data$sdar.method == "SDAR" ~ 
-      "sdar.lazy()",
+      "sdar_lazy()",
     .data$sdar.method == "SDAR with random sub-sampling" ~ 
-      "sdar.lazy()",
+      "sdar_lazy()",
     .data$sdar.method == "standard SDAR" ~ 
       "sdar()"
   )) %>%
   dplyr::mutate("sdar.method" = dplyr::case_when(
     .data$sdar.method == "SDAR with enforced random sub-sampling" ~ 
-      "sdar.lazy\n(enforced random sub-sampling)",
+      "sdar_lazy\n(enforced random sub-sampling)",
     .data$sdar.method == "SDAR" ~ 
-      "sdar.lazy\n(falling back to SDAR)",
+      "sdar_lazy\n(falling back to SDAR)",
     .data$sdar.method == "SDAR with random sub-sampling" ~ 
-      "sdar.lazy\n(with random sub-sampling)",
+      "sdar_lazy\n(with random sub-sampling)",
     .data$sdar.method == "standard SDAR" ~ 
       "sdar"
   )) %>% 

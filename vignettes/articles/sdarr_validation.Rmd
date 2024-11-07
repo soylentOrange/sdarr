@@ -14,9 +14,8 @@ knitr::opts_chunk$set(
 # attach required packages
 library(sdarr)
 library(magrittr)
-library(stats)
 library(ggplot2)
-library(plotly)
+library(plotly, include.only = c("ggplotly", "layout", "config"))
 
 # setup multisession calculations with a maximum of 8 cores
 # (or however many cores are available...)
@@ -28,13 +27,13 @@ future::plan(future::multisession,
 Though no exhaustive validation has been conducted, the Reference Data Set *E3076-DS1(2018) File 01* mentioned in [ASTM E3076-18](https://doi.org/10.1520/E3076-18) as *...available for download from ASTM...* has been used to check the results of this implementation. The Reference Data Set *E3076-DS1(2018) File 01* was also analyzed as benchmark in [NIST Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050) with minor differences to the expected results listed in the standard.
   
   
-## Reference Data Set
+## Reference Data Set 
 
 A plot of the Reference Data Set (after downloading, unpacking and labeling) for validation of the Slope Determination by Analysis of Residuals (SDAR) algorithm is given below.
 
 ```{r Reference_Data_Set, message=FALSE, warning=FALSE, include=FALSE, echo=FALSE}
 # Get Data from Reference Data Set E3076-DS1(2018)
-sdarr.get_DS1.data <- function() {
+get_DS1.data <- function() {
   # satisfy pipe addiction...
   `%>%` <- magrittr::`%>%`
 
@@ -42,35 +41,30 @@ sdarr.get_DS1.data <- function() {
   Reference_Data_Set.zip <- tempfile(fileext = ".zip")
   utils::download.file(
     "https://web.archive.org/web/20190905162007/https://www.astm.org/COMMIT/E3076-DS1(2018).zip",
-    destfile = Reference_Data_Set.zip
-  )
+    destfile = Reference_Data_Set.zip)
 
   # Extract the Zip Archive
   Reference_Data_Set.file <- utils::unzip(Reference_Data_Set.zip,
-    exdir = tempdir()
-  )
+    exdir = tempdir())
 
   # read Data Set from unzipped file
   E3076_DS1_2018.rowwise <- readr::read_csv(Reference_Data_Set.file,
     col_names = FALSE,
     trim_ws = FALSE,
-    show_col_types = FALSE
-  ) %>%
+    show_col_types = FALSE) %>%
     dplyr::mutate(rownum = dplyr::row_number())
 
   # find start of the data section
   data.startIdx <- E3076_DS1_2018.rowwise %>%
     dplyr::mutate(data.start = stringr::str_detect(.data$X1, stringr::coll("<Data>"))) %>%
-    dplyr::filter(data.start) %>%
-    {
+    dplyr::filter(data.start) %>% {
       .$rownum %>% as.numeric()
     }
 
   # find end of the data section
   data.endIdx <- E3076_DS1_2018.rowwise %>%
     dplyr::mutate(data.end = stringr::str_detect(.data$X1, stringr::coll("</Data>"))) %>%
-    dplyr::filter(data.end) %>%
-    {
+    dplyr::filter(data.end) %>% {
       .$rownum %>% as.numeric()
     }
 
@@ -78,16 +72,14 @@ sdarr.get_DS1.data <- function() {
   E3076_DS1_2018.names <- readr::read_table(Reference_Data_Set.file,
     show_col_types = FALSE,
     skip = data.startIdx + 3,
-    n_max = 1
-  )
+    n_max = 1)
 
   # read the data-points from the test record
   E3076_DS1_2018.data <- readr::read_table(Reference_Data_Set.file,
     col_names = FALSE,
     show_col_types = FALSE,
     skip = data.startIdx + 5,
-    n_max = data.endIdx - data.startIdx - 5
-  ) %>%
+    n_max = data.endIdx - data.startIdx - 5) %>%
     magrittr::set_names(E3076_DS1_2018.names %>% names()) %>%
     labelled::set_variable_labels(.labels = E3076_DS1_2018.names) %>%
     magrittr::set_attr("spec", NULL)
@@ -101,139 +93,233 @@ sdarr.get_DS1.data <- function() {
 }
 
 # Get Data from Reference Data Set E3076-DS1(2018)
-E3076_DS1_2018 <- sdarr.get_DS1.data()
+E3076_DS1_2018 <- get_DS1.data()
 ```
 
-```{r plot-Reference_Data_Set, message=FALSE, warning=FALSE, fig.height=4, fig.width=6}
+```{r plot-Reference_Data_Set, echo=FALSE, message=FALSE, warning=FALSE, fig.height=4, fig.width=6}
 # plot of the data
-E3076_DS1_2018 %>%
-  {
-    ggplot(data = ., aes(
-      x = extensometer, y = force,
-      color = "Reference Data Set\n(E3076_DS1_2018)"
-    )) +
-      geom_line() +
-      theme_bw() +
-      labs(
-        title = "Plot of the Reference Data Set",
-        x = "extensometer (in mm)",
-        y = "force (in kN)"
-      )
-  } %>%
+E3076_DS1_2018 %>% {
+  ggplot(data = ., aes(x = extensometer, y = force,
+                       color = "Reference Data Set\n(E3076_DS1_2018)")) +
+    geom_line() +
+    theme_bw() +
+    labs(title = "Plot of the Reference Data Set",
+         x = "extensometer (in mm)",
+         y = "force (in kN)")
+} %>%
   ggplotly(dynamicTicks = TRUE, originalData = FALSE) %>%
   config(displaylogo = FALSE, showSendToCloud = FALSE)
 ```
 
-# Validation of the standard SDAR-algorithm (sdar)
+# Validation of the standard SDAR-algorithm (sdar) {#link_to_standard_sdar}
 
 ```{r sdar_check, fig.height=4, fig.width=6}
 # Run the algorithm
-sdar.results <- E3076_DS1_2018 %>%
+sdar_result <- E3076_DS1_2018 %>%
   sdar(extensometer, force,
-    plot = FALSE, plotFun = TRUE
-  )
+    plot = FALSE, plotFun = TRUE)
+```
 
+```{r sdar_check_plot, echo=FALSE, out.width = "100%"}
 # show the plot of the final fit
-sdar.results$plots$final.fit %>%
-  {
-    # tap the environment of the crated plot-function
-    plot.env <- rlang::fn_env(.)
+sdar_result %>% {
+  # tap the environment of the crated plot-function
+  plot.env <- rlang::fn_env(.$plots$final.fit)
 
-    # get data and labels
-    plot.data <- plot.env$plot.data
-    plot.main <- plot.env$plot.main
-    plot.xlab <- plot.env$plot.xlab
-    plot.ylab <- plot.env$plot.ylab
-    y.data.max <- plot.data$y.data %>% max()
+  # get data and labels
+  plot.data <- plot.env$plot.data
+  plot.main <- plot.env$plot.main
+  plot.xlab <- plot.env$plot.xlab
+  plot.ylab <- plot.env$plot.ylab
+  y.data.max <- plot.data$y.data %>% max()
+  plot.y.lowerBound <- plot.env$y.lowerBound
+  plot.y.upperBound <- plot.env$y.upperBound
 
-    # create the ggplot2
-    plot.data %>% ggplot(aes(
-      x = x.data,
-      y = y.data,
-      color = "Reference Data Set\n(E3076_DS1_2018)"
-    )) +
-      geom_line() +
-      geom_line(
-        data = plot.data %>%
-          dplyr::filter(y.fit <= y.data.max),
-        aes(x = x.data, y = y.fit, color = "fit (sdar)")
-      ) +
-      theme_bw() +
-      labs(
-        title = plot.main,
-        x = plot.xlab,
-        y = plot.ylab
-      )
-  } %>%
-  ggplotly(dynamicTicks = TRUE, originalData = FALSE) %>%
-  config(displaylogo = FALSE, showSendToCloud = FALSE)
+  # create the ggplot2
+  plot.data %>% ggplot(aes(x = x.data,
+                           y = y.data,
+                           color = "Reference Data Set\n(E3076_DS1_2018)")) +
+    geom_line() +
+    geom_line(data = plot.data %>%
+                dplyr::filter(y.fit <= y.data.max),
+              aes(x = x.data, y = y.fit, 
+                  color = "fit (sdar)")) +
+    geom_hline(aes(color = "fit range",
+                   yintercept = plot.y.lowerBound),
+               linetype = "dashed", show.legend = TRUE) +
+    geom_hline(aes(color = "fit range",
+                   yintercept = plot.y.upperBound),
+               linetype = "dashed",show.legend = TRUE) +
+    theme_bw() +
+    labs(title = plot.main, x = plot.xlab, y = plot.ylab,
+         caption = paste0("Result of the SDAR-algorithm:",
+                          "\n\nFinal Slope: ",
+                          round(.$sdar$finalSlope, 2), " kN/mm",
+                          "\nTrue Intercept: ",
+                          round(.$sdar$trueIntercept, 5), " MPa","
+                          \n\nFit Range: ",
+                          round(plot.y.lowerBound, 3), " kN - ",
+                          round(plot.y.upperBound, 3), " kN"))
+} %>% 
+  plot()
 ```
 
 ## Validation Result of the standard SDAR-algorithm (sdar)
 
-The results of the analysis using `sdar()` are practically identical to the results given in [ASTM E3076-18](https://doi.org/10.1520/E3076-18) and perfectly match the results from [NIST Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050) (except for omitting any rounding). As stated in [NIST Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050) *...The few small discrepancies are most likely attributable to rounding errors...*.
+The results (see the [verbose messages](#link_to_standard_sdar) and table 1) of the analysis using `sdar()` are practically identical to the results given in [ASTM E3076-18](https://doi.org/10.1520/E3076-18) and perfectly match the results from [NIST Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050) (except for omitting any rounding). As stated in [NIST Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050) *...The few small discrepancies are most likely attributable to rounding errors...*.
 
-# Validation of the Random Sub-sampling Modification of the SDAR-algorithm (sdar.lazy)
+```{r, message=FALSE, warning=FALSE, echo=FALSE, tab.cap="Table 1: Result comparison for the standard SDAR-algorithm"}
 
-```{r sdar.lazy_check, fig.height=4, fig.width=6}
+# use published results and new for sdar
+sdar_result.table <- tibble::tibble("Parameter/result" = c("Relative x-resolution",
+                                                           "Relative y-resolution",
+                                                           "Relative x-noise",
+                                                           "Relative y-noise",
+                                                           "1st Quartile relative residual slope",
+                                                           "4th Quartile relative residual slope",
+                                                           "Relative Fit Range",
+                                                           "Final Slope (in kN/mm)",
+                                                           "True Intercept (in kN)",
+                                                           "Lower y bound of fit range (in kN)",
+                                                           "Upper y bound of fit range (in kN)"),
+                                    "ASTM E3076" = c("0.67",
+                                                     "0.33",
+                                                     "0.325",
+                                                     "0.144",
+                                                     "0.366",
+                                                     "0.205",
+                                                     "0.92565",
+                                                     "328.10",
+                                                     "-0.03761",
+                                                     "5.457",
+                                                     "14.36"),
+                                    "Excel spreadsheet" = c("0.67",
+                                                           "0.33",
+                                                           "0.325",
+                                                           "0.144",
+                                                           "0.366",
+                                                           "0.205",
+                                                           "0.92562",
+                                                           "328.11",
+                                                           "-0.03761",
+                                                           "5.457",
+                                                           "14.36"),
+                                    "sdar" = c(paste0(round(sdar_result$Data_Quality_Metrics$digitalResolution$x$Relative_resolution, 2)),
+                                               paste0(round(sdar_result$Data_Quality_Metrics$digitalResolution$y$Relative_resolution, 2)),
+                                               paste0(round(sdar_result$Data_Quality_Metrics$Noise$x$Relative_noise, 3)),
+                                               paste0(round(sdar_result$Data_Quality_Metrics$Noise$y$Relative_noise, 3)),
+                                               paste0(round(sdar_result$Fit_Quality_Metrics$Curvature$first_quartile$relative_residual_slope, 3)),
+                                               paste0(round(sdar_result$Fit_Quality_Metrics$Curvature$fourth_quartile$relative_residual_slope, 3)),
+                                               paste0(round(sdar_result$Fit_Quality_Metrics$Fit_range$relative_fit_range, 5)),
+                                               paste0(round(sdar_result$sdar$finalSlope %>% as.numeric(), 2)),
+                                               paste0(round(sdar_result$sdar$trueIntercept %>% as.numeric(), 5)),
+                                               paste0(round(sdar_result$sdar$y.lowerBound %>% as.numeric(), 3)),
+                                               paste0(round(sdar_result$sdar$y.upperBound %>% as.numeric(), 3))))
+
+sdar_result.table %>% 
+  kableExtra::kbl(align = c("l", "c", "c", "c"), escape = FALSE,
+                  caption = "Table 1: Result comparison for the standard SDAR-algorithm") %>%
+  kableExtra::kable_styling(bootstrap_options = c("striped")) %>%
+  kableExtra::row_spec(0, extra_css = "vertical-align:top;")
+```
+
+# Validation of the Random Sub-sampling Modification of the SDAR-algorithm (sdar_lazy) {#link_to_lazy_sdar}
+
+```{r sdar.lazy_check}
 # Run the algorithm (after setting a random seed)
+set.seed(50041180)
 # As the data set is rather short, the algorithm might refuse to use
 # the random sub-sampling as it will require more computational effort.
 # Enforce by setting enforce_subsampling = TRUE.
-set.seed(50041180)
-sdar.lazy.results <- E3076_DS1_2018 %>%
-  sdar.lazy(extensometer, force,
-    plot = FALSE, plotFun = TRUE
-  )
 
-# show the plot of the final fit
-sdar.lazy.results$plots$final.fit %>%
-  {
-    # tap the environment of the crated plot-function
-    plot.env <- rlang::fn_env(.)
-
-    # get data and labels
-    plot.data <- plot.env$plot.data
-    plot.main <- plot.env$plot.main
-    plot.xlab <- plot.env$plot.xlab
-    plot.ylab <- plot.env$plot.ylab
-    y.data.max <- plot.data$y.data %>% max()
-
-    # create the ggplot2
-    plot.data %>%
-      ggplot(aes(x = x.data, y = y.data, color = "Reference Data Set\n(E3076_DS1_2018)")) +
-      geom_line() +
-      geom_line(
-        data = plot.data %>%
-          dplyr::filter(y.fit <= y.data.max),
-        aes(
-          x = x.data, y = y.fit,
-          color = "fit (sdar.lazy)"
-        )
-      ) +
-      theme_bw() +
-      labs(
-        title = plot.main,
-        x = plot.xlab,
-        y = plot.ylab
-      )
-  } %>%
-  ggplotly(dynamicTicks = TRUE, originalData = FALSE) %>%
-  config(displaylogo = FALSE, showSendToCloud = FALSE)
+lazy_result <- E3076_DS1_2018 %>%
+  sdar_lazy(extensometer, force,
+    plot = FALSE, plotFun = TRUE,
+    enforce_subsampling = TRUE)
 ```
 
-## Validation Result of the Random Sub-sampling Modification of the SDAR-algorithm (sdar.lazy)
+```{r sdar.lazy_check_plot, echo=FALSE, out.width = "100%"}
+# show the plot of the final fit
+lazy_result %>% {
+  # tap the environment of the crated plot-function
+  plot.env <- rlang::fn_env(.$plots$final.fit)
 
-At first glimpse, the results of the analysis using the random sub-sampling variant of the SDAR-algorithm `sdar.lazy()` are not identical to the results given in [ASTM E3076-18](https://doi.org/10.1520/E3076-18) or the results from [NIST Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050) (except for omitting any rounding).  
-However, when considering the 95% confidence intervals (additionally given with the result from `sdar()` and `sdar.lazy()`) obtained from the final fitting in the standard SDAR-algorithm, the results of the lazy variant are well within the 95%-CI of the standard variant. There is only a minor difference in the y-range of the final fits resulting in slightly different final results.  
-Comparing the regression curves of `sdar.lazy()` and `sdar()` over the mechanical data, you see that there is practically no difference (zoom in ...a lot... to see a difference).
+  # get data and labels
+  plot.data <- plot.env$plot.data
+  plot.main <- plot.env$plot.main
+  plot.xlab <- plot.env$plot.xlab
+  plot.ylab <- plot.env$plot.ylab
+  y.data.max <- plot.data$y.data %>% max()
+  plot.y.lowerBound <- plot.env$y.lowerBound
+  plot.y.upperBound <- plot.env$y.upperBound
 
-```{r sdar.lazy_comparison, fig.height=4, fig.width=6}
+  # create the ggplot2
+  plot.data %>%
+    ggplot(aes(x = x.data, y = y.data, 
+               color = "Reference Data Set\n(E3076_DS1_2018)")) +
+    geom_line() +
+    geom_line(data = plot.data %>%
+                dplyr::filter(y.fit <= y.data.max),
+              aes(x = x.data, y = y.fit, 
+                  color = "fit (sdar_lazy)")) +
+    geom_hline(aes(color = "fit range",
+                   yintercept = plot.y.lowerBound),
+               linetype = "dashed", show.legend = TRUE) +
+    geom_hline(aes(color = "fit range",
+                   yintercept = plot.y.upperBound),
+               linetype = "dashed",show.legend = TRUE) +
+    theme_bw() +
+    labs(title = plot.main, x = plot.xlab, y = plot.ylab,
+         caption = paste0("Result of the random sub-sampling SDAR-algorithm:",
+                          "\n\nFinal Slope: ",
+                          round(.$sdar$finalSlope, 2), " kN/mm",
+                          "\nTrue Intercept: ",
+                          round(.$sdar$trueIntercept, 5), " MPa","
+                          \n\nFit Range: ",
+                          round(plot.y.lowerBound, 3), " kN - ",
+                          round(plot.y.upperBound, 3), " kN"))
+} %>% 
+  plot()
+```
+
+## Validation Result of the Random Sub-sampling Modification of the SDAR-algorithm (sdar_lazy)
+
+At first glimpse, the results (see the [verbose messages](#link_to_lazy_sdar) and table 2) of the analysis using the random sub-sampling variant of the SDAR-algorithm `sdar_lazy()` are not identical to the results given in [ASTM E3076-18](https://doi.org/10.1520/E3076-18) or the results from [NIST Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050).  
+The final slope has a relative difference of `r paste0(round(((lazy_result$sdar$finalSlope %>% as.numeric()) - 328.1)/328.1*100, 2), " %")` to the reference value from ASTM E3076.  
+  
+However, when considering the 95% confidence interval of the final fitting (not mentioned in the ASTM E3076, but additionally calculated from the final linear regression of the data in `sdar()` and `sdar_lazy()`), the results of the lazy variant are well within the 95%-CI of the standard variant. There is only a minor difference in the y-range of the final fits resulting in slightly different final results.  
+Comparing the regression curves of `sdar_lazy()` and `sdar()` over the mechanical data, you see that there is practically no difference (zoom in ...a lot... to see a difference).
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE, tab.cap="Table 2: Result comparison for the random sub-sampling SDAR-algorithm"}
+
+# insert new results for sdar_lazy
+lazy_result.table <- sdar_result.table %>% 
+  dplyr::select(- sdar) %>% 
+  dplyr::bind_cols(tibble::tibble("sdar_lazy" = c(paste0(round(lazy_result$Data_Quality_Metrics$digitalResolution$x$Relative_resolution, 2)),
+                                                  paste0(round(lazy_result$Data_Quality_Metrics$digitalResolution$y$Relative_resolution, 2)),
+                                                  paste0(round(lazy_result$Data_Quality_Metrics$Noise$x$Relative_noise, 3)),
+                                                  paste0(round(lazy_result$Data_Quality_Metrics$Noise$y$Relative_noise, 3)),
+                                                  paste0(round(lazy_result$Fit_Quality_Metrics$Curvature$first_quartile$relative_residual_slope, 3)),
+                                                  paste0(round(lazy_result$Fit_Quality_Metrics$Curvature$fourth_quartile$relative_residual_slope, 3)),
+                                                  paste0(round(lazy_result$Fit_Quality_Metrics$Fit_range$relative_fit_range, 5)),
+                                                  paste0(round(lazy_result$sdar$finalSlope %>% as.numeric(), 2)),
+                                                  paste0(round(lazy_result$sdar$trueIntercept %>% as.numeric(), 5)),
+                                                  paste0(round(lazy_result$sdar$y.lowerBound %>% as.numeric(), 3)),
+                                                  paste0(round(lazy_result$sdar$y.upperBound %>% as.numeric(), 3)))))
+
+lazy_result.table %>% 
+  kableExtra::kbl(align = c("l", "c", "c", "c"), escape = FALSE,
+                  caption = "Table 2: Result comparison for the random sub-sampling SDAR-algorithm") %>%
+  kableExtra::kable_styling(bootstrap_options = c("striped")) %>%
+  kableExtra::row_spec(0, extra_css = "vertical-align:top;")
+```
+
+```{r sdar.lazy_comparison, echo=FALSE, fig.height=4, fig.width=6}
 # plot fit (with 95% CI) and lazy fit against original test record
 {
   # tap the environment of the crated plot-functions
-  plot.env <- rlang::fn_env(sdar.results$plots$final.fit)
-  plot.env.lazy <- rlang::fn_env(sdar.lazy.results$plots$final.fit)
+  plot.env <- rlang::fn_env(sdar_result$plots$final.fit)
+  plot.env.lazy <- rlang::fn_env(lazy_result$plots$final.fit)
 
   # get data and labels
   plot.data <- plot.env$plot.data %>%
@@ -243,40 +329,30 @@ Comparing the regression curves of `sdar.lazy()` and `sdar()` over the mechanica
   plot.ylab <- plot.env$plot.ylab
 
   # get fit ranges
-  x.lowerBound <- sdar.results$sdar$x.lowerBound
-  x.upperBound <- sdar.results$sdar$x.upperBound
-  x.lowerBound.lazy <- sdar.lazy.results$sdar$x.lowerBound
-  x.upperBound.lazy <- sdar.lazy.results$sdar$x.upperBound
+  x.lowerBound <- sdar_result$sdar$x.lowerBound
+  x.upperBound <- sdar_result$sdar$x.upperBound
+  x.lowerBound.lazy <- lazy_result$sdar$x.lowerBound
+  x.upperBound.lazy <- lazy_result$sdar$x.upperBound
 
   # re-fit for plotting
   y.data.prediction <- plot.data %>%
-    dplyr::filter(dplyr::between(x.data, x.lowerBound, x.upperBound)) %>%
-    {
+    dplyr::filter(dplyr::between(x.data, x.lowerBound, x.upperBound)) %>% {
       data <- .
       lm(y.data ~ x.data, data = data) %>%
-        predict(
-          newdata = dplyr::bind_rows(
-            data.frame(x.data = 0),
-            plot.data %>% dplyr::select(x.data)
-          ),
-          interval = "confidence"
-        )
+        predict(newdata = dplyr::bind_rows(data.frame(x.data = 0),
+                                           plot.data %>% dplyr::select(x.data)),
+          interval = "confidence")
     }
 
   y.data.prediction.lazy <- plot.data %>%
-    dplyr::filter(dplyr::between(
-      x.data,
-      x.lowerBound.lazy,
-      x.upperBound.lazy
-    )) %>%
-    {
+    dplyr::filter(dplyr::between(x.data, 
+                                 x.lowerBound.lazy, 
+                                 x.upperBound.lazy)) %>% {
       data <- .
       lm(y.data ~ x.data, data = data) %>%
-        predict(newdata = dplyr::bind_rows(
-          data.frame(x.data = 0),
-          plot.data %>%
-            dplyr::select(x.data)
-        )) %>%
+        predict(newdata = dplyr::bind_rows(data.frame(x.data = 0),
+                                           plot.data %>%
+                                             dplyr::select(x.data))) %>%
         as.data.frame() %>%
         set_names("fit.lazy")
     }
@@ -284,69 +360,41 @@ Comparing the regression curves of `sdar.lazy()` and `sdar()` over the mechanica
   # add an empty data point at 0 extension to see the difference in intercept
   plot.data <- data.frame(x.data = 0, y.data = NA) %>%
     dplyr::bind_rows(plot.data) %>%
-    dplyr::bind_cols(
-      y.data.prediction,
-      y.data.prediction.lazy
-    )
+    dplyr::bind_cols(y.data.prediction, y.data.prediction.lazy)
 
   y.data.max <- plot.data$y.data %>% max(na.rm = TRUE)
 
-  ggplot(
-    data = plot.data,
-    aes(x = x.data, y = y.data, color = "Reference Data Set\n(E3076_DS1_2018)")
-  ) +
+  ggplot(data = plot.data,
+         aes(x = x.data, y = y.data, 
+             color = "Reference Data Set\n(E3076_DS1_2018)")) +
     geom_line() +
-    geom_line(
-      data = plot.data %>%
-        dplyr::filter(dplyr::between(
-          x.data,
-          x.lowerBound,
-          x.upperBound
-        )),
-      aes(
-        x = x.data, y = y.data,
-        color = "fit-range (sdar)"
-      ),
-      linewidth = 1.5, alpha = 0.5
-    ) +
-    geom_line(
-      data = plot.data %>%
-        dplyr::filter(dplyr::between(
-          x.data,
-          x.lowerBound.lazy,
-          x.upperBound.lazy
-        )),
-      aes(
-        x = x.data, y = y.data,
-        color = "fit-range (sdar.lazy)"
-      ),
-      linewidth = 1.5, alpha = 0.5
-    ) +
-    geom_line(
-      data = plot.data %>%
-        dplyr::filter(fit <= y.data.max),
-      aes(x = x.data, y = fit, color = "fit (sdar)")
-    ) +
-    geom_ribbon(
-      data = plot.data %>%
-        dplyr::filter(fit <= y.data.max),
-      aes(
-        x = x.data, y = NULL, ymin = lwr, ymax = upr,
-        color = "fit (sdar)"
-      ),
-      linewidth = 0, alpha = 0.25
-    ) +
-    geom_line(
-      data = plot.data %>%
-        dplyr::filter(fit.lazy <= y.data.max),
-      aes(x = x.data, y = fit.lazy, color = "fit (sdar.lazy)")
-    ) +
+    geom_line(data = plot.data %>%
+                dplyr::filter(dplyr::between(x.data, 
+                                             x.lowerBound,x.upperBound)),
+              aes(x = x.data, y = y.data,
+                  color = "fit-range (sdar)"),
+              linewidth = 1.5, alpha = 0.5) +
+    geom_line(data = plot.data %>%
+                dplyr::filter(dplyr::between(x.data, 
+                                             x.lowerBound.lazy, 
+                                             x.upperBound.lazy)),
+              aes(x = x.data, y = y.data, 
+                  color = "fit-range (sdar_lazy)"),
+              linewidth = 1.5, alpha = 0.5) +
+    geom_line(data = plot.data %>%
+                dplyr::filter(fit <= y.data.max),
+              aes(x = x.data, y = fit, color = "fit (sdar)")) +
+    geom_ribbon(data = plot.data %>%
+                  dplyr::filter(fit <= y.data.max),
+                aes(x = x.data, y = NULL, ymin = lwr, ymax = upr,
+                    color = "fit (sdar)"),
+                linewidth = 0, alpha = 0.25) +
+    geom_line(data = plot.data %>%
+                dplyr::filter(fit.lazy <= y.data.max),
+              aes(x = x.data, y = fit.lazy, color = "fit (sdar_lazy)")) +
     theme_bw() +
-    labs(
-      title = "Final fit (with 95% CI) vs. final lazy fit",
-      x = plot.xlab,
-      y = plot.ylab
-    )
+    labs(title = "Final fit vs. final lazy fit",
+         x = plot.xlab, y = plot.ylab)
 } %>%
   ggplotly(dynamicTicks = TRUE, originalData = FALSE) %>%
   config(displaylogo = FALSE, showSendToCloud = FALSE)
@@ -354,7 +402,7 @@ Comparing the regression curves of `sdar.lazy()` and `sdar()` over the mechanica
 
 # Conclusions
 
-Even though this is more a benchmarking than a *real* validation, the results of `sdar()` are practically identical to the results listed in [ASTM E3076-18](https://doi.org/10.1520/E3076-18) and in [NIST Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050). Considering the 95% confidence intervals of the fitting results, same seems true for the random sub-sampling modification used in `sdar.lazy()`.
+Even though this is more a benchmarking than a *real* validation, the results of `sdar()` are practically identical to the results listed in [ASTM E3076-18](https://doi.org/10.1520/E3076-18) and in [NIST Technical Note 2050 by E. Lucon](https://doi.org/10.6028/NIST.TN.2050). Considering the 95% confidence intervals of the fitting results, same seems true for the random sub-sampling modification used in `sdar_lazy()`.
 
 ## Final Remark
   
