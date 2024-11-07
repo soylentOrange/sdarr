@@ -40,7 +40,8 @@ Suggests:
     plotly,
     readr,
     rmarkdown,
-    spelling
+    spelling,
+    kableExtra
 Encoding: UTF-8
 Language: en-US
 Roxygen: list(markdown = TRUE)
