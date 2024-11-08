@@ -496,16 +496,15 @@ sdar_execute.lazy <- function(prepared_data,
   return(results)
 }
 
-#' @title Random sub-sampling variant of the SDAR-algorithm
+#' @title Random Sub-Sampling Variant of the SDAR-Algorithm
 #'
 #' @description Run a random sub-sampling modification of the SDAR algorithm as
-#'   originally standardized in ASTM E3076-18. As the original version uses
-#'   numerous linear regressions (`.lm.fit()` from the stats-package), it can be
+#'   standardized in "ASTM E3076-18". As the original version uses numerous
+#'   linear regressions (`.lm.fit()` from the stats-package), it can be
 #'   painfully slow for test data with high resolution. The lazy variant of the
-#'   algorithm will use several random sub-samples of the data to find the best
-#'   estimate for the fit-range within the data and thus can speed up
-#'   calculations. See the article [Speed Benchmarking the
-#'   SDAR-algorithm](https://soylentorange.github.io/sdarr/articles/speed_improvment.html)
+#'   algorithm will use several random sub-samples of the data to find an
+#'   estimate for the fit-range within the data and thus can improve processing
+#'   speed. See the article [Speed Benchmarking the SDAR-algorithm](https://soylentorange.github.io/sdarr/articles/speed_improvment.html)
 #'   for further information.
 #'
 #' @note The function can use parallel processing via the
@@ -539,7 +538,7 @@ sdar_execute.lazy <- function(prepared_data,
 #'   sub-sampled data will pass the quality checks.
 #'
 #' @param ... <[`dynamic-dots`][rlang::dyn-dots]> Pass parameters to downstream
-#'   functions: set `verbose.all`, `plot.all` and `plotFun.all` to `TRUE` to get
+#'   functions: e.g. set `verbose.all` or `plot.all` to `TRUE` to get
 #'   additional diagnostic information during processing data. Set
 #'   `enforce_subsampling` to `TRUE` to run the random sub-sampling algorithm
 #'   even though it might be slower than the standard SDAR-algorithm.
@@ -548,8 +547,7 @@ sdar_execute.lazy <- function(prepared_data,
 #'
 #' @returns A list containing a data.frame with the results of the final fit,
 #'   lists with the quality- and fit-metrics, and a list containing the crated
-#'   plot-function(s) (if `plotFun = TRUE` or, for all diagnostic plots
-#'   `plotFun.all = TRUE`).
+#'   plot-functions.
 #'
 #' @examples
 #' # Synthesize a test record resembling EN AW-6060-T66.
@@ -577,7 +575,6 @@ sdar_execute.lazy <- function(prepared_data,
 sdar_lazy <- function(data, x, y,
                       verbose = TRUE,
                       plot = TRUE,
-                      plotFun = FALSE,
                       n.fit = 5,
                       cutoff_probability = 0.5,
                       ...) {
@@ -606,19 +603,19 @@ sdar_lazy <- function(data, x, y,
   plot.all <- try({additional_parameters$plot.all}, silent = TRUE)
   if (!is.logical(plot.all)) plot.all <- FALSE
 
-  plotFun.all <- try({additional_parameters$plotFun.all}, silent = TRUE)
-  if (!is.logical(plotFun.all)) plotFun.all <- FALSE
-
   n.candidates <- try({additional_parameters$n.candidates}, silent = TRUE)
   if (!is.numeric(n.candidates)) n.candidates <- 5
 
   enforce_subsampling <- try({additional_parameters$enforce_subsampling},
                              silent = TRUE)
+  if (!is.logical(enforce_subsampling)) enforce_subsampling <- FALSE
+
   quality_penalty <- try({additional_parameters$quality_penalty}, silent = TRUE)
   if (!is.numeric(quality_penalty)) quality_penalty <- 0.1
 
-  # save final fit plot, when plotFun.all is set
-  plotFun <- plotFun || plotFun.all
+  # save final fit plot and all other plots
+  plotFun <- TRUE
+  plotFun.all <- TRUE
 
   # give messages for report, when verbose.all is set
   verbose <- verbose || verbose.all

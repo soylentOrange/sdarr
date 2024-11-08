@@ -2,9 +2,9 @@
 % Please edit documentation in R/sdarr_standard.R
 \name{sdar}
 \alias{sdar}
-\title{SDAR-algorithm}
+\title{SDAR-Algorithm}
 \usage{
-sdar(data, x, y, verbose = TRUE, plot = TRUE, plotFun = FALSE, ...)
+sdar(data, x, y, verbose = TRUE, plot = TRUE, ...)
 }
 \arguments{
 \item{data}{Data record to analyze. Labels of the data columns will be used
@@ -15,20 +15,17 @@ within data.}
 
 \item{verbose, plot}{Give a summarizing report / show a plot of the final fit.}
 
-\item{plotFun}{Set to \code{TRUE} to get a plot-function for the final fit with
-the results for later use.}
-
 \item{...}{<\code{\link[rlang:dyn-dots]{dynamic-dots}}> Pass parameters to downstream
-functions: set \code{verbose.all}, \code{plot.all} and \code{plotFun.all} to \code{TRUE} to get
+functions: e.g. set \code{verbose.all} or \code{plot.all} to get
 additional diagnostic information during processing data.}
 }
 \value{
 A list containing a data.frame with the results of the final fit,
 lists with the quality- and fit-metrics, and a list containing the crated
-plot-function(s) (if \code{plotFun = TRUE}).
+plot-functions.
 }
 \description{
-Run the SDAR algorithm as standardized in ASTM E3076-18. Will
+Run the SDAR-algorithm as standardized in "ASTM E3076-18". Will
 use numerous linear regressions (\code{.lm.fit()} from the stats-package) and
 can be painfully slow for test data with high resolution. See the article
 \href{https://soylentorange.github.io/sdarr/articles/speed_improvment.html}{Speed Benchmarking the SDAR-algorithm}

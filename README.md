@@ -73,7 +73,7 @@ Al_6060_T66 <- synthesize_test_data(
 
 # Analyze the test record
 Al_6060_T66.result <- sdar(Al_6060_T66,
-  x = strain, y = stress, plotFun = TRUE)
+  x = strain, y = stress)
 #> Determination of Slope in the Linear Region of a Test Record:
 #> SDAR-algorithm
 #>   Data Quality Metric: Digital Resolution
@@ -139,8 +139,7 @@ set.seed(50041180)
 # Analyze the test record
 # (with enforced random sub-sampling)
 Al_6060_T66.result_lazy <- sdar_lazy(Al_6060_T66,
-  x = strain, y = stress, plot = FALSE,
-  plotFun = TRUE, enforce_subsampling = TRUE)
+  x = strain, y = stress, plot = FALSE, enforce_subsampling = TRUE)
 #> Determination of Slope in the Linear Region of a Test Record:
 #> Random sub-sampling modification of the SDAR-algorithm
 #>   Random sub-sampling information:
@@ -189,11 +188,9 @@ Al_6060_T66.result_lazy <- sdar_lazy(Al_6060_T66,
 
 `sdar()` and `sdar_lazy()` will create diagnostic plots throughout
 calculations, which will only be shown when requested (i.e. set
-`plot = TRUE` for obtaining a [crated](https://github.com/r-lib/carrier)
-plot-function of the final fit, or `plot.all = TRUE` for showing all
-additional diagnostic plots). To have a plot drawn later, you can call
-the provided plot-function from the results, when you set
-`plotFun = TRUE` (or `plotFun.all = TRUE`).
+`plot = TRUE` for showing a plot of the final fit, or `plot.all = TRUE`
+for showing all additional diagnostic plots). To have a plot drawn
+later, you can call the provided plot-function from the results.
 
 The plot-functions are [crated](https://github.com/r-lib/carrier), so
 you can easily tap their environment to convert it into e.g. a

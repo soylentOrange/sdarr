@@ -2,7 +2,7 @@
 % Please edit documentation in R/sdarr_lazy.R
 \name{sdar_lazy}
 \alias{sdar_lazy}
-\title{Random sub-sampling variant of the SDAR-algorithm}
+\title{Random Sub-Sampling Variant of the SDAR-Algorithm}
 \usage{
 sdar_lazy(
   data,
@@ -10,7 +10,6 @@ sdar_lazy(
   y,
   verbose = TRUE,
   plot = TRUE,
-  plotFun = FALSE,
   n.fit = 5,
   cutoff_probability = 0.5,
   ...
@@ -25,9 +24,6 @@ within data.}
 
 \item{verbose, plot}{Give a summarizing report / show a plot of the final fit.}
 
-\item{plotFun}{Set to \code{TRUE} to get a plot-function for the final fit with
-the results for later use.}
-
 \item{n.fit}{Repetitions of drawing a random sub-sample from the data in the
 normalized and finding a fitting range to find an estimate for the final
 fitting range.}
@@ -37,7 +33,7 @@ sub-sampled data range via logistic regression, which is predicting if
 sub-sampled data will pass the quality checks.}
 
 \item{...}{<\code{\link[rlang:dyn-dots]{dynamic-dots}}> Pass parameters to downstream
-functions: set \code{verbose.all}, \code{plot.all} and \code{plotFun.all} to \code{TRUE} to get
+functions: e.g. set \code{verbose.all} or \code{plot.all} to \code{TRUE} to get
 additional diagnostic information during processing data. Set
 \code{enforce_subsampling} to \code{TRUE} to run the random sub-sampling algorithm
 even though it might be slower than the standard SDAR-algorithm.}
@@ -45,17 +41,16 @@ even though it might be slower than the standard SDAR-algorithm.}
 \value{
 A list containing a data.frame with the results of the final fit,
 lists with the quality- and fit-metrics, and a list containing the crated
-plot-function(s) (if \code{plotFun = TRUE} or, for all diagnostic plots
-\code{plotFun.all = TRUE}).
+plot-functions.
 }
 \description{
 Run a random sub-sampling modification of the SDAR algorithm as
-originally standardized in ASTM E3076-18. As the original version uses
-numerous linear regressions (\code{.lm.fit()} from the stats-package), it can be
+standardized in "ASTM E3076-18". As the original version uses numerous
+linear regressions (\code{.lm.fit()} from the stats-package), it can be
 painfully slow for test data with high resolution. The lazy variant of the
-algorithm will use several random sub-samples of the data to find the best
-estimate for the fit-range within the data and thus can speed up
-calculations. See the article \href{https://soylentorange.github.io/sdarr/articles/speed_improvment.html}{Speed Benchmarking the SDAR-algorithm}
+algorithm will use several random sub-samples of the data to find an
+estimate for the fit-range within the data and thus can improve processing
+speed. See the article \href{https://soylentorange.github.io/sdarr/articles/speed_improvment.html}{Speed Benchmarking the SDAR-algorithm}
 for further information.
 }
 \note{

@@ -158,9 +158,9 @@ sdar_execute <- function(prepared_data,
 }
 
 
-#' @title SDAR-algorithm
+#' @title SDAR-Algorithm
 #'
-#' @description Run the SDAR algorithm as standardized in ASTM E3076-18. Will
+#' @description Run the SDAR-algorithm as standardized in "ASTM E3076-18". Will
 #'   use numerous linear regressions (`.lm.fit()` from the stats-package) and
 #'   can be painfully slow for test data with high resolution. See the article
 #'   [Speed Benchmarking the
@@ -192,11 +192,8 @@ sdar_execute <- function(prepared_data,
 #'
 #' @param verbose,plot Give a summarizing report / show a plot of the final fit.
 #'
-#' @param plotFun Set to `TRUE` to get a plot-function for the final fit with
-#'   the results for later use.
-#'
 #' @param ... <[`dynamic-dots`][rlang::dyn-dots]> Pass parameters to downstream
-#'   functions: set `verbose.all`, `plot.all` and `plotFun.all` to `TRUE` to get
+#'   functions: e.g. set `verbose.all` or `plot.all` to get
 #'   additional diagnostic information during processing data.
 #'
 #' @seealso [sdar_lazy()] for the random sub-sampling modification of the
@@ -229,13 +226,12 @@ sdar_execute <- function(prepared_data,
 #'
 #' @returns A list containing a data.frame with the results of the final fit,
 #'   lists with the quality- and fit-metrics, and a list containing the crated
-#'   plot-function(s) (if `plotFun = TRUE`).
+#'   plot-functions.
 #'
 #' @export
 sdar <- function(data, x, y,
                  verbose = TRUE,
                  plot = TRUE,
-                 plotFun = FALSE,
                  ...) {
   # to be furrr-safe, enquote the tidy arguments here
   x <- rlang::enquo(x)
@@ -252,17 +248,15 @@ sdar <- function(data, x, y,
   plot.all <- try({additional_parameters$plot.all}, silent = TRUE)
   if (!is.logical(plot.all)) plot.all <- FALSE
 
-  plotFun.all <- try({additional_parameters$plotFun.all}, silent = TRUE)
-  if (!is.logical(plotFun.all)) plotFun.all <- FALSE
-
-  # save final fit plot, when plotFun.all is set
-  plotFun <- plotFun || plotFun.all
-
   # give messages for report, when verbose.all is set
   verbose <- verbose || verbose.all
 
   # show final fit plot, when plot.all is set
   plot <- plot || plot.all
+
+  # save final fit plot and all other plots
+  plotFun <- TRUE
+  plotFun.all <- TRUE
 
   # get units for data
   x.label.unit <- data %>%

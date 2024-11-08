@@ -1,7 +1,8 @@
 # sdarr current development version
 
-* Added down-sampling variant of the SDAR-algorithm (under development).
-* Use de-noised data in sdar.lazy() when data quality metrics fail on data-set.
+* include all crated plot-function in the results by default
+* streamlined DESCRIPTION 
+* improve articale on validation
 
 # sdarr 0.7.0
 

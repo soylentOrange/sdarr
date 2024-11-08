@@ -23,12 +23,12 @@ The SDAR-algorithm as standardized in [ASTM E3076-18](https://doi.org/10.1520/E3
 
 The Test Data Set for Speed Estimation was generated with different resolution for x (strain) from 11.3 to 15.6 effective bits. A total of 24 synthetic test records resembling tensile mechanical testing of aluminium (EN AW-6060-T66), with a toe region added and some minor noise in the synthetic stress data) was created using [sdarr::synthesize_test_data()](https://soylentorange.github.io/sdarr/reference/synthesize_test_data.html).
 
-Test data was evaluated with the [sequential plan](https://future.futureverse.org/reference/sequential.html) using one core, and the [multisession plan](https://future.futureverse.org/reference/multisession.html) using four and eight cores. The time for execution of [sdarr::sdar()](https://soylentorange.github.io/sdarr/reference/sdar.html), [sdarr:sdar.lazy()](https://soylentorange.github.io/sdarr/reference/sdar_lazy.html) and sdarr:sdar_lazy() with enforced sub-sampling was measured using pracma::tic,toc.  
+Test data was evaluated with the [sequential plan](https://future.futureverse.org/reference/sequential.html) using one core, and the [multisession plan](https://future.futureverse.org/reference/multisession.html) using four and eight cores. The time for execution of [sdarr::sdar()](https://soylentorange.github.io/sdarr/reference/sdar.html), [sdarr:sdar_lazy()](https://soylentorange.github.io/sdarr/reference/sdar_lazy.html) and sdarr:sdar_lazy() with enforced sub-sampling was measured using pracma::tic,toc.  
 The evaluation was run on a 2021 MacBook Pro (with M1 Max processor and 64 GB Ram under macOS 13.4.1). 
 
 ### Side Note on Bechmarking
 As benchmarking takes a significant amount of time, the results were pre-calculated (using the rmd-file speed_improvement_data.Rmd, which is available within the installed sdarr-package). Use `rmarkdown::render()` to have the benchmarking conducted on you computer and knitted to an html-document into the current working directory, i.e. run the following block:
-```
+```r
 # knit the benchmarking-rmd to html-file
 # (and save the result data in the current working directory)
 # caution: might take some time...
@@ -156,7 +156,7 @@ sdarr_benchmark_result %>%
 As expected, the standard SDAR-algorithm seems to scale quadratic with the number of points in the normalized data range. It also benefits the most from using several cores (except for some minor overhead of ~100ms when using 8 cores at very few points in the normalized data range).  
 
 The random sub-sampling modification, which is available via `sdar_lazy()`, drastically reduces processing time compared to the standard SDAR-algorithm for higher resolution test data. For lower resolution test data, the algorithm will fall back to the standard SDAR-algorithm but still, there is some additional overhead to be considered.  
-Considering the results, the speed improvement of the random sub-sampling modification is apparent at 250 - 400 points in the normalized data range (depending on the number of cores used). 
-At very high-resolution data (> 600 points in the normalized range), the execution time for `sdar_lazy()` seems to stabilize to a (more or less) constant value of 1.8 seconds (when using four cores) to 3 seconds (when using only one or eight cores).
+Comparing the results, the speed improvement of the random sub-sampling modification is apparent at 250 - 400 points in the normalized data range (depending on the number of cores used). 
+At very high-resolution data (> 600 points in the normalized range), the execution time for `sdar_lazy()` seems to stabilize to a (more or less) constant value of 1.8 seconds (when using four cores) to 3 seconds (when using only one or eight cores). The actual time will vary depending on the machine used for computation.
   
 Using using several cores for the SDAR-algorithm via setting [multisession plan](https://future.futureverse.org/reference/multisession.html) will drastically improve performance. Yet, the additional overhead might slow down processing when using the maximum available cores. Tweaking the plan (see the vignette [A Future for R: Future Topologies](https://cran.r-project.org/web/packages/future/vignettes/future-3-topologies.html) for further information) might increase overall performance when processing batches of data.  
