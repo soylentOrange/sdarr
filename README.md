@@ -5,7 +5,7 @@
 <!-- [![CRAN](http://www.r-pkg.org/badges/version/sdarr)](https://cran.r-project.org/package=sdarr) -->
 <!-- badges: end -->
 
-<!-- README.md is generated from README.Rmd. Please edit that file -->
+<!-- README.md is generated from README.Rmd. Please edit only README.Rmd -->
 
 # sdarr
 

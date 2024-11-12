@@ -7,7 +7,7 @@ output: github_document
 <!-- [![CRAN](http://www.r-pkg.org/badges/version/sdarr)](https://cran.r-project.org/package=sdarr) -->
 <!-- badges: end -->
 
-<!-- README.md is generated from README.Rmd. Please edit that file -->
+<!-- README.md is generated from README.Rmd. Please edit only README.Rmd -->
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
@@ -29,14 +29,14 @@ As the SDAR-algorithm, implemented in `sdar()`, heavily uses linear regressions,
 
 You can install the latest release version of sdarr from [GitHub](https://github.com/soylentOrange/sdarr/releases/) with:
 
-``` r
+```r
 # install.packages("devtools")
 devtools::install_github("soylentOrange/sdarr@*release")
 ```
 
 You can install the development version of sdarr from [GitHub](https://github.com/soylentOrange/sdarr/) with:
 
-``` r
+```r
 # install.packages("devtools")
 devtools::install_github("soylentOrange/sdarr")
 ```
