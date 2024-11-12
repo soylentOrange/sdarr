@@ -4,7 +4,7 @@ pkgdown_sha: ~
 articles:
   articles/sdarr_validation: sdarr_validation.html
   articles/speed_improvment: speed_improvment.html
-last_built: 2024-11-12T19:43Z
+last_built: 2024-11-12T19:56Z
 urls:
   reference: https://soylentorange.github.io/sdarr/reference
   article: https://soylentorange.github.io/sdarr/articles
