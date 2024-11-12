@@ -10,14 +10,16 @@ optimum_size_for_downsampling <- function(data.normalized,
                                           verbose = FALSE,
                                           plot = FALSE,
                                           plotFun = FALSE) {
+  # check that data is sufficiently long
+  if (nrow(data.normalized) <= 50) {
+    stop("Data is unfit for processing: too little data in the normalized data range.")
+  }
+
   # find optimum fit-range for down-sampling
-  normalized.ranges <- seq.int(
-    50,
-    nrow(data.normalized),
-    (nrow(data.normalized) - 50) / 99
-  ) %>%
-    round(0) %>%
-    {
+  normalized.ranges <- seq.int(50,
+                               nrow(data.normalized),
+                               (nrow(data.normalized) - 50) / 99) %>%
+    round(0) %>% {
       data.frame("idx" = seq.int(length(.)), "range.size" = .)
     } %>%
     tidyr::nest(.by = "idx", .key = "range.size") %>%
@@ -27,31 +29,25 @@ optimum_size_for_downsampling <- function(data.normalized,
         `%>%` <- magrittr::`%>%`
 
         # create data.frame with indices of original test record
-        c(
-          otr.idx[1],
+        c(otr.idx[1],
           otr.idx[length(otr.idx)],
           sample(otr.idx[2:length(otr.idx) - 1], size = value[1, 1] %>%
-            as.numeric() - 2)
-        ) %>%
-          sort() %>%
-          {
+            as.numeric() - 2)) %>%
+          sort() %>% {
             data.frame("otr.idx" = .)
           }
       },
       otr.idx = data.normalized$otr.idx %>%
-        unlist(TRUE, FALSE)
-    ))) %>%
+        unlist(TRUE, FALSE)))) %>%
     dplyr::mutate("data.quality.passed" = furrr::future_map(
-      .$otr.idcs, carrier::crate(
-        function(value) {
+      .$otr.idcs, carrier::crate(function(value) {
           # satisfy pipe addiction...
           `%>%` <- magrittr::`%>%`
 
           # select data by index
           data.normalized %>%
             dplyr::filter(.data$otr.idx %in% value$otr.idx) %>%
-            check_data_quality.lazy() %>%
-            {
+            check_data_quality.lazy() %>% {
               1.0 - ifelse(.$passed.check.resolution.y == TRUE, 0, 0.25) -
                 ifelse(.$passed.check.resolution.x == TRUE, 0, 0.25) -
                 ifelse(.$passed.check.noise.y == TRUE, 0, 0.25) -
@@ -59,10 +55,8 @@ optimum_size_for_downsampling <- function(data.normalized,
             }
         },
         data.normalized = data.normalized,
-        check_data_quality.lazy = check_data_quality.lazy
-      ),
-      .options = furrr::furrr_options(globals = FALSE)
-    )) %>%
+        check_data_quality.lazy = check_data_quality.lazy),
+      .options = furrr::furrr_options(globals = FALSE))) %>%
     dplyr::select(c("idx", "range.size", "data.quality.passed")) %>%
     tidyr::unnest(cols = c("range.size", "data.quality.passed")) %>%
     dplyr::select(c("range.size", "data.quality.passed")) %>%
@@ -71,28 +65,24 @@ optimum_size_for_downsampling <- function(data.normalized,
   # find logistic regression of data quality passed over sub-sampled range-size
   normalized.ranges.model <- stats::glm(data.quality.passed ~ range.size,
     data = normalized.ranges,
-    family = stats::quasibinomial(link = "logit")
-  )
+    family = stats::quasibinomial(link = "logit"))
 
   # predict probability of passing data quality check over all...
   # ...possible range-sizes
   normalized.ranges.modelpredictions <- data.frame(
     "range.size" = seq.int(50, nrow(data.normalized), 1)
-  ) %>%
-    {
+  ) %>% {
       probs <- stats::predict(normalized.ranges.model,
         newdata = .,
         type = "link",
-        se.fit = TRUE
-      )
+        se.fit = TRUE)
 
       ilink <- stats::family(normalized.ranges.model)$linkinv
 
       dplyr::bind_cols(.,
         pm = ilink(probs$fit),
         pu = ilink(probs$fit + probs$se.fit * 1.96),
-        pl = ilink(probs$fit - probs$se.fit * 1.96)
-      )
+        pl = ilink(probs$fit - probs$se.fit * 1.96))
     }
 
   # check if we can satisfy cutoff_probability,
@@ -101,26 +91,22 @@ optimum_size_for_downsampling <- function(data.normalized,
   cutoff_probability.matched <- TRUE
   if (max.pm < cutoff_probability) {
     warning("Failed to determine optimum size by given cutoff_probability.",
-      call. = FALSE
-    )
+      call. = FALSE)
     cutoff_probability <- max.pm
     cutoff_probability.matched <- FALSE
   }
 
   # find optimum range size by (possibly adjusted) cutoff_probability
   optimum.range.size <- normalized.ranges.modelpredictions %>%
-    dplyr::filter(.data$pm >= cutoff_probability) %>%
-    {
+    dplyr::filter(.data$pm >= cutoff_probability) %>% {
       .[1, "range.size"] %>%
         unlist(TRUE, FALSE)
     }
 
   # prepare results
-  results <- list(
-    "optimum.range.size" = optimum.range.size,
-    "cutoff_probability.matched" = cutoff_probability.matched,
-    "max.pm" = max.pm
-  )
+  results <- list("optimum.range.size" = optimum.range.size,
+                  "cutoff_probability.matched" = cutoff_probability.matched,
+                  "max.pm" = max.pm)
 
   # print message
   if (verbose) {

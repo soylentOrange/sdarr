@@ -2,7 +2,7 @@
 
 * include all crated plot-function in the results by default
 * streamlined DESCRIPTION 
-* improve articale on validation
+* improve article on validation
 
 # sdarr 0.7.0
 

@@ -332,6 +332,10 @@ lazy_result.table %>%
   x.upperBound <- sdar_result$sdar$x.upperBound
   x.lowerBound.lazy <- lazy_result$sdar$x.lowerBound
   x.upperBound.lazy <- lazy_result$sdar$x.upperBound
+  y.lowerBound <- sdar_result$sdar$y.lowerBound
+  y.upperBound <- sdar_result$sdar$y.upperBound
+  y.lowerBound.lazy <- lazy_result$sdar$y.lowerBound
+  y.upperBound.lazy <- lazy_result$sdar$y.upperBound
 
   # re-fit for plotting
   y.data.prediction <- plot.data %>%
@@ -367,22 +371,34 @@ lazy_result.table %>%
          aes(x = x.data, y = y.data, 
              color = "Reference Data Set\n(E3076_DS1_2018)")) +
     geom_line() +
-    geom_line(data = plot.data %>%
-                dplyr::filter(dplyr::between(x.data, 
-                                             x.lowerBound,x.upperBound)),
-              aes(x = x.data, y = y.data,
-                  color = "fit-range (sdar)"),
-              linewidth = 1.5, alpha = 0.5) +
-    geom_line(data = plot.data %>%
-                dplyr::filter(dplyr::between(x.data, 
-                                             x.lowerBound.lazy, 
-                                             x.upperBound.lazy)),
-              aes(x = x.data, y = y.data, 
-                  color = "fit-range (sdar_lazy)"),
-              linewidth = 1.5, alpha = 0.5) +
+    # geom_line(data = plot.data %>%
+    #             dplyr::filter(dplyr::between(x.data, 
+    #                                          x.lowerBound,x.upperBound)),
+    #           aes(x = x.data, y = y.data,
+    #               color = "fit-range (sdar)"),
+    #           linewidth = 1.5, alpha = 0.5) +
+    # geom_line(data = plot.data %>%
+    #             dplyr::filter(dplyr::between(x.data, 
+    #                                          x.lowerBound.lazy, 
+    #                                          x.upperBound.lazy)),
+    #           aes(x = x.data, y = y.data, 
+    #               color = "fit-range (sdar_lazy)"),
+    #           linewidth = 1.5, alpha = 0.5) +
     geom_line(data = plot.data %>%
                 dplyr::filter(fit <= y.data.max),
               aes(x = x.data, y = fit, color = "fit (sdar)")) +
+    geom_hline(aes(color = "fit range (sdar_lazy)",
+                   yintercept = y.lowerBound.lazy),
+               linetype = "dashed", show.legend = TRUE) +
+    geom_hline(aes(color = "fit range (sdar_lazy)",
+                   yintercept = y.upperBound.lazy),
+               linetype = "dashed",show.legend = TRUE) +
+    geom_hline(aes(color = "fit range (sdar)",
+                   yintercept = y.lowerBound),
+               linetype = "dashed", show.legend = TRUE) +
+    geom_hline(aes(color = "fit range (sdar)",
+                   yintercept = y.upperBound),
+               linetype = "dashed",show.legend = TRUE) +
     geom_ribbon(data = plot.data %>%
                   dplyr::filter(fit <= y.data.max),
                 aes(x = x.data, y = NULL, ymin = lwr, ymax = upr,

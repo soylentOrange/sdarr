@@ -50,30 +50,24 @@ sdar_execute.lazy <- function(prepared_data,
       n.fit,
       n.candidates,
       optimum.range.size,
-      Nmin_factor = Nmin_factor
-    ) %>%
+      Nmin_factor = Nmin_factor) %>%
       # penalize by data quality metrics
       dplyr::mutate(data.quality.penalty = 1.0) %>%
       dplyr::mutate(data.quality.penalty = dplyr::case_when(
         data.quality.check.passed.check.noise.y == FALSE ~ data.quality.penalty * quality_penalty,
-        TRUE ~ data.quality.penalty
-      )) %>%
+        TRUE ~ data.quality.penalty)) %>%
       dplyr::mutate(data.quality.penalty = dplyr::case_when(
         data.quality.check.passed.check.noise.x == FALSE ~ data.quality.penalty * quality_penalty,
-        TRUE ~ data.quality.penalty
-      )) %>%
+        TRUE ~ data.quality.penalty)) %>%
       dplyr::mutate(data.quality.penalty = dplyr::case_when(
         data.quality.check.passed.check.resolution.y == FALSE ~ data.quality.penalty * quality_penalty,
-        TRUE ~ data.quality.penalty
-      )) %>%
+        TRUE ~ data.quality.penalty)) %>%
       dplyr::mutate(data.quality.penalty = dplyr::case_when(
         data.quality.check.passed.check.resolution.x == FALSE ~ data.quality.penalty * quality_penalty,
-        TRUE ~ data.quality.penalty
-      )) %>%
+        TRUE ~ data.quality.penalty)) %>%
       dplyr::mutate(offset_raise.weighed = dplyr::case_when(
         offset_raise_required ~ -data.quality.penalty,
-        TRUE ~ data.quality.penalty
-      ))
+        TRUE ~ data.quality.penalty))
 
     # judge by weighed majority decision if an offset raise is required
     if (mean(optimum_fits$offset_raise.weighed) >= 0) {
@@ -103,6 +97,9 @@ sdar_execute.lazy <- function(prepared_data,
   # calculate success rate of quality checks
   passed.check.data <- nrow(optimum_fits %>%
     dplyr::filter(.data$data.quality.check.passed.check == TRUE)) / optimum_fits.nrow
+  # TODO:remove
+  tstme <- .data$data.quality.check.passed.check
+  print(testme)
   passed.check.fit <- nrow(optimum_fits %>%
     dplyr::filter(.data$passed.check == TRUE)) / optimum_fits.nrow
   passed.check <- nrow(optimum_fits %>%
@@ -118,9 +115,9 @@ sdar_execute.lazy <- function(prepared_data,
       " points of ", nrow(normalized_data$data.normalized),
       " points in the normalized range were used."
     ))
-    message(paste0("      ", round(passed.check.data * 100, 1), " % of sub-sampled normalized ranges passed the data quality checks."))
-    message(paste0("      ", round(passed.check.fit * 100, 1), " % of linear regressions passed the fit quality checks."))
-    message(paste0("      ", round(passed.check * 100, 1), " % of linear regressions passed all quality checks.\n  "))
+    message(paste0("      ", round(passed.check.data * 100, 1), " % of the sub-samples passed the data quality checks."))
+    message(paste0("      ", round(passed.check.fit * 100, 1), " % of the sub-samples passed the fit quality checks."))
+    message(paste0("      ", round(passed.check * 100, 1), " % of the sub-samples passed all quality checks.\n  "))
   }
 
   # get numerically stable fits and add weights
