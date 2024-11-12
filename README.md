@@ -25,7 +25,7 @@ sub-sampling within the normalized range of the test-data.
 ## Installation
 
 You can install the latest release version of sdarr from
-[GitHub](https://github.com/) with:
+[GitHub](https://github.com/soylentOrange/sdarr/releases/) with:
 
 ``` r
 # install.packages("devtools")
@@ -33,7 +33,7 @@ devtools::install_github("soylentOrange/sdarr@*release")
 ```
 
 You can install the development version of sdarr from
-[GitHub](https://github.com/) with:
+[GitHub](https://github.com/soylentOrange/sdarr/) with:
 
 ``` r
 # install.packages("devtools")
@@ -144,9 +144,9 @@ Al_6060_T66.result_lazy <- sdar_lazy(Al_6060_T66,
 #> Random sub-sampling modification of the SDAR-algorithm
 #>   Random sub-sampling information:
 #>       118 points of 375 points in the normalized range were used.
-#>       0 % of sub-sampled normalized ranges passed the data quality checks.
-#>       100 % of linear regressions passed the fit quality checks.
-#>       0 % of linear regressions passed all quality checks.
+#>       0 % of the sub-samples passed the data quality checks.
+#>       100 % of the sub-samples passed the fit quality checks.
+#>       0 % of the sub-samples passed all quality checks.
 #> 
 #>   Data Quality Metric: Digital Resolution
 #>     x

@@ -27,14 +27,14 @@ As the SDAR-algorithm, implemented in `sdar()`, heavily uses linear regressions,
   
 ## Installation
 
-You can install the latest release version of sdarr from [GitHub](https://github.com/) with:
+You can install the latest release version of sdarr from [GitHub](https://github.com/soylentOrange/sdarr/releases/) with:
 
 ``` r
 # install.packages("devtools")
 devtools::install_github("soylentOrange/sdarr@*release")
 ```
 
-You can install the development version of sdarr from [GitHub](https://github.com/) with:
+You can install the development version of sdarr from [GitHub](https://github.com/soylentOrange/sdarr/) with:
 
 ``` r
 # install.packages("devtools")
