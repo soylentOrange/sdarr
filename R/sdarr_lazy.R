@@ -51,7 +51,8 @@ sdar_execute.lazy <- function(prepared_data,
       n.candidates,
       optimum.range.size,
       Nmin_factor = Nmin_factor) %>%
-      # penalize by data quality metrics
+
+      # penalize result by data quality metrics
       dplyr::mutate(data.quality.penalty = 1.0) %>%
       dplyr::mutate(data.quality.penalty = dplyr::case_when(
         data.quality.check.passed.check.noise.y == FALSE ~ data.quality.penalty * quality_penalty,
@@ -97,9 +98,6 @@ sdar_execute.lazy <- function(prepared_data,
   # calculate success rate of quality checks
   passed.check.data <- nrow(optimum_fits %>%
     dplyr::filter(.data$data.quality.check.passed.check == TRUE)) / optimum_fits.nrow
-  # TODO:remove
-  tstme <- .data$data.quality.check.passed.check
-  print(testme)
   passed.check.fit <- nrow(optimum_fits %>%
     dplyr::filter(.data$passed.check == TRUE)) / optimum_fits.nrow
   passed.check <- nrow(optimum_fits %>%
